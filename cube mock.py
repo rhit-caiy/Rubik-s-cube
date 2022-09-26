@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug 30 15:15:26 2022
-
-@author: caiy
-"""
 #ulfrbd mesxyz
 from tkinter import Tk,Canvas
 import random,time
@@ -16,9 +10,6 @@ cube=[[1, 1, 1, 1, 1, 1, 1, 1, 1],
       [5, 5, 5, 5, 5, 5, 5, 5, 5], 
       [6, 6, 6, 6, 6, 6, 6, 6, 6]]
 
-for i in range(6):
-    for j in range(9):
-        cube[i][j]+=1
 #print(cube)
 window=Tk()
 canvas=Canvas(window,bg="#808080",width=1440,height=810)
