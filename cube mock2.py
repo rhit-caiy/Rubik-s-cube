@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Sep 21 20:54:11 2022
-
-@author: caiy
-"""
-
 from tkinter import Tk,Canvas
 import random,time
 window=Tk()
@@ -17,7 +10,7 @@ edge=[i for i in range(12)]#0,1,2,3,4,5,6,7,8,9,10,11,ub,ul,uf,ur,lb,lf,rf,rb,db
 edged=[0,0,0,0,1,2,3,4,5,5,5,5]#white or yellow, then right color on equator edge
 center=[0,1,2,3,4,5]#center
 
-
+#paste cube data here
 
 cube=[[i]*9 for i in range(6)]#color representation
 facecorner=[[0,2,3,1],[0,6,4,2],[2,4,5,3],[3,5,7,1],[1,7,6,0],[4,6,7,5]]
@@ -245,7 +238,7 @@ def display():
             for k in range(3):
                 canvas.create_rectangle(x+60*k,y+60*j+20,x+60*k+60,y+60*j+80,fill=color[cube[i][3*j+k]])
     canvas.update()
-    #time.sleep(2)
+    time.sleep(0.05)
     
 def updatecube():
     global cube
@@ -300,7 +293,8 @@ def do(s):
     rotates=["U","L","F","R","B","D","M","E","S","x","y","z"]
     i=0
     solutionstring+=s
-    #print(s)
+    if s!="y":
+        print(s)
     while i<l:
         a=rotates.index(s[i])
         if 0<=a<=5:
@@ -355,7 +349,9 @@ def solve():
     p()
     totalsteps[3]=totalstep-sum(totalsteps)
     print("steps",totalstep)
-    print("cfop step",totalsteps)
+    print(">=STM step")
+    print("\nc f o p steps",totalsteps)
+    print("total steps:",totalstep)
     
 #cross
 def c():
@@ -387,11 +383,6 @@ def cross(edge,edged):
     #[edge,edged,current steps,useless next step]
     for c in range(1,9):
         print("step",c,"queue size",len(queue))
-        '''
-        if queue==[]:
-            print("error")
-            break
-        '''
         #dequeue
         for i in queue:
             istep=i[2]
@@ -639,11 +630,114 @@ def o():
             if edged[edge[1]]!=0:
                 do("y'")
             if edged[edge[0]]==0:
-                do("RUR'U'M'URU'L'")#57
-            else:
                 do("MUM'U2MUM'")#28
+            else:
+                do("RUR'U'M'URU'L'")#57
         elif c==2:
-            do("")
+            while edged[edge[1]]!=0:
+                do("y")
+            if edged[edge[3]]==0:#33 45 34 39 40 46
+                if cornerd[corner[0]]==0 and cornerd[corner[2]]==0 or cornerd[corner[1]]==0 and cornerd[corner[3]]==0:
+                    if cornerd[corner[1]]!=0:
+                        do("y2")
+                    if cornerd[corner[0]]==1:
+                        do("FRUR'U'F'")#45
+                    else:
+                        do("RUR'U'R'FRF'")#33
+                elif cornerd[corner[0]]==0 and cornerd[corner[3]]==0 or cornerd[corner[1]]==0 and cornerd[corner[2]]==0:
+                    if cornerd[corner[0]]==0:
+                        if cornerd[corner[2]]!=1:
+                            do("y2")
+                        do("R'FRUR'U'F'UR")#40
+                    else:
+                        if cornerd[corner[0]]!=4:
+                            do("y2")
+                        do("LF'L'U'LUFU'L'")#39
+                else:
+                    if cornerd[corner[0]]==0:
+                        do("y2")
+                    if cornerd[corner[0]]==1:
+                        do("RUR'U'B'R'FRS")#34
+                    else:
+                        do("y")
+                        do("R'U'R'FRF'UR")#46
+            else:#31 32 43 44 35 37 29 30 41 42 36 38
+                if edged[edge[0]]!=0:
+                    do("y")
+                if cornerd[corner[0]]==0 and cornerd[corner[3]]==0:
+                    if cornerd[corner[2]]==2:
+                        do("FRU'R'U'RUR'F'")#37
+                    else:
+                        do("y2")
+                        do("RU2R2FRF'RU2R'")#35
+                elif cornerd[corner[1]]==0 and cornerd[corner[2]]==0:
+                    if cornerd[corner[0]]==4:
+                        do("RUR'URU'R'U'R'FRF'")#38
+                    else:
+                        do("y")
+                        do("L'U'LU'L'ULULF'L'F")#36
+                elif cornerd[corner[0]]==0:
+                    if cornerd[corner[2]]==0:
+                        if cornerd[corner[1]]==3:
+                            do("FURU'R'F'")#44
+                        else:
+                            do("y2")
+                            do("SRUR'U'R'FRB'")#32
+                    else:
+                        if cornerd[corner[2]]==2:
+                            do("y")
+                            do("F'U'L'ULF")#43
+                        else:
+                            do("y")
+                            do("R'U'FURU'R'F'R")#31
+                else:
+                    while cornerd[corner[0]]!=0 or cornerd[corner[1]]!=0:
+                        do("y")
+                    s=[["L2U'LBL'UL2U'L'B'L","R'U'RU'R'U2RFRUR'U'F'"],["R2UR'B'RU'R2URBR'","LUL'ULU2L'F'L'U'LUF"]]#29 42 30 41
+                    ed=edged[edge[1]]
+                    cd=cornerd[corner[2]]-1
+                    do(s[ed][cd])#29 42 30 41
+        elif c==1:
+            while edged[edge[1]]!=0:
+                do("y")
+            if edged[edge[3]]==0:#13 14 15 16
+                if cornerd[corner[2]]==0 or cornerd[corner[3]]==0:
+                    do("y2")
+                s=[["R'F'RL'U'LUR'FR","B'U'R'U2RUR'U'RB"],["BULU2L'U'LUL'B'","LFL'RUR'U'LF'L'"]]#15 14 13 16
+                cd1=cornerd[corner[0]]
+                if cd1!=0:
+                    cd1=1
+                cd2=cornerd[corner[2]]-1
+                do(s[cd1][cd2])#13 14 15 16
+            else:#5 6 9 10 7 8 11 12
+                if edged[edge[0]]!=0:
+                    do("y")
+                if cornerd[corner[0]]==0:#5 6
+                    if cornerd[corner[1]]==4:
+                        do("y")
+                        do("LF2R'F'RF'L'")#6
+                    else:
+                        do("R'F2LFL'FR")#5
+                elif cornerd[corner[3]]==0:#9 10
+                    if cornerd[corner[0]]==1:
+                        do("RUR'U'R'FR2UR'U'F'")#9
+                    else:
+                        do("y'")
+                        do("RUR'UR'FRF'RU2R'")#10
+                else:
+                    if cornerd[corner[1]]==0:
+                        if cornerd[corner[0]]==4:
+                            do("y'")
+                            do("F'L'U'LUFUFRUR'U'F'")#11
+                        else:
+                            do("y")
+                            do("R'F'LF'L'F2R")#8
+                    else:
+                        if cornerd[corner[0]]==4:
+                            do("LFR'FRF2L'")#7
+                        else:
+                            do("y2")
+                            do("FRUR'U'F'UFRUR'U'F'")#12
         elif c==0:
             if edged[edge[0]]==0 and edged[edge[2]]==0 or edged[edge[1]]==0 and edged[edge[3]]==0:#51 52 55 56
                 if edged[edge[0]]==0:
@@ -658,11 +752,29 @@ def o():
                     do("y")
                     do("RU2R2U'RU'R'U2FRF'")#55
                 else:
-                    while cornerd[corner[0]]!=4 and cornerd[corner[2]]!=2:
+                    while cornerd[corner[0]]!=4 or cornerd[corner[2]]!=2:
                         do("y")
                     do("RUR'URU'BU'B'R'")#52
-            else:
-                do("")
+            else:#47 48 49 50 53 54
+                while edged[edge[0]]!=0 or edged[edge[1]]!=0:
+                    do("y")
+                if cornerd[corner[0]]==4 and cornerd[corner[0]]==4:
+                    if cornerd[corner[2]]==1:
+                        do("y")
+                        do("F'L'U'LUL'U'LUF")#47
+                    else:
+                        do("y")
+                        do("LFR'FRF'R'FRF2L'")#54
+                elif cornerd[corner[0]]==1 and cornerd[corner[2]]==1:
+                    if cornerd[corner[1]]==4:
+                        do("FRUR'U'RUR'U'F'")#48
+                    else:
+                        do("R'F'LF'L'FLF'L'F2R")#53
+                elif cornerd[corner[0]]==4:
+                    do("R'R2B'R2F'R2BR'")#50
+                else:
+                    do("y'")
+                    do("RB'R2FR2BR2F'R")#49
     elif e==0:#1 2 3 4 17 18 19
         if c==0:#1 2
             while cornerd[corner[0]]!=1 or cornerd[corner[2]]!=1:
@@ -711,7 +823,57 @@ def direction():
         do("y")
     
 def p():
-    print("nyi")
+    print(edge[:4],corner[:4])
+    if corner[:4] in [[0,1,2,3],[2,0,3,1],[3,2,1,0],[1,3,0,2]]:#1 2 3 4
+        while corner[0]!=0:
+            do("y")
+        if edge[:4]==[0,1,2,3]:
+            return#0
+        elif edge[:4]==[2,3,0,1]:
+            do("M2UM2U2M2UM2")#3
+        elif edge[:4]==[1,0,3,2] or edge[:4]==[3,2,1,0]:
+            if edge[0]==3:
+                do("y")
+            do("M2UM2UM'U2M2U2M'")#4
+        else:
+            while cornerposition[corner[0]][2][0]!=edgeposition[edge[0]][1][0]:
+                do("y")
+            if cornerposition[corner[2]][1][0]==edgeposition[edge[1]][1][0]:
+                do("M2UMU2M'UM2")#1
+            else:
+                do("M2U'MU2M'U'M2")#2
+    elif edge[:4] in [[0,1,2,3],[3,0,1,2],[2,3,0,1],[1,2,3,0]]:
+        if edge[1]==0:
+            do("U")
+        elif edge[2]==0:
+            do("U2")
+        elif edge[3]==0:
+            do("U'")
+        if corner[:4]==[2,3,0,1] or corner[:4]==[1,0,3,2]:
+            if corner[0]==1:
+                do("y")
+            do("x'RU'R'DRUR'D'RUR'DRU'R'D'")#7
+        else:
+            while cornerposition[corner[0]][2][0]!=cornerposition[corner[1]][1][0]:
+                do("y")
+            if cornerposition[corner[2]][1][0]==edgeposition[edge[2]][1][0]:
+                do("y")
+                do("x'R2D2R'U'RD2R'UR'")#5
+            else:
+                do("y'")
+                do("x'L2D2LUL'D2LU'L")#6
+    else:
+        for i in range(4):
+            do("y")
+            
+            
+    direction()
+    if corner[1]==0:
+        do("U'")
+    elif corner[2]==0:
+        do("U")
+    elif corner[3]==0:
+        do("U2")
     
 canvas.bind("<Button-1>",click)
 canvas.bind_all("<KeyPress>",keypress)
