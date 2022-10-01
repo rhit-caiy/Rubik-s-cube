@@ -183,6 +183,7 @@ for i in range(1,6):
 print(len(almostrightedge))
 print(len(almostrightedged))
 print(len(almostrightsolution))
+
 #two steps to cross
 for n in range(len(almostrightedge)):
     for i in range(6):
@@ -205,7 +206,7 @@ for n in range(len(almostrightedge)):
 print(len(almostrightedge))
 print(len(almostrightedged))
 print(len(almostrightsolution))
-'''
+
 #three steps
 for n in range(len(almostrightedge)):
     if len(almostrightsolution[n])==2:
@@ -228,7 +229,7 @@ for n in range(len(almostrightedge)):
 print(len(almostrightedge))
 print(len(almostrightedged))
 print(len(almostrightsolution))
-
+'''
 #four step
 for n in range(len(almostrightedge)):
     if len(almostrightsolution[n])==3:
@@ -247,11 +248,11 @@ for n in range(len(almostrightedge)):
                     almostrightedge.append(newedge.copy())
                     almostrightedged.append(newedged.copy())
                     almostrightsolution.append(solution.copy())
-                    
+                    '''
 print(len(almostrightedge))
 print(len(almostrightedged))
 print(len(almostrightsolution))
-'''
+
 #exhaustively get optimize cross, return format [[0,0],[6,1]],[face number, rotation time-1]
 def cross(edge,edged,cnum):
     queue=[]
@@ -309,7 +310,7 @@ def cross(edge,edged,cnum):
                         #enqueue
                         if c<5:
                             newqueue.append([newedge.copy(),newedged.copy(),newstep.copy(),newhelpless.copy()])
-                            
+                        '''  
                         else:
                             m=0
                             for l in newedged:
@@ -317,7 +318,7 @@ def cross(edge,edged,cnum):
                                     m+=1
                             if c==5 and m>=1:
                                 newqueue.append([newedge.copy(),newedged.copy(),newstep.copy(),newhelpless.copy()])
-                                
+                                '''
         queue=newqueue.copy()
         newqueue=[]
     
@@ -325,7 +326,7 @@ def cross(edge,edged,cnum):
 pce=[[5,6],[7,7],[6,4],[4,5]]#paired corner edge, pce[i][0] is corner, pce[i][1] is edge
 def f():
     #both blocks are on top
-    for i in range(8):
+    for i in range(12):
         solvedce=solvedf2l()#0,1,2,3 to represent lb,lf,rf,rb corner ede block pairs correct locations
         n=len(solvedce)#number of solved pairs
         if n==4:
@@ -639,7 +640,7 @@ def o():
                     do("y")
                 if cornerd[corner[0]]==1 and cornerd[corner[3]]==3:
                     do("LFL'URU'R'URU'R'LF'L'")#56
-                elif cornerd[corner[0]]==0 and cornerd[corner[1]]==4:
+                elif cornerd[corner[0]]==1 and cornerd[corner[1]]==4:
                     do("BULU'L'ULU'L'B'")#51
                 elif cornerd[corner[0]]==4 and cornerd[corner[1]]==3:
                     do("FURU'R'URU'R'F'")#51
@@ -823,7 +824,7 @@ def replacemiddle(s):
     s=s.replace("S","BFFFz")
     return s
 def decode(s):
-    global center
+    center=[0,1,2,3,4,5]
     s2=""
     newcenter=center.copy()
     for i in s:
@@ -907,14 +908,7 @@ def stmnum(g):
     return totalstm
 def compressstep(s):
     return stmnum(group(decode(replacemiddle(flatten(s)))))
-'''
-corner=[i for i in range(8)]#0,1,2,3,4,5,6,7,lub,rub,luf,ruf,ldf,rdf,ldb,rdb
-cornerd=[0,0,0,0,5,5,5,5]#white or yellow face direction
-edge=[i for i in range(12)]#0,1,2,3,4,5,6,7,8,9,10,11,ub,ul,uf,ur,lb,lf,rf,rb,db,dl,df,dr
-edged=[0,0,0,0,1,2,3,4,5,5,5,5]#white or yellow, then right color on equator edge
-center=[0,1,2,3,4,5]#center
-cubepack=[corner,cornerd,edge,edged,center]
-'''
+
 def initialize():
     global corner,cornerd,edge,edged,center
     corner=[i for i in range(8)]#0,1,2,3,4,5,6,7,lub,rub,luf,ruf,ldf,rdf,ldb,rdb
@@ -930,38 +924,41 @@ cfopsteps=[]
 solutionstring=""
 onecubestep=[]
 t1=time.time()
-n=5
+n=10
 cnum=100
+print("cube number",n,", cross: 6 *",cnum)
 for i in range(n):
-    print("cube",i+1,end=" ")
+    print("cube",i+1,"time",time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     randomstring=randomcube()
     onecubestep=[]
-    for j in range(24):#24 initial cube states for different color base
+    for j in range(6):#6 initial cube states for different color base
         initialize()
-        do(cuberotations[j]+randomstring)
+        do(cuberotations[4*j]+randomstring)
         direction()
-        cubepack=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]#,center.copy()]
+        cubepack=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
 
         csolution=c(cnum)
-        print(len(csolution),end=" ")
+        print(j+1,len(csolution),end=" ")
         for k in csolution:
             #print(len((k.replace("'","")).replace("2","")))#c steps
             corner=cubepack[0].copy()
             cornerd=cubepack[1].copy()
             edge=cubepack[2].copy()
             edged=cubepack[3].copy()
-            #center=cubepack[4].copy()
             solutionstring=""
             do(k)#c()
             f()
             o()
             p()
             onecubestep.append(compressstep(solutionstring))
-    #print(onecubestep)
+        print("current minimum",min(onecubestep))
     minimumstep=min(onecubestep)
     totalsteps.append(minimumstep)
-    print(minimumstep)
+    print("cube",i+1,"min",minimumstep,totalsteps,"average",sum(totalsteps)/len(totalsteps),'\n')
+print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 t2=time.time()
+print(len(almostrightsolution))
+print("reduce 3 steps and enqueue while <5, step within 8")
 print("total solve",n,"each cross number",cnum)
 print(totalsteps,sum(totalsteps)/n)
 print("time",t2-t1,"average",(t2-t1)/n)

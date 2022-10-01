@@ -572,7 +572,7 @@ def o():
                     do("y")
                 if cornerd[corner[0]]==1 and cornerd[corner[3]]==3:
                     do("LFL'URU'R'URU'R'LF'L'")#56
-                elif cornerd[corner[0]]==0 and cornerd[corner[1]]==4:
+                elif cornerd[corner[0]]==1 and cornerd[corner[1]]==4:
                     do("BULU'L'ULU'L'B'")#51
                 elif cornerd[corner[0]]==4 and cornerd[corner[1]]==3:
                     do("FURU'R'URU'R'F'")#51
@@ -745,7 +745,7 @@ import matplotlib.pyplot as plt
 start=time.time()
 grosstotalsteps=[0,0,0,0]
 compressedsteps=[]
-number=1000
+number=100
 cs=[]
 fs=[]
 os=[]
@@ -754,7 +754,7 @@ totals=[]
 ts=[]
 
 for cubes in range(number):
-    if cubes%100==0 and cubes!=0:
+    if cubes%10==0 and cubes!=0:
         print(cubes,sum(totals)/cubes,[i/cubes for i in grosstotalsteps],sum(compressedsteps)/cubes)
     totalstep=0
     totalsteps=[0,0,0,0]

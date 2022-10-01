@@ -1,6 +1,6 @@
 from tkinter import Tk,Canvas
 import random,time
-import compress
+
 window=Tk()
 canvas=Canvas(window,bg="#808080",width=1440,height=810)
 window.title("cube")
@@ -355,8 +355,8 @@ def solve():
     print("\nc f o p steps",totalsteps)
     print("total steps:",totalstep)
     print("solution:",solutionstring)
-    print("compressed steps",compress.compress(solutionstring))
-    print("STM step:",compress.compressedstep)
+    print("compressed steps",compress(solutionstring)[0])
+    print("STM step:",compress(solutionstring)[1])
     
 #cross
 def c():
@@ -402,22 +402,6 @@ def cross(edge,edged):
     edged=edged[8:]
     queue.append([edge.copy(),edged.copy(),[],helpless.copy()])
     
-    '''
-    onestepcube=[]#store cubes that only 1 step from correct one, reduce last step
-    correctedge=[8,9,10,11]
-    correctedged=[5,5,5,5]
-    for i in range(1,6):#up doesn't count
-        r=faceedge[i]
-        newedge=correctedge.copy()
-        newedged=correctedged.copy()
-        for j in range(3):#totally 15 possible bottom cube
-            for l in range(4):
-                if newedge[l] in r:
-                    newedge[l]=r[(r.index(newedge[l])-1)%4]
-                    if newedged[l]!=i:
-                        newedged[l]=adj[i][(adj[i].index(newedged[l])+1)%4]
-            onestepcube.append([newedge.copy(),newedged.copy()])
-            '''
     #require only 1 step to solve
     if [edge,edged] in onestepcube:
         print("1 step for cross")
@@ -454,9 +438,9 @@ def cross(edge,edged):
                             if m[0] not in newedge and m[1] not in newedge and m[2] not in newedge and m[3] not in newedge:
                                 newhelpless.append(l)
                         #return
-                        #if newedge==[8,9,10,11] and newedged==[5,5,5,5]:
-                        #    return newstep
-                        if [newedge,newedged] in onestepcube:
+                        if newedge==[8,9,10,11] and newedged==[5,5,5,5]:
+                            return newstep
+                        elif [newedge,newedged] in onestepcube:
                             index=onestepcube.index([newedge,newedged])
                             print("find almost solved, cross step is",c+1)
                             return newstep+[[index//3+1,2-index%3]]
@@ -468,7 +452,7 @@ def cross(edge,edged):
                             for l in newedged:
                                 if l==5:
                                     m+=1
-                            if c==5 and m>=1 or c==6 and m>=2 or c==7 and m>=3:
+                            if c==5 and m>=1 or c==6 and m>=2:
                                 newqueue.append([newedge.copy(),newedged.copy(),newstep.copy(),newhelpless.copy()])
         queue=newqueue.copy()
         newqueue=[]
@@ -477,7 +461,7 @@ def cross(edge,edged):
 pce=[[5,6],[7,7],[6,4],[4,5]]#paired corner edge, pce[i][0] is corner, pce[i][1] is edge
 def f():
     #both blocks are on top
-    for i in range(8):
+    for i in range(12):
         solvedce=solvedf2l()#0,1,2,3 to represent lb,lf,rf,rb corner ede block pairs correct locations
         n=len(solvedce)#number of solved pairs
         if n==4:
@@ -792,7 +776,7 @@ def o():
                     do("y")
                 if cornerd[corner[0]]==1 and cornerd[corner[3]]==3:
                     do("LFL'URU'R'URU'R'LF'L'")#56
-                elif cornerd[corner[0]]==0 and cornerd[corner[1]]==4:
+                elif cornerd[corner[0]]==1 and cornerd[corner[1]]==4:
                     do("BULU'L'ULU'L'B'")#51
                 elif cornerd[corner[0]]==4 and cornerd[corner[1]]==3:
                     do("FURU'R'URU'R'F'")#51
@@ -959,6 +943,91 @@ def p():
         do("U")
     elif corner[3]==0:
         do("U2")
+    
+def flatten(s):
+    s=s.replace("2","-")
+    s=s.replace("'","--")
+    s2=""
+    for i in range(len(s)):
+        if s[i]=="-":
+            s2=s2+s2[-1]
+        else:
+            s2=s2+s[i]
+    
+    return s2
+def replacemiddle(s):
+    s=s.replace("M","RLLLxxx")
+    s=s.replace("E","UDDDyyy")
+    s=s.replace("S","BFFFz")
+    return s
+def decode(s):
+    center=[0,1,2,3,4,5]
+    s2=""
+    newcenter=center.copy()
+    for i in s:
+        n=rotates.index(i)
+        if n<6:
+            s2+=str(center[n])
+        elif n>=9:
+            #RUF
+            rotatecube=[3,0,2]
+            n-=9
+            for j in range(4):
+                newcenter[adj[rotatecube[n]][(j+1)%4]]=center[adj[rotatecube[n]][j]]
+            center=newcenter.copy()
+    return s2
+
+#0,5  1,3  2,4
+def group(s):
+    anti=[[0,5],[1,3],[2,4]]
+    g=[]
+    m=0
+    n=0
+    for i in s:
+        i=int(i)
+        if i in anti[0]:
+            n=0
+        elif i in anti[1]:
+            n=1
+        elif i in anti[2]:
+            n=2
+        m=anti[n].index(i)
+        if g==[]:
+            g=[[n,0,0]]
+        if g[-1][0]!=n:
+            g.append([n,0,0])
+        g[-1][m+1]+=1
+    for i in g:
+        i[1]%=4
+        i[2]%=4
+    g=[i for i in g if not (i[1]==0 and i[2]==0)]
+    return g
+
+def stm(g):
+    anti=[[0,5],[1,3],[2,4]]
+    allrotation=[["U","U2","U'"],["L","L2","L'"],["F","F2","F'"],["R","R2","R'"],["B","B2","B'"],["D","D2","D'"]]
+    middlerotation=[["Ey","E2y2","E'y'"],["M'x'","M2x2","Mx"],["S'z","S2z2","Sz'"]]
+    s=""
+    totalstm=0
+    for i in g:
+        a=i[1]
+        b=i[2]
+        if a==4-b:
+            s+=middlerotation[i[0]][a-1]
+            totalstm+=1
+        elif a==0:
+            s+=allrotation[anti[i[0]][1]][b-1]
+            totalstm+=1
+        elif b==0:
+            s+=allrotation[anti[i[0]][0]][a-1]
+            totalstm+=1
+        else:
+            s+=allrotation[anti[i[0]][0]][a-1]+allrotation[anti[i[0]][1]][b-1]
+            totalstm+=2
+    return [s,totalstm]
+#return [compressed steps, step number]
+def compress(s):
+    return stm(group(decode(replacemiddle(flatten(s)))))
     
 canvas.bind("<Button-1>",click)
 canvas.bind_all("<KeyPress>",keypress)
