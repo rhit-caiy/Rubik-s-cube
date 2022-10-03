@@ -146,10 +146,7 @@ def do(s):
 
 #cross
 def c(cnum):
-    direction()
-    if edge[8:]==[8,9,10,11] and edged[8:]==[5,5,5,5]:
-        return
-    rotation=cross(edge,edged,cnum)
+    rotation=cross(cnum)
     returnsteps=[]
     for r in rotation:
         string=""
@@ -167,25 +164,6 @@ almostrightsolution=[]
 almostrightedge.append(correctedge)
 almostrightedged.append(correctedged)
 almostrightsolution.append([])
-'''
-#one step to cross
-for i in range(1,6):
-    r=faceedge[i]
-    newedge=correctedge.copy()
-    newedged=correctedged.copy()
-    for j in range(3):
-        for l in range(4):
-            if newedge[l] in r:
-                newedge[l]=r[(r.index(newedge[l])-1)%4]
-                if newedged[l]!=i:
-                    newedged[l]=adj[i][(adj[i].index(newedged[l])+1)%4]
-        solution=[[i,2-j]]
-        almostrightedge.append(newedge.copy())
-        almostrightedged.append(newedged.copy())
-        almostrightsolution.append(solution)
-
-print(len(almostrightedge))
-'''
 
 #max number to enqueue in cross, usually less than 5
 maxenqueue=5
@@ -193,6 +171,7 @@ maxenqueue=5
 almostrightstepnum=6
 
 maxstepstring=str(maxenqueue)+"++1+"+str(almostrightstepnum)
+print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 print("able to detect solution within",maxstepstring,"steps")
 print(0,len(almostrightedge))
 for previousstepnum in range(almostrightstepnum):
@@ -214,111 +193,7 @@ for previousstepnum in range(almostrightstepnum):
                         almostrightedged.append(newedged.copy())
                         almostrightsolution.append(solution.copy())
     print(previousstepnum+1,len(almostrightedge))
-'''
-#two steps to cross
-for n in range(len(almostrightedge)):
-    for i in range(6):
-        r=faceedge[i]
-        newedge=almostrightedge[n].copy()
-        newedged=almostrightedged[n].copy()
-        reversesolution=almostrightsolution[n].copy()
-        if i!=reversesolution[0][0]:
-            for j in range(3):
-                for l in range(4):
-                    if newedge[l] in r:
-                        newedge[l]=r[(r.index(newedge[l])-1)%4]
-                        if newedged[l]!=i:
-                            newedged[l]=adj[i][(adj[i].index(newedged[l])+1)%4]
-                solution=[[i,2-j]]+reversesolution
-                almostrightedge.append(newedge.copy())
-                almostrightedged.append(newedged.copy())
-                almostrightsolution.append(solution.copy())
-                
-print(len(almostrightedge))
 
-#three steps
-for n in range(len(almostrightedge)):
-    if len(almostrightsolution[n])==2:
-        for i in range(6):
-            newedge=almostrightedge[n].copy()
-            newedged=almostrightedged[n].copy()
-            reversesolution=almostrightsolution[n].copy()
-            if i!=reversesolution[1][0]:
-                for j in range(3):
-                    for l in range(4):
-                        if newedge[l] in faceedge[i]:
-                            newedge[l]=faceedge[i][(faceedge[i].index(newedge[l])-1)%4]
-                            if newedged[l]!=i:
-                                newedged[l]=adj[i][(adj[i].index(newedged[l])+1)%4]
-                    solution=[[i,2-j]]+reversesolution
-                    almostrightedge.append(newedge.copy())
-                    almostrightedged.append(newedged.copy())
-                    almostrightsolution.append(solution.copy())
-print(len(almostrightedge))
-
-#four step
-for n in range(len(almostrightedge)):
-    if len(almostrightsolution[n])==3:
-        for i in range(6):
-            newedge=almostrightedge[n].copy()
-            newedged=almostrightedged[n].copy()
-            reversesolution=almostrightsolution[n].copy()
-            if i!=reversesolution[2][0]:
-                for j in range(3):
-                    for l in range(4):
-                        if newedge[l] in faceedge[i]:
-                            newedge[l]=faceedge[i][(faceedge[i].index(newedge[l])-1)%4]
-                            if newedged[l]!=i:
-                                newedged[l]=adj[i][(adj[i].index(newedged[l])+1)%4]
-                    solution=[[i,2-j]]+reversesolution
-                    almostrightedge.append(newedge.copy())
-                    almostrightedged.append(newedged.copy())
-                    almostrightsolution.append(solution.copy())
-                    
-print(len(almostrightedge))
-
-#five step
-for n in range(len(almostrightedge)):
-    if len(almostrightsolution[n])==4:
-        for i in range(6):
-            newedge=almostrightedge[n].copy()
-            newedged=almostrightedged[n].copy()
-            reversesolution=almostrightsolution[n].copy()
-            if i!=reversesolution[2][0]:
-                for j in range(3):
-                    for l in range(4):
-                        if newedge[l] in faceedge[i]:
-                            newedge[l]=faceedge[i][(faceedge[i].index(newedge[l])-1)%4]
-                            if newedged[l]!=i:
-                                newedged[l]=adj[i][(adj[i].index(newedged[l])+1)%4]
-                    solution=[[i,2-j]]+reversesolution
-                    almostrightedge.append(newedge.copy())
-                    almostrightedged.append(newedged.copy())
-                    almostrightsolution.append(solution.copy())
-                    
-print(len(almostrightedge))
-
-#six step
-for n in range(len(almostrightedge)):
-    if len(almostrightsolution[n])==5:
-        for i in range(6):
-            newedge=almostrightedge[n].copy()
-            newedged=almostrightedged[n].copy()
-            reversesolution=almostrightsolution[n].copy()
-            if i!=reversesolution[2][0]:
-                for j in range(3):
-                    for l in range(4):
-                        if newedge[l] in faceedge[i]:
-                            newedge[l]=faceedge[i][(faceedge[i].index(newedge[l])-1)%4]
-                            if newedged[l]!=i:
-                                newedged[l]=adj[i][(adj[i].index(newedged[l])+1)%4]
-                    solution=[[i,2-j]]+reversesolution
-                    almostrightedge.append(newedge.copy())
-                    almostrightedged.append(newedged.copy())
-                    almostrightsolution.append(solution.copy())
-                    
-print(len(almostrightedge))
-'''
 #almostright=[[almostrightedge[i],almostrightedged[i]] for i in range(len(almostrightedged))]
 #turn to use hash map
 cubedict={}
@@ -327,19 +202,19 @@ for i in range(len(almostrightedge)):
     cubedict[key]=almostrightsolution[-i-1]#backward to prefer shorter solution
 
 #exhaustively get optimize cross, return format [[0,0],[6,1]],[face number, rotation time-1]
-def cross(edge,edged,cnum):
+def cross(cnum):
     queue=[]
     newqueue=[]
     returnqueue=[]
-    helpless=[]#previously rotated face
+    helpless=[]#previously rotated face, now it doesn't count face that doesn't have bottom edge block
     #edge,edge direction,current rotation,face without white block or repeated rotate face
-    edge=[edge.index(i) for i in range(8,12)]
-    edged=edged[8:]
-    queue.append([edge.copy(),edged.copy(),[],helpless.copy()])
+    beginedge=[edge.index(i) for i in range(8,12)]
+    beginedged=edged[8:]
+    queue.append([beginedge.copy(),beginedged.copy(),[],helpless.copy()])
     #[edge,edged,current steps,useless next step]
-    for c in range(1,9):
+    for c in range(1,maxenqueue+3):
         if len(queue)==0:
-            return returnqueue
+            break
         #dequeue
         for i in queue:
             istep=i[2]
@@ -373,7 +248,7 @@ def cross(edge,edged,cnum):
                             newqueue.append([newedge.copy(),newedged.copy(),newstep.copy(),newhelpless.copy()])
         queue=newqueue.copy()
         newqueue=[]
-    
+    return returnqueue
 #f2l
 pce=[[5,6],[7,7],[6,4],[4,5]]#paired corner edge, pce[i][0] is corner, pce[i][1] is edge
 def f():
@@ -858,7 +733,7 @@ def p():
     elif corner[3]==0:
         do("U2")
 
-def flatten(s):
+def compressstep(s):
     s=s.replace("2","-")
     s=s.replace("'","--")
     s2=""
@@ -867,14 +742,7 @@ def flatten(s):
             s2=s2+s2[-1]
         else:
             s2=s2+s[i]
-    
-    return s2
-def replacemiddle(s):
-    s=s.replace("M","RLLLxxx")
-    s=s.replace("E","UDDDyyy")
-    s=s.replace("S","BFFFz")
-    return s
-def decode(s):
+    s=s2.replace("M","RLLLxxx").replace("E","UDDDyyy").replace("S","BFFFz")
     center=[0,1,2,3,4,5]
     s2=""
     newcenter=center.copy()
@@ -889,15 +757,11 @@ def decode(s):
             for j in range(4):
                 newcenter[adj[rotatecube[n]][(j+1)%4]]=center[adj[rotatecube[n]][j]]
             center=newcenter.copy()
-    return s2
-
-#0,5  1,3  2,4
-def group(s):
     anti=[[0,5],[1,3],[2,4]]
     g=[]
     m=0
     n=0
-    for i in s:
+    for i in s2:
         i=int(i)
         if i in anti[0]:
             n=0
@@ -915,50 +779,33 @@ def group(s):
         i[1]%=4
         i[2]%=4
     g=[i for i in g if not (i[1]==0 and i[2]==0)]
-    return g
-
-def stm(g):
-    anti=[[0,5],[1,3],[2,4]]
-    allrotation=[["U","U2","U'"],["L","L2","L'"],["F","F2","F'"],["R","R2","R'"],["B","B2","B'"],["D","D2","D'"]]
-    middlerotation=[["Ey","E2y2","E'y'"],["M'x'","M2x2","Mx"],["S'z","S2z2","Sz'"]]
-    s=""
-    totalstm=0
+    #stm<=htm<=qtm
+    stm=0
+    htm=0
+    qtm=0
     for i in g:
         a=i[1]
         b=i[2]
         if a==4-b:
-            s+=middlerotation[i[0]][a-1]
-            totalstm+=1
+            stm+=1
         elif a==0:
-            s+=allrotation[anti[i[0]][1]][b-1]
-            totalstm+=1
+            stm+=1
         elif b==0:
-            s+=allrotation[anti[i[0]][0]][a-1]
-            totalstm+=1
+            stm+=1
         else:
-            s+=allrotation[anti[i[0]][0]][a-1]+allrotation[anti[i[0]][1]][b-1]
-            totalstm+=2
-    return [s,totalstm]
-#return [compressed steps, step number]
-def compress(s):
-    return stm(group(decode(replacemiddle(flatten(s)))))
+            stm+=2
+        if a!=0:
+            htm+=1
+            qtm+=1
+            if a==2:
+                qtm+=1
+        if b!=0:
+            htm+=1
+            qtm+=1
+            if b==2:
+                qtm+=1
+    return [stm,htm,qtm]
 
-def stmnum(g):
-    totalstm=0
-    for i in g:
-        a=i[1]
-        b=i[2]
-        if a==4-b:
-            totalstm+=1
-        elif a==0:
-            totalstm+=1
-        elif b==0:
-            totalstm+=1
-        else:
-            totalstm+=2
-    return totalstm
-def compressstep(s):
-    return stmnum(group(decode(replacemiddle(flatten(s)))))
 
 def initialize():
     global corner,cornerd,edge,edged,center
@@ -975,15 +822,15 @@ cfopsteps=[]
 solutionstring=""
 onecubestep=[]
 t1=time.time()
-n=10
-cnum=10000
+n=1
+cnum=1
 print("cube number",n,", max cross on one cube: 24 *",cnum,flush=True)
 for i in range(n):
     print("cube",i+1,"time",time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     randomstring=randomcube()
     onecubestep=[]
     for j in range(6):#6 initial cube states for different color base
-        print("face",j)
+        #print("face",j)
         cubepack=[[],[],[],[]]
         initialize()
         do(cuberotations[4*j]+randomstring)
@@ -996,9 +843,9 @@ for i in range(n):
             do(cuberotations[4*j]+randomstring)
             direction()
             cubepack[k+1]=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
-        print("cross solution number",len(csolution))
+        #print("cross solution number",len(csolution))
         for k in range(4):#4 degree
-            print(4*j+k,"/ 24,",end=" ")
+            #print(4*j+k,"/ 24,",end=" ")
             for crossstring in csolution:
                 corner=cubepack[k][0].copy()
                 cornerd=cubepack[k][1].copy()
@@ -1012,11 +859,13 @@ for i in range(n):
                 f()
                 o()
                 p()
-                onecubestep.append(compressstep(solutionstring))
-            print("cube min",min(onecubestep))
+                onecubestep.append(compressstep(solutionstring)[0])
+                print(compressstep(solutionstring))
+            #print("cube min",min(onecubestep))
     minimumstep=min(onecubestep)
     totalsteps.append(minimumstep)
-    print("cube",i+1,"min",minimumstep,totalsteps,"average",sum(totalsteps)/len(totalsteps))
+    #print("cube",i+1,"min",minimumstep,totalsteps,"average",sum(totalsteps)/len(totalsteps))#for n<100
+    print("cube",i+1,"min",minimumstep,"average",sum(totalsteps)/len(totalsteps))#for n>100
     print("estimated time left:",round((time.time()-t1)*(n-i-1)/(i+1),3),'s\n')
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 t2=time.time()
