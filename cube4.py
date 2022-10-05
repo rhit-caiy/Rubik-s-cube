@@ -49,9 +49,9 @@ def rotate(a):
 def rotatemiddle(a):
     global center,edge,edged
     #LDF for MES
-    ne=[i for i in edge]
-    ned=[i for i in edged]
-    nc=[i for i in center]
+    ne=edge.copy()
+    ned=edged.copy()
+    nc=center.copy()
     facenum=0
     if a==0:
         facenum=1
@@ -94,7 +94,6 @@ def rotatecube(a):
         rotate(4)
 
 
-    
 def randomcube():
     a=random.randrange(80,120)
     randomstring=""
@@ -107,7 +106,6 @@ def randomcube():
         randomstring+=rotates[r]
     return randomstring
         
-
 #letters to action
 def do(s):
     global solutionstring
@@ -174,6 +172,7 @@ maxstepstring=str(maxenqueue)+"++1+"+str(almostrightstepnum)
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 print("able to detect solution within",maxstepstring,"steps")
 print(0,len(almostrightedge))
+
 for previousstepnum in range(almostrightstepnum):
     for n in range(len(almostrightedge)):
         if len(almostrightsolution[n])==previousstepnum:
@@ -193,13 +192,14 @@ for previousstepnum in range(almostrightstepnum):
                         almostrightedged.append(newedged.copy())
                         almostrightsolution.append(solution.copy())
     print(previousstepnum+1,len(almostrightedge))
-
+    
 #almostright=[[almostrightedge[i],almostrightedged[i]] for i in range(len(almostrightedged))]
 #turn to use hash map
 cubedict={}
 for i in range(len(almostrightedge)):
     key=str(almostrightedge[-i-1]+almostrightedged[-i-1])
     cubedict[key]=almostrightsolution[-i-1]#backward to prefer shorter solution
+print("length of hashmap",len(cubedict))
 
 #exhaustively get optimize cross, return format [[0,0],[6,1]],[face number, rotation time-1]
 def cross(cnum):
@@ -248,7 +248,9 @@ def cross(cnum):
                             newqueue.append([newedge.copy(),newedged.copy(),newstep.copy(),newhelpless.copy()])
         queue=newqueue.copy()
         newqueue=[]
-    return returnqueue
+        
+    #print("cross solution number",len(returnqueue),"required size",cnum)
+    return returnqueue[:cnum]
 #f2l
 pce=[[5,6],[7,7],[6,4],[4,5]]#paired corner edge, pce[i][0] is corner, pce[i][1] is edge
 def f():
@@ -817,25 +819,28 @@ def initialize():
     
 cuberotations=["","y","y2","y'","x","xy","xy2","xy'","z","zy","zy2","zy'","x'","x'y","x'y2","x'y'","z'","z'y","z'y2","z'y'","x2","x2y","x2y2","x2y'"]
 
-totalsteps=[]
-cfopsteps=[]
 solutionstring=""
-onecubestep=[]
+totalstm=[]
+totalhtm=[]
+totalqtm=[]
 t1=time.time()
-n=1
-cnum=1
-print("cube number",n,", max cross on one cube: 24 *",cnum,flush=True)
+n=10
+cnum=1000
+print("cube number",n,", max cross on one cube: 24 *",cnum)
 for i in range(n):
     print("cube",i+1,"time",time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     randomstring=randomcube()
-    onecubestep=[]
+    cubestm=[]
+    cubehtm=[]
+    cubeqtm=[]
     for j in range(6):#6 initial cube states for different color base
-        #print("face",j)
+        print("face",j)
         cubepack=[[],[],[],[]]
         initialize()
         do(cuberotations[4*j]+randomstring)
         direction()
         csolution=c(cnum)
+        print("cross solution number",len(csolution),"required size",cnum)
         cubepack[0]=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
         for k in range(3):
             initialize()
@@ -843,9 +848,11 @@ for i in range(n):
             do(cuberotations[4*j]+randomstring)
             direction()
             cubepack[k+1]=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
-        #print("cross solution number",len(csolution))
         for k in range(4):#4 degree
-            #print(4*j+k,"/ 24,",end=" ")
+            quarterstm=[]
+            quarterhtm=[]
+            quarterqtm=[]
+            print(4*j+k,"/ 24,",end=" ")
             for crossstring in csolution:
                 corner=cubepack[k][0].copy()
                 cornerd=cubepack[k][1].copy()
@@ -859,27 +866,43 @@ for i in range(n):
                 f()
                 o()
                 p()
-                onecubestep.append(compressstep(solutionstring)[0])
-                print(compressstep(solutionstring))
-            #print("cube min",min(onecubestep))
-    minimumstep=min(onecubestep)
-    totalsteps.append(minimumstep)
-    #print("cube",i+1,"min",minimumstep,totalsteps,"average",sum(totalsteps)/len(totalsteps))#for n<100
-    print("cube",i+1,"min",minimumstep,"average",sum(totalsteps)/len(totalsteps))#for n>100
+                tm=compressstep(solutionstring)
+                quarterstm.append(tm[0])
+                quarterhtm.append(tm[1])
+                quarterqtm.append(tm[2])
+            print("[",min(quarterstm),min(quarterhtm),min(quarterqtm),"]")
+            cubestm.append(min(quarterstm))
+            cubehtm.append(min(quarterhtm))
+            cubeqtm.append(min(quarterqtm))
+        print("current cube min [",min(cubestm),min(cubehtm),min(cubeqtm),"]")
+    totalstm.append(min(cubestm))
+    totalhtm.append(min(cubehtm))
+    totalqtm.append(min(cubeqtm))
+    print("cube",i+1,"min [",min(cubestm),min(cubehtm),min(cubeqtm),"] average [",sum(totalstm)/(i+1),sum(totalhtm)/(i+1),sum(totalqtm)/(i+1),"]")#for n<100
+    print("stm",totalstm,sum(totalstm)/len(totalstm))
+    print("htm",totalhtm,sum(totalhtm)/len(totalhtm))
+    print("qtm",totalqtm,sum(totalqtm)/len(totalqtm))
     print("estimated time left:",round((time.time()-t1)*(n-i-1)/(i+1),3),'s\n')
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 t2=time.time()
 print("able to detect solution within",maxstepstring,"steps")#step to enqueue, 1 step before reject by queue, prediction steps, must >=8
 print("total solve",n,"each cross number",cnum)
-print(totalsteps,sum(totalsteps)/n)
+print("stm",totalstm,sum(totalstm)/n)
+print("htm",totalhtm,sum(totalhtm)/n)
+print("qtm",totalqtm,sum(totalqtm)/n)
+print("[",sum(totalstm)/n,sum(totalhtm)/n,sum(totalqtm)/n,"]")
 print("time",t2-t1,"average",(t2-t1)/n)
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-totalsteps=np.array(totalsteps)
+totalstm=np.array(totalstm)
+totalhtm=np.array(totalhtm)
+totalqtm=np.array(totalqtm)
 
-plt.hist(totalsteps,color='k')
+plt.hist(totalstm,color='r')
+plt.hist(totalhtm,color='g')
+plt.hist(totalqtm,color='b')
 plt.title("c")
 plt.xlabel("steps")
 plt.ylabel("number")
