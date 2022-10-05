@@ -157,7 +157,6 @@ correctedge=[8,9,10,11]
 correctedged=[5,5,5,5]
 predictstate=[]
 predictsolution=[]
-
 predictstate.append([correctedge.copy(),correctedged.copy()])
 predictsolution.append([])
 
@@ -165,24 +164,20 @@ newpredictstate=[]
 newpredictsolution=[]
 
 #max number to enqueue in cross, usually less than 5
-maxenqueue=5
-#number of steps that reverse from solved cross, usually take 5+-1
-almostrightstepnum=6
-
-maxstepstring=str(maxenqueue)+"++1+"+str(almostrightstepnum)
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
-print("able to detect solution within",maxstepstring,"steps")
 #use dictionary
 cubedict={}
 cubedict[str(correctedge+correctedged)]=[]
 
-for previousstepnum in range(almostrightstepnum):
+for previousstepnum in range(1,10):
+    if predictstate==[]:
+        break
     for n in range(len(predictstate)):
         for i in range(6):
             newedge=predictstate[n][0].copy()
             newedged=predictstate[n][1].copy()
             reversesolution=predictsolution[n].copy()
-            if (reversesolution==[] or i!=reversesolution[0][0]) and not (i==0 and previousstepnum==0):
+            if (reversesolution==[] or i!=reversesolution[0][0]) and not (i==0 and previousstepnum==1):
                 for j in range(3):
                     for l in range(4):
                         if newedge[l] in faceedge[i]:
@@ -191,15 +186,11 @@ for previousstepnum in range(almostrightstepnum):
                                 newedged[l]=adj[i][(adj[i].index(newedged[l])+1)%4]
                     solution=[[i,2-j]]+reversesolution
                     key=str(newedge+newedged)
-                    if key in cubedict:
-                        old=cubedict[key]
-                        cubedict[key]=old+[solution]
-                    else:
-                        cubedict[key]=[solution.copy()]
-                    if previousstepnum+1!=almostrightstepnum:
+                    if key not in cubedict:
+                        cubedict[key]=solution.copy()
                         newpredictstate.append([newedge.copy(),newedged.copy()])
                         newpredictsolution.append(solution.copy())
-    print(previousstepnum+1,"length of dict",len(cubedict),"number of cube",len(newpredictstate),flush=True)
+    print(previousstepnum,"length of dict",len(cubedict),"number of cube",len(newpredictstate),flush=True)
     predictstate=newpredictstate.copy()
     predictsolution=newpredictsolution.copy()
     newpredictstate.clear()
@@ -208,28 +199,28 @@ for previousstepnum in range(almostrightstepnum):
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 print("length of dictionary",len(cubedict))
 
-#exhaustively get optimize cross, return format [[0,0],[6,1]],[face number, rotation time-1]
+#exhaustively get optimize cross, return format [[0,0],[6,1]],where each element is [face number, 90 degree rotation time-1]
 def cross(cnum):
-    queue=[]
+    queue=[]#contains [edge,edged,steps so far]
     newqueue=[]
     returnqueue=[]
-    helpless=[]#previously rotated face, now it doesn't count face that doesn't have bottom edge block
     #edge,edge direction,current rotation,face without white block or repeated rotate face
     beginedge=[edge.index(i) for i in range(8,12)]
     beginedged=edged[8:]
-    queue.append([beginedge.copy(),beginedged.copy(),[],helpless.copy()])
-    #[edge,edged,current steps,useless next step]
-    for c in range(1,maxenqueue+3):
+    queue.append([beginedge.copy(),beginedged.copy(),[]])
+    #for c=0
+    furthersolution=cubedict.get(str(beginedge+beginedged))
+    returnqueue.append(furthersolution.copy())
+    for c in range(1,maxcross+1):
         if len(queue)==0:
             return returnqueue
         #dequeue
         for i in queue:
             istep=i[2]
-            helpless=i[3]
             #turn 6 faces
             for j in range(6):
-                if j not in helpless:
-                    #rotation time in one face
+                #rotate shouldn't duplicate, after first is 18, rests are 15
+                if c==1 or j!=istep[-1][0]:
                     newedge=i[0].copy()
                     newedged=i[1].copy()
                     #3 angles
@@ -242,23 +233,18 @@ def cross(cnum):
                                 if newedged[l]!=j:
                                     newedged[l]=adj[j][(adj[j].index(newedged[l])+1)%4]
                         newstep=istep+[[j,k]]
-                        newhelpless=[j]
-                        #see whether exist solution within several steps
-                        furthersolution=cubedict.get(str(newedge+newedged),-1)
-                        if furthersolution!=-1:
-                            for s in furthersolution:
-                                thissolution=newstep.copy()+s.copy()
-                                returnqueue.append(thissolution.copy())
-                            if len(returnqueue)>=cnum:
-                                return returnqueue
-                        if c<=maxenqueue:
+                        #get solution from cubedict
+                        furthersolution=cubedict.get(str(newedge+newedged))
+                        thissolution=newstep.copy()+furthersolution.copy()
+                        returnqueue.append(thissolution.copy())
+                        if len(returnqueue)>=cnum:
+                            return returnqueue
+                        if c<maxcross:
                             #enqueue
-                            newqueue.append([newedge.copy(),newedged.copy(),newstep.copy(),newhelpless.copy()])
+                            newqueue.append([newedge.copy(),newedged.copy(),newstep.copy()])
         queue=newqueue.copy()
         newqueue=[]
-        
-    print("cross solution number",len(returnqueue),"required size",cnum)
-    return returnqueue[:cnum]
+    return returnqueue
 #f2l
 pce=[[5,6],[7,7],[6,4],[4,5]]#paired corner edge, pce[i][0] is corner, pce[i][1] is edge
 def f():
@@ -832,9 +818,11 @@ totalstm=[]
 totalhtm=[]
 totalqtm=[]
 t1=time.time()
-n=1
-cnum=10000
-print("cube number",n,", max cross on one cube: 24 *",cnum)
+n=10
+cnum=1000000
+maxcross=3
+print("max cross search step number",maxcross)
+#print("cube number",n,", max cross on one cube: 24 *",min(cnum,18**maxcross))
 for i in range(n):
     print("cube",i+1,"time",time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     randomstring=randomcube()
@@ -886,41 +874,33 @@ for i in range(n):
     totalstm.append(min(cubestm))
     totalhtm.append(min(cubehtm))
     totalqtm.append(min(cubeqtm))
-    print("cube",i+1,"min [",min(cubestm),min(cubehtm),min(cubeqtm),"] average [",sum(totalstm)/(i+1),sum(totalhtm)/(i+1),sum(totalqtm)/(i+1),"]")#for n<100
-    print("stm",totalstm,sum(totalstm)/len(totalstm))
-    print("htm",totalhtm,sum(totalhtm)/len(totalhtm))
-    print("qtm",totalqtm,sum(totalqtm)/len(totalqtm))
+    print("cube",i+1,"min [",min(cubestm),min(cubehtm),min(cubeqtm),"]")
+    print("stm",totalstm)
+    print("htm",totalhtm)
+    print("qtm",totalqtm)
+    print("[",sum(totalstm)/(i+1),sum(totalhtm)/(i+1),sum(totalqtm)/(i+1),"]")
     print("estimated time left:",round((time.time()-t1)*(n-i-1)/(i+1),3),'s\n')
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 t2=time.time()
-print("able to detect solution within",maxstepstring,"steps")#step to enqueue, 1 step before reject by queue, prediction steps, must >=8
+print("search all cross within",maxcross,"steps")#step to enqueue, 1 step before reject by queue, prediction steps, must >=8
 print("total solve",n,"each cross number",cnum)
-print("stm",totalstm,sum(totalstm)/n)
-print("htm",totalhtm,sum(totalhtm)/n)
-print("qtm",totalqtm,sum(totalqtm)/n)
+print("stm",totalstm)
+print("htm",totalhtm)
+print("qtm",totalqtm)
 print("[",sum(totalstm)/n,sum(totalhtm)/n,sum(totalqtm)/n,"]")
 print("time",t2-t1,"average",(t2-t1)/n)
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-# totalstm=np.array(totalstm)
-# totalhtm=np.array(totalhtm)
-# totalqtm=np.array(totalqtm)
+totalstm=np.array(totalstm)
+totalhtm=np.array(totalhtm)
+totalqtm=np.array(totalqtm)
 
-# plt.hist(totalstm,color='r')
-# plt.hist(totalhtm,color='g')
-# plt.hist(totalqtm,color='b')
+plt.hist(totalstm,color='r')
+plt.hist(totalhtm,color='g')
+plt.hist(totalqtm,color='b')
 
-dic=cubedict.values()
-l=[]
-for i in dic:
-    l.append(len(i))
-    
-for i in range(100):
-    print(i,l.count(i))
-l=np.array(l)
-plt.hist(l)
 
 plt.title("c")
 plt.xlabel("steps")
