@@ -1,4 +1,9 @@
+from tkinter import Tk,Canvas
 import random,time
+
+window=Tk()
+canvas=Canvas(window,bg="#808080",width=1440,height=810)
+window.title("cube")
 
 corner=[i for i in range(8)]#0,1,2,3,4,5,6,7,lub,rub,luf,ruf,ldf,rdf,ldb,rdb
 cornerd=[0,0,0,0,5,5,5,5]#white or yellow face direction
@@ -6,6 +11,9 @@ edge=[i for i in range(12)]#0,1,2,3,4,5,6,7,8,9,10,11,ub,ul,uf,ur,lb,lf,rf,rb,db
 edged=[0,0,0,0,1,2,3,4,5,5,5,5]#white or yellow, then right color on equator edge
 center=[0,1,2,3,4,5]#center
 
+#paste cube data here
+
+cube=[[i]*9 for i in range(6)]#color representation
 facecorner=[[0,2,3,1],[0,6,4,2],[2,4,5,3],[3,5,7,1],[1,7,6,0],[4,6,7,5]]
 faceedge=[[0,1,2,3],[1,4,9,5],[2,5,10,6],[3,6,11,7],[0,7,8,4],[10,9,8,11]]
 adj=[[4,3,2,1],[0,2,5,4],[0,3,5,1],[0,4,5,2],[0,1,5,3],[1,2,3,4]]#adjacent face of each
@@ -18,10 +26,12 @@ edgeposition=[[[0,1],[4,1]],[[0,3],[1,1]],[[0,7],[2,1]],[[0,5],[3,1]],
 centeredge=[[0,2,10,8],[4,5,6,7],[1,3,11,9]]#middle rotation block
 color=["#FFFF00","#0000FF","#FF0000","#00FF00","#FF8000","#FFFFFF"]
 rotates=["U","L","F","R","B","D","M","E","S","x","y","z"]
-allrotation=[["U","U2","U'"],["L","L2","L'"],["F","F2","F'"],["R","R2","R'"],["B","B2","B'"],["D","D2","D'"]]
 def rotate(a):
-    global edge,edged,corner,cornerd
-    #edge
+    rotateedge(a)
+    rotatecorner(a)
+    
+def rotateedge(a):
+    global edge,edged
     r=faceedge[a]
     ne=edge.copy()
     ned=edged.copy()
@@ -33,7 +43,9 @@ def rotate(a):
             ned[i]=adj[a][(adj[a].index(edged[i])+1)%4]
     edge=ne
     edged=ned
-    #corner
+    
+def rotatecorner(a):
+    global corner,cornerd
     r=facecorner[a]
     nc=corner.copy()
     ncd=cornerd.copy()
@@ -93,6 +105,174 @@ def rotatecube(a):
         rotate(4)
         rotate(4)
 
+def start():
+    draw()
+    display()
+    
+def draw():
+    canvas.create_rectangle(50,500,150,550,fill="#C0C0C0")
+    canvas.create_text(100,525,text="reset")
+    canvas.create_rectangle(200,500,300,550,fill="#C0C0C0")
+    canvas.create_text(250,525,text="random")
+    canvas.create_rectangle(50,560,150,610,fill="#C0C0C0")
+    canvas.create_text(100,585,text="solve")
+    canvas.create_rectangle(200,560,300,610,fill="#C0C0C0")
+    canvas.create_text(250,585,text="random and solve")
+    canvas.create_rectangle(900,500,1000,550,fill="#C0C0C0")
+    canvas.create_text(950,525,text="input")
+    for i in range(12):
+        canvas.create_rectangle(100*i+110,650,100*i+190,690,fill="#C0C0C0")
+        canvas.create_text(100*i+140,670,text=rotates[i])
+    for i in range(12):
+        canvas.create_rectangle(100*i+110,700,100*i+190,740,fill="#C0C0C0")
+        canvas.create_text(100*i+140,720,text=rotates[i]+"'")
+        
+def click(coordinate):
+    global cube,corner,cornerd,edge,edged,center
+    x=coordinate.x
+    y=coordinate.y
+    if 650<y<690:
+        a=(x-100)//100
+        if 0<=a<=5:
+            rotate(a)
+        elif 6<=a<=8:
+            rotatemiddle(a-6)
+        elif 9<=a<=11:
+            rotatecube(a-9)
+    elif 700<y<740:
+        a=(x-100)//100
+        if 0<=a<=5:
+            rotate(a)
+            rotate(a)
+            rotate(a)
+        elif 6<=a<=8:
+            rotatemiddle(a-6)
+            rotatemiddle(a-6)
+            rotatemiddle(a-6)
+        elif 9<=a<=11:
+            rotatecube(a-9)
+            rotatecube(a-9)
+            rotatecube(a-9)
+    elif 50<x<150 and 500<y<550:
+        cube=[[i+1]*9 for i in range(6)]
+        corner=[i for i in range(8)]
+        cornerd=[0,0,0,0,5,5,5,5]
+        edge=[i for i in range(12)]
+        edged=[0,0,0,0,1,2,3,4,5,5,5,5]
+        center=[0,1,2,3,4,5]
+    elif 200<x<300 and 500<y<550:
+        randomcube()
+        print("random")
+        print("cube =",cube)
+        print("corner =",corner)
+        print("cornerd =",cornerd)
+        print("edge =",edge)
+        print("edged =",edged)
+        print("center =",center)
+    elif 50<x<150 and 560<y<610:
+        print("solve")
+        print("cube =",cube)
+        print("corner =",corner)
+        print("cornerd =",cornerd)
+        print("edge =",edge)
+        print("edged =",edged)
+        print("center =",center)
+        solve()
+    elif 200<x<300 and 560<y<610:
+        randomcube()
+        print("random and solve")
+        print("cube =",cube)
+        print("corner =",corner)
+        print("cornerd =",cornerd)
+        print("edge =",edge)
+        print("edged =",edged)
+        print("center =",center)
+        solve()
+    elif 900<x<1000 and 500<y<550:
+        i=input("input:")
+        do(i)
+    display()
+    
+def keypress(key):
+    k=key.keysym
+    print(k)
+    if k=='U':
+        rotate(0)
+    elif k=='L':
+        rotate(1)
+    elif k=='F':
+        rotate(2)
+    elif k=='R':
+        rotate(3)
+    elif k=='B':
+        rotate(4)
+    elif k=='D':
+        rotate(5)
+    elif k=="M":
+        rotatemiddle(0)
+    elif k=="E":
+        rotatemiddle(1)
+    elif k=="S":
+        rotatemiddle(2)
+    elif k=='x':
+        rotatecube(0)
+    elif k=='y':
+        rotatecube(1)
+    elif k=='z':
+        rotatecube(2)
+    display()
+    
+def display():
+    updatecube()
+    canvas.delete("all")
+    draw()
+    for i in range(6):
+        x=0
+        y=0
+        if i==0:
+            x=500
+            y=0
+        elif i==5:
+            x=500
+            y=400
+        else:
+            x=i*200+100
+            y=200
+        for j in range(3):
+            for k in range(3):
+                canvas.create_rectangle(x+60*k,y+60*j+20,x+60*k+60,y+60*j+80,fill=color[cube[i][3*j+k]])
+    canvas.update()
+    #time.sleep(0.1)
+    
+def updatecube():
+    global cube
+    #center
+    for i in range(6):
+        cube[i][4]=center[i]
+    #edge
+    for i in range(12):
+        b=edge[i]#block number
+        if edged[b]==edgeposition[i][0][0]:
+            cube[edgeposition[i][0][0]][edgeposition[i][0][1]]=edgeposition[edge[i]][0][0]
+            cube[edgeposition[i][1][0]][edgeposition[i][1][1]]=edgeposition[edge[i]][1][0]
+        else:
+            cube[edgeposition[i][0][0]][edgeposition[i][0][1]]=edgeposition[edge[i]][1][0]
+            cube[edgeposition[i][1][0]][edgeposition[i][1][1]]=edgeposition[edge[i]][0][0]
+    #corner
+    for i in range(8):
+        b=corner[i]
+        if cornerd[b]==cornerposition[i][0][0]:
+            cube[cornerposition[i][0][0]][cornerposition[i][0][1]]=cornerposition[corner[i]][0][0]
+            cube[cornerposition[i][1][0]][cornerposition[i][1][1]]=cornerposition[corner[i]][1][0]
+            cube[cornerposition[i][2][0]][cornerposition[i][2][1]]=cornerposition[corner[i]][2][0]
+        elif cornerd[b]==cornerposition[i][1][0]:
+            cube[cornerposition[i][0][0]][cornerposition[i][0][1]]=cornerposition[corner[i]][2][0]
+            cube[cornerposition[i][1][0]][cornerposition[i][1][1]]=cornerposition[corner[i]][0][0]
+            cube[cornerposition[i][2][0]][cornerposition[i][2][1]]=cornerposition[corner[i]][1][0]
+        else:
+            cube[cornerposition[i][0][0]][cornerposition[i][0][1]]=cornerposition[corner[i]][1][0]
+            cube[cornerposition[i][1][0]][cornerposition[i][1][1]]=cornerposition[corner[i]][2][0]
+            cube[cornerposition[i][2][0]][cornerposition[i][2][1]]=cornerposition[corner[i]][0][0]
 
 def randomcube():
     a=random.randrange(80,120)
@@ -104,20 +284,27 @@ def randomcube():
         else:
             rotatemiddle(r-6)
         randomstring+=rotates[r]
-    return randomstring
+    print("mix up steps:",randomstring)
         
+totalstep=0
+solutionstring=""
 #letters to action
 def do(s):
-    global solutionstring
+    global totalstep,solutionstring
     l=len(s)
+    rotates=["U","L","F","R","B","D","M","E","S","x","y","z"]
     i=0
     solutionstring+=s
+    if s!="y":
+        print(s)
     while i<l:
         a=rotates.index(s[i])
         if 0<=a<=5:
             rotate(a)
+            totalstep+=1
         elif 6<=a<=8:
             rotatemiddle(a-6)
+            totalstep+=1
         elif 9<=a<=11:
             rotatecube(a-9)
         i+=1
@@ -141,18 +328,51 @@ def do(s):
                     rotatemiddle(a-6)
                 elif 9<=a<=11:
                     rotatecube(a-9)
+        display()
+
+def solve():
+    global totalstep,solutionstring
+    solutionstring=""
+    totalstep=0
+    totalsteps=[0,0,0,0]
+    print("\nCROSS")
+    c()
+    totalsteps[0]=totalstep
+    print("steps",totalstep)
+    print("\nF2L")
+    f()
+    totalsteps[1]=totalstep-sum(totalsteps)
+    print("steps",totalstep)
+    print("\nOLL")
+    o()
+    totalsteps[2]=totalstep-sum(totalsteps)
+    print("steps",totalstep)
+    print("\nPLL")
+    p()
+    totalsteps[3]=totalstep-sum(totalsteps)
+    print("steps",totalstep)
+    print(">=STM step")
+    print("\nc f o p steps",totalsteps)
+    print("total steps:",totalstep)
+    print("solution:",solutionstring)
+    result=compressstep(solutionstring)
+    print("compressed steps",result[3])
+    print("STM step:",result[0])
+    print("HTM step:",result[1])
+    print("QTM step:",result[2])
+    
+allrotation=[["U","U2","U'"],["L","L2","L'"],["F","F2","F'"],["R","R2","R'"],["B","B2","B'"],["D","D2","D'"]]
 
 #cross
-def c(cnum):
-    rotation=cross(cnum)
-    returnsteps=[]
-    for r in rotation:
-        string=""
-        for i in r:
-            string+=allrotation[i[0]][i[1]]
-        returnsteps.append(string)
-    return returnsteps
-    
+def c():
+    direction()
+    r=cubedict[str([edge.index(i) for i in range(8,12)]+edged[8:])]
+    print(r)
+    string=""
+    for i in r:
+        string+=allrotation[i[0]][i[1]]
+    do(string)
+
 correctedge=[8,9,10,11]
 correctedged=[5,5,5,5]
 predictstate=[]
@@ -197,52 +417,6 @@ for previousstepnum in range(1,9):
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 print("length of dictionary, or number of bottom edge distribution",len(cubedict))
 
-#exhaustively get optimize cross, return format [[0,0],[6,1]],where each element is [face number, 90 degree rotation time-1]
-def cross(cnum):
-    queue=[]#contains [edge,edged,steps so far]
-    newqueue=[]
-    returnqueue=[]
-    #edge,edge direction,current rotation,face without white block or repeated rotate face
-    beginedge=[edge.index(i) for i in range(8,12)]
-    beginedged=edged[8:]
-    queue.append([beginedge.copy(),beginedged.copy(),[]])
-    #for c=0
-    furthersolution=cubedict.get(str(beginedge+beginedged))
-    returnqueue.append(furthersolution.copy())
-    for c in range(1,maxcross+1):
-        if len(queue)==0:
-            return returnqueue
-        #dequeue
-        for i in queue:
-            istep=i[2]
-            #turn 6 faces
-            for j in range(6):
-                #rotate shouldn't duplicate, after first is 18, rests are 15
-                if c==1 or j!=istep[-1][0]:
-                    newedge=i[0].copy()
-                    newedged=i[1].copy()
-                    #3 angles
-                    r=faceedge[j]
-                    for k in range(3):
-                        #rotate and change edge and edge direction
-                        for l in range(4):
-                            if newedge[l] in r:
-                                newedge[l]=r[(r.index(newedge[l])-1)%4]
-                                if newedged[l]!=j:
-                                    newedged[l]=adj[j][(adj[j].index(newedged[l])+1)%4]
-                        newstep=istep+[[j,k]]
-                        #get solution from cubedict
-                        furthersolution=cubedict.get(str(newedge+newedged))
-                        thissolution=newstep.copy()+furthersolution.copy()
-                        returnqueue.append(thissolution.copy())
-                        if len(returnqueue)>=cnum:
-                            return returnqueue
-                        if c<maxcross:
-                            #enqueue
-                            newqueue.append([newedge.copy(),newedged.copy(),newstep.copy()])
-        queue=newqueue.copy()
-        newqueue=[]
-    return returnqueue
 #f2l
 pce=[[5,6],[7,7],[6,4],[4,5]]#paired corner edge, pce[i][0] is corner, pce[i][1] is edge
 def f():
@@ -262,6 +436,7 @@ def f():
         if n==newn:
             removeother()
         
+
 #solved f2l index, length=4 if finished
 def solvedf2l():
     solvedce=[]#0,1,2,3 to represent lb,lf,rf,rb corner ede block pairs correct locations
@@ -403,6 +578,7 @@ def o():
             e+=1
         if cornerd[i]==0:
             c+=1
+    print("edge,corner",e,c)
     if e==4:#0 21 22 23 24 25 26 27
         if c==4:#0
             return
@@ -639,6 +815,7 @@ def direction():
         do("y")
     
 def p():
+    print(edge[:4],corner[:4])
     if corner[:4] in [[0,1,2,3],[2,0,3,1],[3,2,1,0],[1,3,0,2]]:#1 2 3 4
         while corner[0]!=0:
             do("y")
@@ -726,7 +903,7 @@ def p():
         do("U")
     elif corner[3]==0:
         do("U2")
-
+    
 def compressstep(s):
     s=s.replace("2","-")
     s=s.replace("'","--")
@@ -773,20 +950,26 @@ def compressstep(s):
         i[1]%=4
         i[2]%=4
     g=[i for i in g if not (i[1]==0 and i[2]==0)]
+    middlerotation=[["Ey","E2y2","E'y'"],["M'x'","M2x2","Mx"],["S'z","S2z2","Sz'"]]
     #stm<=htm<=qtm
     stm=0
     htm=0
     qtm=0
+    s=""
     for i in g:
         a=i[1]
         b=i[2]
         if a==4-b:
+            s+=middlerotation[i[0]][a-1]
             stm+=1
         elif a==0:
+            s+=allrotation[anti[i[0]][1]][b-1]
             stm+=1
         elif b==0:
+            s+=allrotation[anti[i[0]][0]][a-1]
             stm+=1
         else:
+            s+=allrotation[anti[i[0]][0]][a-1]+allrotation[anti[i[0]][1]][b-1]
             stm+=2
         if a!=0:
             htm+=1
@@ -798,112 +981,12 @@ def compressstep(s):
             qtm+=1
             if b==2:
                 qtm+=1
-    return [stm,htm,qtm]
+    return [stm,htm,qtm,s]
 
 
-def initialize():
-    global corner,cornerd,edge,edged,center
-    corner=[i for i in range(8)]#0,1,2,3,4,5,6,7,lub,rub,luf,ruf,ldf,rdf,ldb,rdb
-    cornerd=[0,0,0,0,5,5,5,5]#white or yellow face direction
-    edge=[i for i in range(12)]#0,1,2,3,4,5,6,7,8,9,10,11,ub,ul,uf,ur,lb,lf,rf,rb,db,dl,df,dr
-    edged=[0,0,0,0,1,2,3,4,5,5,5,5]#white or yellow, then right color on equator edge
-    center=[0,1,2,3,4,5]#center
-    
-cuberotations=["","y","y2","y'","x","xy","xy2","xy'","z","zy","zy2","zy'","x'","x'y","x'y2","x'y'","z'","z'y","z'y2","z'y'","x2","x2y","x2y2","x2y'"]
 
-solutionstring=""
-totalstm=[]
-totalhtm=[]
-totalqtm=[]
-t1=time.time()
-n=10
-cnum=1000000
-maxcross=3
-print("max cross search step number",maxcross)
-print("cube number",n,"cross number",cnum,"/",round(9/7*15**maxcross-2/7))
-print("estimated time",round(n*min(cnum,round(9/7*15**maxcross-2/7))/18),"s")
-for i in range(n):
-    print("cube",i+1,"time",time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
-    randomstring=randomcube()
-    cubestm=[]
-    cubehtm=[]
-    cubeqtm=[]
-    for j in range(6):#6 initial cube states for different color base
-        print("face",j)
-        cubepack=[[],[],[],[]]
-        initialize()
-        do(cuberotations[4*j]+randomstring)
-        direction()
-        csolution=c(cnum)
-        print("cross solution number",len(csolution),"required size",cnum)
-        cubepack[0]=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
-        for k in range(3):
-            initialize()
-            do("y"*(k+1))
-            do(cuberotations[4*j]+randomstring)
-            direction()
-            cubepack[k+1]=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
-        for k in range(4):#4 degree
-            quarterstm=[]
-            quarterhtm=[]
-            quarterqtm=[]
-            print(4*j+k,"/ 24,",end=" ")
-            for crossstring in csolution:
-                corner=cubepack[k][0].copy()
-                cornerd=cubepack[k][1].copy()
-                edge=cubepack[k][2].copy()
-                edged=cubepack[k][3].copy()
-                center=[0,1,2,3,4,5]
-                solutionstring=""
-                do("y"*k)
-                do(crossstring)
-                direction()
-                f()
-                o()
-                p()
-                tm=compressstep(solutionstring)
-                quarterstm.append(tm[0])
-                quarterhtm.append(tm[1])
-                quarterqtm.append(tm[2])
-            print("[",min(quarterstm),min(quarterhtm),min(quarterqtm),"]")
-            cubestm.append(min(quarterstm))
-            cubehtm.append(min(quarterhtm))
-            cubeqtm.append(min(quarterqtm))
-        print("current cube min [",min(cubestm),min(cubehtm),min(cubeqtm),"]")
-    totalstm.append(min(cubestm))
-    totalhtm.append(min(cubehtm))
-    totalqtm.append(min(cubeqtm))
-    print("cube",i+1,"min [",min(cubestm),min(cubehtm),min(cubeqtm),"]")
-    print("stm",totalstm)
-    print("htm",totalhtm)
-    print("qtm",totalqtm)
-    print("[",sum(totalstm)/(i+1),sum(totalhtm)/(i+1),sum(totalqtm)/(i+1),"]")
-    print("estimated time left:",round((time.time()-t1)*(n-i-1)/(i+1),3),'s\n')
-print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
-t2=time.time()
-print("search all cross within",maxcross,"steps")#step to enqueue, 1 step before reject by queue, prediction steps, must >=8
-print("total solve",n,"each cross number",cnum)
-print("stm",totalstm)
-print("htm",totalhtm)
-print("qtm",totalqtm)
-print("[",sum(totalstm)/n,sum(totalhtm)/n,sum(totalqtm)/n,"]")
-print("time",t2-t1,"average",(t2-t1)/n)
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-totalstm=np.array(totalstm)
-totalhtm=np.array(totalhtm)
-totalqtm=np.array(totalqtm)
-
-plt.hist(totalstm,color='r')
-plt.hist(totalhtm,color='g')
-plt.hist(totalqtm,color='b')
-
-
-plt.title("c")
-plt.xlabel("steps")
-plt.ylabel("number")
-plt.grid()
-
-plt.show()
+canvas.bind("<Button-1>",click)
+canvas.bind_all("<KeyPress>",keypress)
+start()
+canvas.pack()
+window.mainloop()
