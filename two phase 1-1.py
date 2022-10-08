@@ -47,14 +47,13 @@ def rotate(a):
     cornerd=ncd
 
 def randomcube():
-    # a=random.randrange(1,10)
-    a=10
+    a=random.randrange(64,128)
     randomstring=""
     for i in range(a):
         r=random.randrange(0,6)
         rotate(r)
         randomstring+=str(r)
-    print("random string",randomstring)
+    #print("random string",randomstring)
     do(randomstring)
 
 def do(s):
@@ -125,7 +124,7 @@ for c in range(1,7):
                         dict1[str(newcornerd)]=newstep
                         newpredictstate.append([newcornerd.copy(),newstep])
             
-    print(c,"cube left",len(newpredictstate),"dict length",len(dict1))
+    #print(c,"cube left",len(newpredictstate),"dict length",len(dict1))
     predictstate=newpredictstate.copy()
     newpredictstate.clear()
 
@@ -134,16 +133,14 @@ def phase1(corner,cornerd,edge,edged):
     newcubes=[]
     
     if checkphase1([corner,cornerd,edge,edged]):
-        print("already satisfy phase 1")
+        #print("already satisfy phase 1")
         return
     
-    maxstep=6
-    print("max detect",maxstep+6,"steps")
-    print(0,len(cubes))
+    maxstep=7
+    #print("max detect",maxstep+6,"steps")
+    #print(0,len(cubes))
     for step in range(1,maxstep+1):
         time1=time.time()
-        if len(cubes)==0:
-            print("empty")
         for cubepack in cubes:
             cubecorner=cubepack[0]
             cubecornerd=cubepack[1]
@@ -186,7 +183,7 @@ def phase1(corner,cornerd,edge,edged):
                                 finish=False
                                 break
                         if finish:
-                            print("find solution at step",step,"solution",newstep)
+                            #print("find solution at step",step,"solution",newstep)
                             return newstep+furtherstep
                         
                         if step!=maxstep:
@@ -194,22 +191,37 @@ def phase1(corner,cornerd,edge,edged):
                             newcubes.append(newcubepack)
         cubes=newcubes.copy()
         newcubes.clear()
-        print(step,len(cubes),time.time()-time1)
+        #print(step,len(cubes),time.time()-time1)
     print("not found in",step,"steps")
 
-#do("123451234")
-randomcube()
-print("corner =",corner)
-print("cornerd =",cornerd)
-print("edge =",edge)
-print("edged =",edged)
-solutionstring=phase1(corner,cornerd,edge,edged)
-stepnum=int(len(solutionstring)/2)
-for i in range(stepnum):
-    for j in range(int(solutionstring[2*i+1])):
-        do(solutionstring[2*i])
-print("solutionstring",solutionstring,"length",int(len(solutionstring)/2))
-print("corner =",corner)
-print("cornerd =",cornerd)
-print("edge =",edge)
-print("edged =",edged)
+# #do("0123451234")
+# randomcube()
+# print("corner =",corner)
+# print("cornerd =",cornerd)
+# print("edge =",edge)
+# print("edged =",edged)
+# solutionstring=phase1(corner,cornerd,edge,edged)
+# stepnum=int(len(solutionstring)/2)
+# for i in range(stepnum):
+#     for j in range(int(solutionstring[2*i+1])):
+#         do(solutionstring[2*i])
+# print("solutionstring",solutionstring,"length",int(len(solutionstring)/2))
+# print("corner =",corner)
+# print("cornerd =",cornerd)
+# print("edge =",edge)
+# print("edged =",edged)
+
+n=100
+t1=time.time()
+allsteps=[]
+print("max detect phase 1 in 13 steps")
+print("number",n)
+for i in range(n):
+    randomcube()
+    solutionstring=phase1(corner,cornerd,edge,edged)
+    stepnum=int(len(solutionstring)/2)
+    allsteps.append(stepnum)
+    print(i,stepnum,sum(allsteps)/(i+1))
+t2=time.time()
+print("time used",t2-t1,"average",(t2-t1)/n)
+print(sum(allsteps)/n)
