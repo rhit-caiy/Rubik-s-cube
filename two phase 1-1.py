@@ -9,13 +9,13 @@ center=[0,1,2,3,4,5]#center
 facecorner=[[0,2,3,1],[0,6,4,2],[2,4,5,3],[3,5,7,1],[1,7,6,0],[4,6,7,5]]
 faceedge=[[0,1,2,3],[1,4,9,5],[2,5,10,6],[3,6,11,7],[0,7,8,4],[10,9,8,11]]
 adj=[[4,3,2,1],[0,2,5,4],[0,3,5,1],[0,4,5,2],[0,1,5,3],[1,2,3,4]]#adjacent face of each
-cornerposition=[[[0,0],[1,0],[4,2]],[[0,2],[4,0],[3,2]],[[0,6],[2,0],[1,2]],[[0,8],[3,0],[2,2]],
-                [[5,0],[1,8],[2,6]],[[5,2],[2,8],[3,6]],[[5,6],[4,8],[1,6]],[[5,8],[3,8],[4,6]]]#corner face map to position
-edgeposition=[[[0,1],[4,1]],[[0,3],[1,1]],[[0,7],[2,1]],[[0,5],[3,1]],
-              [[1,3],[4,5]],[[2,3],[1,5]],[[3,3],[2,5]],[[4,3],[3,5]],
-              [[5,7],[4,7]],[[5,3],[1,7]],[[5,1],[2,7]],[[5,5],[3,7]]]#edge face map to position
+# cornerposition=[[[0,0],[1,0],[4,2]],[[0,2],[4,0],[3,2]],[[0,6],[2,0],[1,2]],[[0,8],[3,0],[2,2]],
+#                 [[5,0],[1,8],[2,6]],[[5,2],[2,8],[3,6]],[[5,6],[4,8],[1,6]],[[5,8],[3,8],[4,6]]]#corner face map to position
+# edgeposition=[[[0,1],[4,1]],[[0,3],[1,1]],[[0,7],[2,1]],[[0,5],[3,1]],
+#               [[1,3],[4,5]],[[2,3],[1,5]],[[3,3],[2,5]],[[4,3],[3,5]],
+#               [[5,7],[4,7]],[[5,3],[1,7]],[[5,1],[2,7]],[[5,5],[3,7]]]#edge face map to position
 
-centeredge=[[0,2,10,8],[4,5,6,7],[1,3,11,9]]#middle rotation block
+# centeredge=[[0,2,10,8],[4,5,6,7],[1,3,11,9]]#middle rotation block
 color=["#FFFF00","#0000FF","#FF0000","#00FF00","#FF8000","#FFFFFF"]
 rotates=["U","L","F","R","B","D","M","E","S","x","y","z"]
 allrotation=[["U","U2","U'"],["L","L2","L'"],["F","F2","F'"],["R","R2","R'"],["B","B2","B'"],["D","D2","D'"]]
@@ -51,7 +51,6 @@ def randomcube():
     randomstring=""
     for i in range(a):
         r=random.randrange(0,6)
-        rotate(r)
         randomstring+=str(r)
     #print("random string",randomstring)
     do(randomstring)
@@ -131,16 +130,16 @@ for c in range(1,7):
 def phase1(corner,cornerd,edge,edged):
     cubes=[[corner,cornerd,edge,edged,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
     newcubes=[]
-    
+    #phase1return=[]
     if checkphase1([corner,cornerd,edge,edged]):
         #print("already satisfy phase 1")
-        return
+        return ""
     
     maxstep=7
     #print("max detect",maxstep+6,"steps")
     #print(0,len(cubes))
     for step in range(1,maxstep+1):
-        time1=time.time()
+        #time1=time.time()
         for cubepack in cubes:
             cubecorner=cubepack[0]
             cubecornerd=cubepack[1]
@@ -211,7 +210,8 @@ def phase1(corner,cornerd,edge,edged):
 # print("edge =",edge)
 # print("edged =",edged)
 
-n=100
+print("126720*2187")
+n=10
 t1=time.time()
 allsteps=[]
 print("max detect phase 1 in 13 steps")
@@ -221,7 +221,7 @@ for i in range(n):
     solutionstring=phase1(corner,cornerd,edge,edged)
     stepnum=int(len(solutionstring)/2)
     allsteps.append(stepnum)
-    print(i,stepnum,sum(allsteps)/(i+1))
+    print(i+1,stepnum,sum(allsteps)/(i+1))
 t2=time.time()
 print("time used",t2-t1,"average",(t2-t1)/n)
 print(sum(allsteps)/n)

@@ -9,13 +9,13 @@ center=[0,1,2,3,4,5]#center
 facecorner=[[0,2,3,1],[0,6,4,2],[2,4,5,3],[3,5,7,1],[1,7,6,0],[4,6,7,5]]
 faceedge=[[0,1,2,3],[1,4,9,5],[2,5,10,6],[3,6,11,7],[0,7,8,4],[10,9,8,11]]
 adj=[[4,3,2,1],[0,2,5,4],[0,3,5,1],[0,4,5,2],[0,1,5,3],[1,2,3,4]]#adjacent face of each
-cornerposition=[[[0,0],[1,0],[4,2]],[[0,2],[4,0],[3,2]],[[0,6],[2,0],[1,2]],[[0,8],[3,0],[2,2]],
-                [[5,0],[1,8],[2,6]],[[5,2],[2,8],[3,6]],[[5,6],[4,8],[1,6]],[[5,8],[3,8],[4,6]]]#corner face map to position
-edgeposition=[[[0,1],[4,1]],[[0,3],[1,1]],[[0,7],[2,1]],[[0,5],[3,1]],
-              [[1,3],[4,5]],[[2,3],[1,5]],[[3,3],[2,5]],[[4,3],[3,5]],
-              [[5,7],[4,7]],[[5,3],[1,7]],[[5,1],[2,7]],[[5,5],[3,7]]]#edge face map to position
+# cornerposition=[[[0,0],[1,0],[4,2]],[[0,2],[4,0],[3,2]],[[0,6],[2,0],[1,2]],[[0,8],[3,0],[2,2]],
+#                 [[5,0],[1,8],[2,6]],[[5,2],[2,8],[3,6]],[[5,6],[4,8],[1,6]],[[5,8],[3,8],[4,6]]]#corner face map to position
+# edgeposition=[[[0,1],[4,1]],[[0,3],[1,1]],[[0,7],[2,1]],[[0,5],[3,1]],
+#               [[1,3],[4,5]],[[2,3],[1,5]],[[3,3],[2,5]],[[4,3],[3,5]],
+#               [[5,7],[4,7]],[[5,3],[1,7]],[[5,1],[2,7]],[[5,5],[3,7]]]#edge face map to position
 
-centeredge=[[0,2,10,8],[4,5,6,7],[1,3,11,9]]#middle rotation block
+# centeredge=[[0,2,10,8],[4,5,6,7],[1,3,11,9]]#middle rotation block
 #input: <face, rotate time> 2 number string
 def rotate(a):
     global edge,edged,corner,cornerd
@@ -51,7 +51,6 @@ def randomcube():
     randomstring=""
     for i in range(a):
         r=str(random.randrange(0,6))+str(random.randrange(1,4))
-        rotate(r)
         randomstring+=r
     #print("random string",randomstring)
     do(randomstring)
@@ -192,7 +191,7 @@ def phase1(corner,cornerd,edge,edged):
                             oe=ne.copy()
                             oed=ned.copy()
                         
-                        finish=True
+                        finish=(i!=0 and i!=5)
                         for j in [0,1,2,3,8,9,10,11]:
                             if ned[j]!=0 and ned[j]!=5:
                                 finish=False
