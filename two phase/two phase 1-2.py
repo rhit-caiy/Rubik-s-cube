@@ -97,9 +97,11 @@ for c in range(1,10):
         oldstep=i[2]
         for j in range(6):
             #6 face, no repeated rotation
-            if c==1 or oldstep[0]!=str(j):
+            if (c==1 and j!=0 and j!=5) or (c!=1 and oldstep[0]!=str(j)):
                 #3 rotations
                 for k in range(1,4):
+                    if c==1 and k==2:
+                        continue
                     newcornerd=oldcornerd.copy()
                     newmedgep=oldmedgep.copy()
                     for l in range(4):

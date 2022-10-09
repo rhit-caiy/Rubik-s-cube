@@ -16,9 +16,9 @@ adj=[[4,3,2,1],[0,2,5,4],[0,3,5,1],[0,4,5,2],[0,1,5,3],[1,2,3,4]]#adjacent face 
 #               [[5,7],[4,7]],[[5,3],[1,7]],[[5,1],[2,7]],[[5,5],[3,7]]]#edge face map to position
 
 # centeredge=[[0,2,10,8],[4,5,6,7],[1,3,11,9]]#middle rotation block
-color=["#FFFF00","#0000FF","#FF0000","#00FF00","#FF8000","#FFFFFF"]
-rotates=["U","L","F","R","B","D","M","E","S","x","y","z"]
-allrotation=[["U","U2","U'"],["L","L2","L'"],["F","F2","F'"],["R","R2","R'"],["B","B2","B'"],["D","D2","D'"]]
+# color=["#FFFF00","#0000FF","#FF0000","#00FF00","#FF8000","#FFFFFF"]
+# rotates=["U","L","F","R","B","D","M","E","S","x","y","z"]
+# allrotation=[["U","U2","U'"],["L","L2","L'"],["F","F2","F'"],["R","R2","R'"],["B","B2","B'"],["D","D2","D'"]]
 def rotate(a):
     global edge,edged,corner,cornerd
     #edge
@@ -110,8 +110,10 @@ for c in range(1,7):
         oldcornerd=i[0]
         oldstep=i[1]
         for j in range(6):
-            if c==1 or oldstep[0]!=str(j):
+            if (c==1 and j!=0 and j!=5) or (c!=1 and oldstep[0]!=str(j)):
                 for k in range(1,4):
+                    if c==1 and k==2:
+                        continue
                     newcornerd=oldcornerd.copy()
                     for l in range(4):
                         if oldcornerd[facecorner[j][(l+k)%4]]!=j:
@@ -123,18 +125,20 @@ for c in range(1,7):
                         dict1[str(newcornerd)]=newstep
                         newpredictstate.append([newcornerd.copy(),newstep])
             
-    #print(c,"cube left",len(newpredictstate),"dict length",len(dict1))
+    print(c,"cube left",len(newpredictstate),"dict length",len(dict1))
     predictstate=newpredictstate.copy()
     newpredictstate.clear()
 
 def phase1(corner,cornerd,edge,edged):
     cubes=[[corner,cornerd,edge,edged,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
     newcubes=[]
-    #phase1return=[]
+    phase1solution=[]
+    maxsolution=10
+    '''
     if checkphase1([corner,cornerd,edge,edged]):
         #print("already satisfy phase 1")
         return ""
-    
+    '''
     maxstep=7
     #print("max detect",maxstep+6,"steps")
     #print(0,len(cubes))
@@ -183,7 +187,10 @@ def phase1(corner,cornerd,edge,edged):
                                 break
                         if finish:
                             #print("find solution at step",step,"solution",newstep)
-                            return newstep+furtherstep
+                            #return newstep+furtherstep
+                            phase1solution.append(newstep+furtherstep)
+                            if len(phase1solution)>=maxsolution:
+                                return phase1solution
                         
                         if step!=maxstep:
                             newcubepack.append(newstep)
@@ -191,7 +198,8 @@ def phase1(corner,cornerd,edge,edged):
         cubes=newcubes.copy()
         newcubes.clear()
         #print(step,len(cubes),time.time()-time1)
-    print("not found in",step,"steps")
+    #print("not found in",step,"steps")
+    return phase1solution
 
 # #do("0123451234")
 # randomcube()
@@ -217,11 +225,17 @@ allsteps=[]
 print("max detect phase 1 in 13 steps")
 print("number",n)
 for i in range(n):
+    print(i+1)
     randomcube()
-    solutionstring=phase1(corner,cornerd,edge,edged)
-    stepnum=int(len(solutionstring)/2)
-    allsteps.append(stepnum)
-    print(i+1,stepnum,sum(allsteps)/(i+1))
+    solutionstrings=phase1(corner,cornerd,edge,edged)
+    #print(solutionstrings)
+    onecubesolutionstep=[]
+    for solutionstring in solutionstrings:
+        l=int(len(solutionstring)/2)
+        onecubesolutionstep.append(l)
+    minstepnum=min(onecubesolutionstep)
+    allsteps.append(minstepnum)
+    print(onecubesolutionstep,minstepnum,sum(allsteps)/(i+1))
 t2=time.time()
-print("time used",t2-t1,"average",(t2-t1)/n)
-print(sum(allsteps)/n)
+print("time used",round(t2-t1,3),"s, average time",round((t2-t1)/n,3),"s")
+print("average step",sum(allsteps)/n)
