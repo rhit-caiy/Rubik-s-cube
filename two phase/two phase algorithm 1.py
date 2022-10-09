@@ -195,7 +195,8 @@ dict1={}
 predictstate=[[ccd,correctmiddleedgep,""]]
 newpredictstate=[]
 dict1[str(ccd+correctmiddleedgep)]=""
-t1=time.time()
+print("phase 1 dict")
+t0=time.time()
 for c in range(1,10):
     for i in predictstate:
         oldcornerd=i[0]
@@ -225,7 +226,7 @@ for c in range(1,10):
     print(c,"cube left",len(newpredictstate),"dict length",len(dict1))
     predictstate=newpredictstate.copy()
     newpredictstate.clear()
-    
+print("dict1 time",time.time()-t0,"s")
 def phase1(corner,cornerd,edge,edged):
     cubes=[[corner,cornerd,edge,edged,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
     newcubes=[]
@@ -328,7 +329,8 @@ newpredictstate=[]
 dict2[str(cc+ce+cmed)]=""
 #usually 8+-1
 phase2maxstep=9
-print("phase 2")
+print("phase 2 dict")
+t0=time.time()
 for c in range(1,phase2maxstep+1):
     t1=time.time()
     for i in predictstate:
@@ -368,24 +370,29 @@ for c in range(1,phase2maxstep+1):
                     dict2[key]=newstep
                     if c!=phase2maxstep:
                         newpredictstate.append([nc.copy(),ne.copy(),nmed.copy(),newstep])
-            
     print(c,"cube left",len(newpredictstate),"dict length",len(dict2),time.time()-t1)
     predictstate=newpredictstate.copy()
     newpredictstate.clear()
+print("dict2 time",time.time()-t0,"s")
 
-def phase2(corner,cornerd,edge,edged):
-    cubes=[[corner,cornerd,edge,edged,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
+def phase2(cubepack):
+    c=cubepack[0]
+    cd=cubepack[1]
+    e=cubepack[2]
+    ed=cubepack[3]
+    cubes=[[c,cd,e,ed,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
     newcubes=[]
-    maxstep=16
-    if str(corner+edge+edged[4:8]) in dict2:
-        return dict2[str(corner+edge+edged[4:8])]
+    maxstep=7#sum to 16 with dict2 max step
+    if str(c+e+ed[4:8]) in dict2:
+        print("directly in dict2")
+        return dict2[str(c+e+ed[4:8])]
     for step in range(1,maxstep+1):
-        for cubepack in cubes:
-            cubecorner=cubepack[0]
-            cubecornerd=cubepack[1]
-            cubeedge=cubepack[2]
-            cubeedged=cubepack[3]
-            previousstep=cubepack[4]#formed by <face,degree>... string
+        for cube in cubes:
+            cubecorner=cube[0]
+            cubecornerd=cube[1]
+            cubeedge=cube[2]
+            cubeedged=cube[3]
+            previousstep=cube[4]#formed by <face,degree>... string
             for r in phase2rotations:
                 f=r[0]
                 t=r[1]
@@ -398,41 +405,58 @@ def phase2(corner,cornerd,edge,edged):
                     key=str(newcorner+newedge+newedged[4:8])
                     if key in dict2:
                         return previousstep+r+dict2[key]
-                    newcubes.append([newcorner.copy(),newcornerd.copy(),newedge.copy(),newedged.copy(),previousstep+r])
+                    if step!=maxstep:
+                        newcubes.append([newcorner.copy(),newcornerd.copy(),newedge.copy(),newedged.copy(),previousstep+r])
         cubes=newcubes.copy()
         newcubes.clear()
-        
-phase1solutionnum=10
+        #print(step,len(cubes))
+    #print("unable to find solution in",maxstep,"steps in phase 2")
+    return "0"*200
+
+phase1solutionnum=64
 n=10
 #print("phase 1 predict 2187 situations of corner block position, return",n,"solutions")
 print("phase 1 predict middle edge and corner position")
 print("phase 2 max predict step",phase2maxstep)
+print("length of two dicts",len(dict1),len(dict2))
 allcubestep=[]
+findlen=[]
 starttime=time.time()
 for i in range(n):
-    print(i)
+    print("cube",i+1)
     randomcube()
     t1=time.time()
     p1solutions=phase1(corner,cornerd,edge,edged)
-    print("p1solution",p1solutions)
+    p1solutions.sort(key=len)
+    print("phase 1 solutions' step",[int(len(j)/2) for j in p1solutions])
+    print("phase 2")
     onecubestep=[]
-    for s in p1solutions:
+    for j in range(len(p1solutions)):
+        s=p1solutions[j]
+        print(i+1,"-",j+1,end="    ")
         p1length=int(len(s)/2)
+        #print("phase 1 length",p1length)
         cubepack=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
         for l in range(p1length):
             cubepack=rotatecube(int(s[2*l]),int(s[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
-        p2solution=phase2(cubepack[0],cubepack[1],cubepack[2],cubepack[3])
+        
+        p2solution=phase2(cubepack)
         p2length=int(len(p2solution)/2)
+        #print("phase 2 length",p2length)
         for l in range(p2length):
             cubepack=rotatecube(int(p2solution[2*l]),int(p2solution[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
         stepsum=p1length+p2length
         print(p1length,"+",p2length,"=",stepsum,flush=True)
-        if cubepack!=[cc,ccd,ce,ced]:
-            print("error cube",cubepack)
+        # if cubepack!=[cc,ccd,ce,ced]:
+        #     print("error cube",cubepack)
         onecubestep.append(stepsum)
+        if stepsum<30:
+            break
     t2=time.time()
-    print(t2-t1,onecubestep,min(onecubestep))
+    findlen.append(len(onecubestep))
+    print(t2-t1,"s",onecubestep,"length to find",len(onecubestep),"minimum step",min(onecubestep))
     allcubestep.append(min(onecubestep))
 endtime=time.time()
-print("total time",starttime-endtime,"s, average time",(starttime-endtime)/n,"s")
-print(allcubestep,"average",sum(allcubestep)/n)
+print("total time",endtime-starttime,"s, average time",(endtime-starttime)/n,"s")
+print(allcubestep,"average number",sum(allcubestep)/n)
+print("number of solutions to find solution",findlen,"average",sum(findlen)/len(findlen))

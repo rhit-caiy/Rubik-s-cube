@@ -139,11 +139,12 @@ for c in range(1,maxstep+1):
     newpredictstate.clear()
 
 def phase2(corner,cornerd,edge,edged):
+    print([corner,cornerd,edge,edged])
     cubes=[[corner,cornerd,edge,edged,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
     newcubes=[]
     maxstep=16
     if str(corner+edge+edged[4:8]) in dict2:
-        #print("find in step 0")
+        print("find in step 0")
         return dict2[str(corner+edge+edged[4:8])]
     for step in range(1,maxstep+1):
         for cubepack in cubes:
@@ -163,20 +164,37 @@ def phase2(corner,cornerd,edge,edged):
                     newedged=newcubepack[3]
                     key=str(newcorner+newedge+newedged[4:8])
                     if key in dict2:
-                        #print("find in step",step)
+                        print("find in step",step)
                         return previousstep+r+dict2[key]
                     newcubes.append([newcorner.copy(),newcornerd.copy(),newedge.copy(),newedged.copy(),previousstep+r])
-        #print(step,len(newcubes))
+        print(step,len(newcubes))
         cubes=newcubes.copy()
         newcubes.clear()
         
+# cubepack=[[1, 5, 2, 0, 3, 4, 6, 7], [0, 0, 0, 5, 5, 0, 5, 5], [11, 1, 10, 0, 6, 7, 5, 4, 9, 8, 3, 2], [0, 0, 5, 5, 4, 3, 1, 2, 5, 5, 0, 0]]
+# corner=cubepack[0]
+# cornerd=cubepack[1]
+# edge=cubepack[2]
+# edged=cubepack[3]
+# # solutionstring=phase2(corner,cornerd,edge,edged)
+# # print(solutionstring)
+# # do("031242325101221201")
+# solutionstring=phase2(corner,cornerd,edge,edged)
+# print(solutionstring)
+        
 print("phase 2",maxstep,"+ ?")
-n=1000
+n=10
 t1=time.time()
 allsteps=[]
 print("number",n)
 for i in range(n):
     randomcube()
+    # cubepack=[[0, 2, 5, 6, 4, 1, 7, 3], [0, 5, 0, 5, 5, 0, 0, 5], [0, 11, 1, 10, 4, 6, 5, 7, 3, 9, 2, 8], [0, 0, 5, 5, 4, 3, 1, 4, 5, 5, 0, 0]]
+    # corner=cubepack[0]
+    # cornerd=cubepack[1]
+    # edge=cubepack[2]
+    # edged=cubepack[3]
+    
     solutionstring=phase2(corner,cornerd,edge,edged)
     stepnum=int(len(solutionstring)/2)
     allsteps.append(stepnum)
