@@ -180,7 +180,7 @@ for previousstepnum in range(almostrightstepnum):
                 newedge=almostrightedge[n].copy()
                 newedged=almostrightedged[n].copy()
                 reversesolution=almostrightsolution[n].copy()
-                if (reversesolution==[] or i!=reversesolution[0][0]) and not (n==0 and i==0):
+                if (reversesolution==[] or i!=reversesolution[0][0]) and not (previousstepnum==0 and i==0):
                     for j in range(3):
                         for l in range(4):
                             if newedge[l] in faceedge[i]:
@@ -193,7 +193,6 @@ for previousstepnum in range(almostrightstepnum):
                         almostrightsolution.append(solution.copy())
     print(previousstepnum+1,len(almostrightedge))
     
-#almostright=[[almostrightedge[i],almostrightedged[i]] for i in range(len(almostrightedged))]
 #turn to use hash map
 cubedict={}
 for i in range(len(almostrightedge)):
@@ -825,7 +824,7 @@ totalhtm=[]
 totalqtm=[]
 t1=time.time()
 n=10
-cnum=1000
+cnum=100
 print("cube number",n,", max cross on one cube: 24 *",cnum)
 for i in range(n):
     print("cube",i+1,"time",time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))

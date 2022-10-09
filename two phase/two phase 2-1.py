@@ -171,7 +171,7 @@ def phase2(corner,cornerd,edge,edged):
         newcubes.clear()
         
 print("phase 2",maxstep,"+ ?")
-n=100
+n=10000
 t1=time.time()
 allsteps=[]
 print("number",n)

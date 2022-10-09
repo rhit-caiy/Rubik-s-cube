@@ -12,6 +12,10 @@ edged=[0,0,0,0,1,2,3,4,5,5,5,5]#white or yellow, then right color on equator edg
 center=[0,1,2,3,4,5]#center
 
 #paste cube data here
+corner=[1, 4, 6, 0, 3, 5, 7, 2]
+cornerd=[2, 4, 5, 1, 0, 2, 1, 4]
+edge=[4, 0, 3, 7, 5, 6, 2, 1, 8, 9, 10, 11]
+edged=[1, 4, 3, 0, 4, 1, 1, 3, 5, 5, 5, 5]
 
 cube=[[i]*9 for i in range(6)]#color representation
 facecorner=[[0,2,3,1],[0,6,4,2],[2,4,5,3],[3,5,7,1],[1,7,6,0],[4,6,7,5]]
