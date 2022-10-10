@@ -75,7 +75,8 @@ def rotatecube(a,t,corner,cornerd,edge,edged):
     return [nc,ncd,ne,ned]
 
 ccd=[0,0,0,0,5,5,5,5]#position from 0 to 7, first 4 can only be 0 to 4, last 4 is 1 to 5
-'''
+
+
 dict1={}
 predictstate=[[ccd,""]]
 newpredictstate=[]
@@ -314,6 +315,8 @@ def phase1(corner,cornerd,edge,edged):
         cubes=newcubes.copy()
         newcubes.clear()
     return phase1solution
+'''
+
 
 #correct corner, correct edge, correct middle edge direction
 cc=[0,1,2,3,4,5,6,7]
@@ -413,50 +416,58 @@ def phase2(cubepack):
     #print("unable to find solution in",maxstep,"steps in phase 2")
     return "0"*200
 
-phase1solutionnum=64
-n=10
-#print("phase 1 predict 2187 situations of corner block position, return",n,"solutions")
-print("phase 1 predict middle edge and corner position")
+def initialize():
+    global corner,cornerd,edge,edged,center
+    corner=[i for i in range(8)]
+    cornerd=[0,0,0,0,5,5,5,5]
+    edge=[i for i in range(12)]
+    edged=[0,0,0,0,1,2,3,4,5,5,5,5]
+
+phase1solutionnum=100
+n=20
+print("phase 1 predict 2187 situations of corner block position")
+#print("phase 1 predict middle edge and corner position")
 print("phase 2 max predict step",phase2maxstep)
-print("length of two dicts",len(dict1),len(dict2))
+print("number of phase 1 solution",phase1solutionnum,"total cube",n)
 allcubestep=[]
-findlen=[]
+p=0
+total=0
 starttime=time.time()
 for i in range(n):
-    print("cube",i+1)
+    print("\ncube",i+1)
+    print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
+    initialize()
     randomcube()
+    print("phase 1")
     t1=time.time()
     p1solutions=phase1(corner,cornerd,edge,edged)
     p1solutions.sort(key=len)
-    print("phase 1 solutions' step",[int(len(j)/2) for j in p1solutions])
+    total+=len(p1solutions)
+    print([int(len(j)/2) for j in p1solutions])
     print("phase 2")
     onecubestep=[]
     for j in range(len(p1solutions)):
         s=p1solutions[j]
         print(i+1,"-",j+1,end="    ")
         p1length=int(len(s)/2)
-        #print("phase 1 length",p1length)
         cubepack=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
         for l in range(p1length):
             cubepack=rotatecube(int(s[2*l]),int(s[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
         
         p2solution=phase2(cubepack)
         p2length=int(len(p2solution)/2)
-        #print("phase 2 length",p2length)
         for l in range(p2length):
             cubepack=rotatecube(int(p2solution[2*l]),int(p2solution[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
         stepsum=p1length+p2length
-        print(p1length,"+",p2length,"=",stepsum,flush=True)
-        # if cubepack!=[cc,ccd,ce,ced]:
-        #     print("error cube",cubepack)
+        print(p1length,"+",p2length,"=",stepsum)
         onecubestep.append(stepsum)
-        if stepsum<30:
-            break
+        if stepsum<100:
+            p+=1
     t2=time.time()
-    findlen.append(len(onecubestep))
     print(t2-t1,"s",onecubestep,"length to find",len(onecubestep),"minimum step",min(onecubestep))
     allcubestep.append(min(onecubestep))
+    print("current result",allcubestep,"average",sum(allcubestep)/len(allcubestep))
 endtime=time.time()
 print("total time",endtime-starttime,"s, average time",(endtime-starttime)/n,"s")
 print(allcubestep,"average number",sum(allcubestep)/n)
-print("number of solutions to find solution",findlen,"average",sum(findlen)/len(findlen))
+print("probability to find solution in phase 2",p,"/",total,"=",p/total)
