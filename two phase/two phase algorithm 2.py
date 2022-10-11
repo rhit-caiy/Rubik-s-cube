@@ -45,7 +45,7 @@ def randomcube():
     for i in range(a):
         r=str(random.randrange(0,6))+str(random.randrange(1,4))
         randomstring+=r
-    do(randomstring)
+    return randomstring
     
 def do(s):
     for i in range(int(len(s)/2)):
@@ -77,120 +77,9 @@ def rotatecube(a,t,corner,cornerd,edge,edged):
 ccd=[0,0,0,0,5,5,5,5]#position from 0 to 7, first 4 can only be 0 to 4, last 4 is 1 to 5
 
 
-dict1={}
-predictstate=[[ccd,""]]
-newpredictstate=[]
-dict1[str(ccd)]=""
-print("phase 1")
-for c in range(1,7):
-    for i in predictstate:
-        oldcornerd=i[0]
-        oldstep=i[1]
-        for j in range(6):
-            if (c==1 and j!=0 and j!=5) or (c!=1 and oldstep[0]!=str(j)):
-                for k in range(1,4):
-                    if c==1 and k==2:
-                        continue
-                    newcornerd=oldcornerd.copy()
-                    for l in range(4):
-                        if oldcornerd[facecorner[j][(l+k)%4]]!=j:
-                            newcornerd[facecorner[j][l]]=adj[j][(adj[j].index(oldcornerd[facecorner[j][(l+k)%4]])+k)%4]
-                        else:
-                            newcornerd[facecorner[j][l]]=j
-                    if str(newcornerd) not in dict1:
-                        newstep=str(j)+str(4-k)+oldstep
-                        dict1[str(newcornerd)]=newstep
-                        newpredictstate.append([newcornerd.copy(),newstep])
-            
-    print(c,"cube left",len(newpredictstate),"dict length",len(dict1))
-    predictstate=newpredictstate.copy()
-    newpredictstate.clear()
-
-def phase1(corner,cornerd,edge,edged):
-    cubes=[[corner,cornerd,edge,edged,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
-    newcubes=[]
-    phase1solution=[]
-    maxstep=7
-    
-    #check first
-    furtherstep=dict1[str([cornerd[j] for j in corner])]
-    oe=edge
-    oed=edged
-    ne=oe.copy()
-    ned=oed.copy()
-    for j in range(int(len(furtherstep)/2)):
-        a=int(furtherstep[2*j])#turning face
-        t=int(furtherstep[2*j+1])#turning time
-        r=faceedge[a]
-        for k in range(4):
-           ne[r[k]]=oe[r[(k+t)%4]]
-        for k in r:
-            k=oe[k]
-            if oed[k]!=a:
-                ned[k]=adj[a][(adj[a].index(oed[k])+t)%4]
-        oe=ne.copy()
-        oed=ned.copy()
-    finish=True
-    for j in [0,1,2,3,8,9,10,11]:
-        if ned[j]!=0 and ned[j]!=5:
-            finish=False
-            break
-    if finish:
-        phase1solution.append(furtherstep)
-        
-    for step in range(1,maxstep+1):
-        for cubepack in cubes:
-            cubecorner=cubepack[0]
-            cubecornerd=cubepack[1]
-            cubeedge=cubepack[2]
-            cubeedged=cubepack[3]
-            previousstep=cubepack[4]#formed by <face,degree>... string
-            for i in range(6):
-                if step==1 or str(i)!=previousstep[-2] and not (step>2 and str(i)==previousstep[-4] and previousstep[-4]+previousstep[-2] in ["05","50","13","31","24","42"]):
-                    for t in range(1,4):
-                        #rotate cube, return [nc,ncd,ne,ned]
-                        newcubepack=rotatecube(i,t,cubecorner,cubecornerd,cubeedge,cubeedged)
-                        newcorner=newcubepack[0]
-                        newcornerd=newcubepack[1]
-                        #use dictionary to mock edge position
-                        newstep=previousstep+str(i)+str(t)
-                        furtherstep=dict1[str([newcornerd[j] for j in newcorner])]
-                        #do the further rotations
-                        oe=newcubepack[2]
-                        oed=newcubepack[3]
-                        ne=oe.copy()
-                        ned=oed.copy()
-                        #simple way to turn edge
-                        for j in range(int(len(furtherstep)/2)):
-                            a=int(furtherstep[2*j])#turning face
-                            t=int(furtherstep[2*j+1])#turning time
-                            r=faceedge[a]
-                            for k in range(4):
-                               ne[r[k]]=oe[r[(k+t)%4]]
-                            for k in r:
-                                k=oe[k]
-                                if oed[k]!=a:
-                                    ned[k]=adj[a][(adj[a].index(oed[k])+t)%4]
-                            oe=ne.copy()
-                            oed=ned.copy()
-                        
-                        finish=True
-                        for j in [0,1,2,3,8,9,10,11]:
-                            if ned[j]!=0 and ned[j]!=5:
-                                finish=False
-                                break
-                        if finish:
-                            phase1solution.append(newstep+furtherstep)
-                            if len(phase1solution)>=phase1solutionnum:
-                                return phase1solution
-                        
-                        if step!=maxstep:
-                            newcubepack.append(newstep)
-                            newcubes.append(newcubepack)
-        cubes=newcubes.copy()
-        newcubes.clear()
-    return phase1solution
 '''
+
+#1-2
 correctmiddleedgep=[4,5,6,7]
 dict1={}
 predictstate=[[ccd,correctmiddleedgep,""]]
@@ -306,16 +195,139 @@ def phase1(corner,cornerd,edge,edged):
                                 finish=False
                                 break
                         if finish:
-                            phase1solution.append(newstep+furtherstep)
-                            if len(phase1solution)>=phase1solutionnum:
-                                return phase1solution
+                            if ned[4] in [1,3] and ned[6] in [1,3] and ned[5] in [2,4] and ned[7] in [2,4]:
+                                phase1solution.append(newstep+furtherstep)
+                                if len(phase1solution)>=phase1solutionnum:
+                                    return phase1solution
                         elif step!=maxstep:
                             newcubepack.append(newstep)
                             newcubes.append(newcubepack)
         cubes=newcubes.copy()
         newcubes.clear()
     return phase1solution
+
+
+
 '''
+#1-1
+dict1={}
+predictstate=[[ccd,""]]
+newpredictstate=[]
+dict1[str(ccd)]=""
+print("phase 1 dict")
+for c in range(1,7):
+    for i in predictstate:
+        oldcornerd=i[0]
+        oldstep=i[1]
+        for j in range(6):
+            if (c==1 and j!=0 and j!=5) or (c!=1 and oldstep[0]!=str(j)):
+                for k in range(1,4):
+                    if c==1 and k==2:
+                        continue
+                    newcornerd=oldcornerd.copy()
+                    for l in range(4):
+                        if oldcornerd[facecorner[j][(l+k)%4]]!=j:
+                            newcornerd[facecorner[j][l]]=adj[j][(adj[j].index(oldcornerd[facecorner[j][(l+k)%4]])+k)%4]
+                        else:
+                            newcornerd[facecorner[j][l]]=j
+                    if str(newcornerd) not in dict1:
+                        newstep=str(j)+str(4-k)+oldstep
+                        dict1[str(newcornerd)]=newstep
+                        newpredictstate.append([newcornerd.copy(),newstep])
+            
+    print(c,"cube left",len(newpredictstate),"dict length",len(dict1))
+    predictstate=newpredictstate.copy()
+    newpredictstate.clear()
+
+def phase1(corner,cornerd,edge,edged):
+    cubes=[[corner,cornerd,edge,edged,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
+    newcubes=[]
+    phase1solution=[]
+    maxstep=7
+    
+    #check first
+    furtherstep=dict1[str([cornerd[j] for j in corner])]
+    oe=edge
+    oed=edged
+    ne=oe.copy()
+    ned=oed.copy()
+    for j in range(int(len(furtherstep)/2)):
+        a=int(furtherstep[2*j])#turning face
+        t=int(furtherstep[2*j+1])#turning time
+        r=faceedge[a]
+        for k in range(4):
+           ne[r[k]]=oe[r[(k+t)%4]]
+        for k in r:
+            k=oe[k]
+            if oed[k]!=a:
+                ned[k]=adj[a][(adj[a].index(oed[k])+t)%4]
+        oe=ne.copy()
+        oed=ned.copy()
+    finish=True
+    for j in [0,1,2,3,8,9,10,11]:
+        if ned[j]!=0 and ned[j]!=5:
+            finish=False
+            break
+    if finish:
+        phase1solution.append(furtherstep)
+        print(len(phase1solution),end=" ")
+    for step in range(1,maxstep+1):
+        for cubepack in cubes:
+            cubecorner=cubepack[0]
+            cubecornerd=cubepack[1]
+            cubeedge=cubepack[2]
+            cubeedged=cubepack[3]
+            previousstep=cubepack[4]#formed by <face,degree>... string
+            for i in range(6):
+                if step==1 or str(i)!=previousstep[-2] and not (step>2 and str(i)==previousstep[-4] and previousstep[-4]+previousstep[-2] in ["05","50","13","31","24","42"]):
+                    for t in range(1,4):
+                        #rotate cube, return [nc,ncd,ne,ned]
+                        newcubepack=rotatecube(i,t,cubecorner,cubecornerd,cubeedge,cubeedged)
+                        newcorner=newcubepack[0]
+                        newcornerd=newcubepack[1]
+                        #use dictionary to mock edge position
+                        newstep=previousstep+str(i)+str(t)
+                        furtherstep=dict1[str([newcornerd[j] for j in newcorner])]
+                        #do the further rotations
+                        oe=newcubepack[2]
+                        oed=newcubepack[3]
+                        ne=oe.copy()
+                        ned=oed.copy()
+                        #simple way to turn edge
+                        for j in range(int(len(furtherstep)/2)):
+                            a=int(furtherstep[2*j])#turning face
+                            t=int(furtherstep[2*j+1])#turning time
+                            r=faceedge[a]
+                            for k in range(4):
+                               ne[r[k]]=oe[r[(k+t)%4]]
+                            for k in r:
+                                k=oe[k]
+                                if oed[k]!=a:
+                                    ned[k]=adj[a][(adj[a].index(oed[k])+t)%4]
+                            oe=ne.copy()
+                            oed=ned.copy()
+                        
+                        finish=True
+                        for j in [0,1,2,3,8,9,10,11]:
+                            if ned[j]!=0 and ned[j]!=5:
+                                finish=False
+                                break
+                        if finish:
+                            if ned[4] in [1,3] and ned[6] in [1,3] and ned[5] in [2,4] and ned[7] in [2,4]:
+                                phase1solution.append(newstep+furtherstep)
+                                print(len(phase1solution),end=" ")
+                                if len(phase1solution)>=phase1solutionnum:
+                                    return phase1solution
+                        
+                        if step!=maxstep:
+                            newcubepack.append(newstep)
+                            newcubes.append(newcubepack)
+        cubes=newcubes.copy()
+        newcubes.clear()
+    return phase1solution
+
+
+
 
 
 #correct corner, correct edge, correct middle edge direction
@@ -385,9 +397,8 @@ def phase2(cubepack):
     ed=cubepack[3]
     cubes=[[c,cd,e,ed,""]]#element in: [corner,cornerd,edge,edged,steps represented by 0 to 5]
     newcubes=[]
-    maxstep=7#sum to 16 with dict2 max step
+    maxstep=16#sum to 16 with dict2 max step
     if str(c+e+ed[4:8]) in dict2:
-        print("directly in dict2")
         return dict2[str(c+e+ed[4:8])]
     for step in range(1,maxstep+1):
         for cube in cubes:
@@ -412,9 +423,6 @@ def phase2(cubepack):
                         newcubes.append([newcorner.copy(),newcornerd.copy(),newedge.copy(),newedged.copy(),previousstep+r])
         cubes=newcubes.copy()
         newcubes.clear()
-        #print(step,len(cubes))
-    #print("unable to find solution in",maxstep,"steps in phase 2")
-    return "0"*200
 
 def initialize():
     global corner,cornerd,edge,edged,center
@@ -423,51 +431,58 @@ def initialize():
     edge=[i for i in range(12)]
     edged=[0,0,0,0,1,2,3,4,5,5,5,5]
 
-phase1solutionnum=100
-n=10
-print("phase 1 predict 2187 situations of corner block position")
-#print("phase 1 predict middle edge and corner position")
+changebasetable=[[5,1,4,3,2,0],[3,0,2,5,4,1],[4,1,0,3,5,2],[1,5,2,0,4,3],[2,1,5,3,0,4],[0,1,2,3,4,5]]
+def rotatewithbase(randomstring,base):
+    l=int(len(randomstring)/2)
+    initialize()
+    newrandomstring=""
+    for i in range(l):
+        newrandomstring+=randomstring[2*i]+str(changebasetable[base][int(randomstring[2*i+1])])
+    do(newrandomstring)
+
+phase1solutionnum=10
+n=1
+print("1-1 phase 1 predict 2187 situations of corner block position")
+#print("1-2 phase 1 predict middle edge and corner position")
 print("phase 2 max predict step",phase2maxstep)
 print("number of phase 1 solution",phase1solutionnum,"total cube",n)
 allcubestep=[]
-p=0
-total=0
 starttime=time.time()
 for i in range(n):
     print("\ncube",i+1)
     print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     initialize()
-    randomcube()
-    print("phase 1")
+    randomstring=randomcube()
+    print("random string:",randomstring)
     t1=time.time()
-    p1solutions=phase1(corner,cornerd,edge,edged)
-    p1solutions.sort(key=len)
-    total+=len(p1solutions)
-    print([int(len(j)/2) for j in p1solutions])
-    print("phase 2")
     onecubestep=[]
-    for j in range(len(p1solutions)):
-        s=p1solutions[j]
-        print(i+1,"-",j+1,end="    ")
-        p1length=int(len(s)/2)
-        cubepack=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
-        for l in range(p1length):
-            cubepack=rotatecube(int(s[2*l]),int(s[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
-        
-        p2solution=phase2(cubepack)
-        p2length=int(len(p2solution)/2)
-        for l in range(p2length):
-            cubepack=rotatecube(int(p2solution[2*l]),int(p2solution[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
-        stepsum=p1length+p2length
-        print(p1length,"+",p2length,"=",stepsum)
-        onecubestep.append(stepsum)
-        if stepsum<100:
-            p+=1
+    for f in range(6):
+        print(i+1,f)
+        rotatewithbase(randomstring,f)
+        print("phase 1")
+        p1solutions=phase1(corner,cornerd,edge,edged)
+        p1solutions.sort(key=len)
+        print([int(len(j)/2) for j in p1solutions])
+        print("phase 2")
+        for j in range(len(p1solutions)):
+            s=p1solutions[j]
+            print(i+1,"-",j+1,end="    ")
+            p1length=int(len(s)/2)
+            cubepack=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
+            for l in range(p1length):
+                cubepack=rotatecube(int(s[2*l]),int(s[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
+            
+            p2solution=phase2(cubepack)
+            p2length=int(len(p2solution)/2)
+            for l in range(p2length):
+                cubepack=rotatecube(int(p2solution[2*l]),int(p2solution[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
+            stepsum=p1length+p2length
+            print(p1length,"+",p2length,"=",stepsum)
+            onecubestep.append(stepsum)
     t2=time.time()
-    print(t2-t1,"s",onecubestep,"length to find",len(onecubestep),"minimum step",min(onecubestep))
+    print(t2-t1,"s",onecubestep,"size",len(onecubestep),"minimum step",min(onecubestep))
     allcubestep.append(min(onecubestep))
-    print("current result",allcubestep,"average",sum(allcubestep)/len(allcubestep))
+    print("cube",i+1,"current results:",allcubestep,"average",sum(allcubestep)/len(allcubestep))
 endtime=time.time()
 print("total time",endtime-starttime,"s, average time",(endtime-starttime)/n,"s")
 print(allcubestep,"average number",sum(allcubestep)/n)
-print("probability to find solution in phase 2",p,"/",total,"=",p/total)
