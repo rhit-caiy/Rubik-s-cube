@@ -457,7 +457,7 @@ for i in range(n):
     t1=time.time()
     onecubestep=[]
     for f in range(6):
-        print(i+1,f)
+        print("cube",i+1,"face",f)
         rotatewithbase(randomstring,f)
         print("phase 1")
         p1solutions=phase1(corner,cornerd,edge,edged)
@@ -466,7 +466,7 @@ for i in range(n):
         print("phase 2")
         for j in range(len(p1solutions)):
             s=p1solutions[j]
-            print(i+1,"-",j+1,end="    ")
+            print(i+1,"-",f,"-",j+1,end="    ")
             p1length=int(len(s)/2)
             cubepack=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
             for l in range(p1length):
@@ -482,7 +482,7 @@ for i in range(n):
     t2=time.time()
     print(t2-t1,"s",onecubestep,"size",len(onecubestep),"minimum step",min(onecubestep))
     allcubestep.append(min(onecubestep))
-    print("cube",i+1,"current results:",allcubestep,"average",sum(allcubestep)/len(allcubestep))
+    print("finish",i+1,"cubes, current results:",allcubestep,"average",sum(allcubestep)/len(allcubestep))
 endtime=time.time()
 print("total time",endtime-starttime,"s, average time",(endtime-starttime)/n,"s")
 print(allcubestep,"average number",sum(allcubestep)/n)
