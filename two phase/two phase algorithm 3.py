@@ -122,15 +122,11 @@ def phase1(corner,cornerd,edge,edged):
         phase1return.append(furtherstep)
     for step in range(1,maxstep+1):
         for cubepack in cubes:
-            cubecorner=cubepack[0]
-            cubecornerd=cubepack[1]
-            cubeedge=cubepack[2]
-            cubeedged=cubepack[3]
             previousstep=cubepack[4]#formed by <face,degree>... string
             for f in range(6):
                 if step==1 or str(f)!=previousstep[-2] and not (step>2 and str(f)==previousstep[-4] and previousstep[-4]+previousstep[-2] in ["05","50","13","31","24","42"]):
                     for t in range(1,4):
-                        newcubepack=rotatecube(f,t,cubecorner,cubecornerd,cubeedge,cubeedged)
+                        newcubepack=rotatecube(f,t,*cubepack[:4])
                         nc=newcubepack[0]
                         ncd=newcubepack[1]
                         ne=newcubepack[2]
@@ -166,7 +162,6 @@ t0=time.time()
 for step in range(1,dict2step+1):
     t1=time.time()
     for cube in predictstate:
-        #old
         oc=cube[0]
         oe=cube[1]
         omed=cube[2]
@@ -207,41 +202,29 @@ for step in range(1,dict2step+1):
     newpredictstate.clear()
 print("dict2 time",time.time()-t0,"s")
 
-def phase2(cubepack,cubepack2,stepleft):
+def phase2(cubepack,s,stepleft):
     c=cubepack[0]
     cd=cubepack[1]
     e=cubepack[2]
     ed=cubepack[3]
     
-    c2=cubepack2[0]
-    cd2=cubepack2[1]
-    e2=cubepack2[2]
-    ed2=cubepack2[3]
     newcubes=[]
-    
     #if can't find solution within maxstep, directly return
-    maxstep=stepleft-dict2step
+    maxstep=stepleft-dict2step-1
     #check first
     if str(c+e+ed[4:8]) in dict2:
-        return dict2[str(c+e+ed[4:8])]
-    if str(c2+e2+ed2[4:8]) in dict2:
-        return dict2[str(c2+e2+ed2[4:8])]
+        return s+dict2[str(c+e+ed[4:8])]
     if maxstep<1:
-        return "0"*60
-    
-    cubes=[[c,cd,e,ed,""],[c2,cd2,e2,ed2,""]]
+        return "0"*100
+    cubes=[[c,cd,e,ed,s]]
     for step in range(1,maxstep+1):
         for cube in cubes:
-            cubecorner=cube[0]
-            cubecornerd=cube[1]
-            cubeedge=cube[2]
-            cubeedged=cube[3]
             previousstep=cube[4]#formed by <face,degree>... string
             for r in phase2rotations:
                 f=r[0]
                 t=r[1]
-                if step==1 or f!=previousstep[-2] and not (step>2 and f==previousstep[-4] and previousstep[-4]+previousstep[-2] in ["05","50","13","31","24","42"]):
-                    newcubepack=rotatecube(int(f),int(t),cubecorner,cubecornerd,cubeedge,cubeedged)
+                if len(previousstep)==0 or f!=previousstep[-2] and not (step>2 and f==previousstep[-4] and previousstep[-4]+previousstep[-2] in ["05","50","13","31","24","42"]):
+                    newcubepack=rotatecube(int(f),int(t),*cube[:4])
                     newcorner=newcubepack[0]
                     newcornerd=newcubepack[1]
                     newedge=newcubepack[2]
@@ -253,10 +236,10 @@ def phase2(cubepack,cubepack2,stepleft):
                         newcubes.append([newcorner,newcornerd,newedge,newedged,previousstep+r])
         cubes=newcubes.copy()
         newcubes.clear()
-    return "0"*40
+    return "0"*100
 
 def initialize():
-    global corner,cornerd,edge,edged,center
+    global corner,cornerd,edge,edged
     corner=[i for i in range(8)]
     cornerd=[0,0,0,0,5,5,5,5]
     edge=[i for i in range(12)]
@@ -271,57 +254,69 @@ def rotatewithbase(randomstring,base):
         newrandomstring+=str(changebasetable[base][int(randomstring[2*i])])+randomstring[2*i+1]
     do(newrandomstring)
     
-phase1solutionnum=100
-n=100
+phase1solutionnum=10000
+n=10
 print("phase 1 max predict step",dict1step)
 print("phase 2 max predict step",dict2step)
 print("number of phase 1 solution",phase1solutionnum,"total cube",n)
-print("6 colors all can be base")
+print("3 colors as base")
 allcubestep=[]
 starttime=time.time()
+phasetime=[0,0]
 for i in range(n):
     print("\ncube",i+1)
     print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     randomstring=randomcube()
-    print("random string:",randomstring)
+    #print("random string:",randomstring)
     t1=time.time()
     #max expected step number
-    currentminstep=24
-    for f in range(6):
-        print("cube",i+1,"face",f)
-        rotatewithbase(randomstring,f)
-        print("phase 1")
+    currentminstep=30
+    for f in range(3):
+        tp0=time.time()
+        rotatewithbase(randomstring,5-f)
+        #print("phase 1")
         p1solutions=phase1(corner,cornerd,edge,edged)
-        print([int(len(j)/2) for j in p1solutions])
-        print("phase 2")
+        #print("phase 2")
+        tp1=time.time()
+        print(f,"/ 3, len",len(p1solutions),end=", ")
         for j in range(len(p1solutions)):
             s=p1solutions[j]
             p1length=int(len(s)/2)
-            cubepack=[corner.copy(),cornerd.copy(),edge.copy(),edged.copy()]
+            cubepack=[corner,cornerd,edge,edged]
             #phase 1
             for l in range(p1length):
-                cubepack=rotatecube(int(s[2*l]),int(s[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
-            cubepack2=cubepack
-            if p1length>0:
-                cubepack2=rotatecube(int(s[-2]),2,cubepack[0],cubepack[1],cubepack[2],cubepack[3])
-            
-            #phase 2
+                cubepack=rotatecube(int(s[2*l]),int(s[2*l+1]),*cubepack)
             stepleft=currentminstep-p1length
-            p2solution=phase2(cubepack,cubepack2,stepleft)
-            p2length=int(len(p2solution)/2)
-            for l in range(p2length):
-                cubepack=rotatecube(int(p2solution[2*l]),int(p2solution[2*l+1]),cubepack[0],cubepack[1],cubepack[2],cubepack[3])
-            stepsum=p1length+p2length
-            print(stepsum,end=" ")
+            solution1=phase2(cubepack,s,stepleft)
+            #reduce one of the first step in phase 2 by another cube
+            cubepack2=cubepack
+            s2=s
+            solution2=solution1
+            if p1length>0:
+                cubepack2=rotatecube(int(s[-2]),2,*cubepack)
+                s2=s2[:-1]+"1"
+                solution2=phase2(cubepack,s2,stepleft)
+                
+            #phase 2
+            stepsum1=int(len(solution1)/2)
+            stepsum2=int(len(solution2)/2)
+            stepsum=min(stepsum1,stepsum2)
             if stepsum<currentminstep:
                 currentminstep=stepsum
+                print(stepsum,end=" ")
             #print(p1length,"+",p2length,"=",stepsum,"current min",currentminstep)
+        tp2=time.time()
+        phasetime[0]+=tp1-tp0
+        phasetime[1]+=tp2-tp1
         print()
-        print("current min",currentminstep)
     t2=time.time()
-    print(t2-t1,"s","minimum step",currentminstep)
+    print("minimum step",currentminstep)
+    print(t2-t1,"s","two phase time sum",phasetime)
     allcubestep.append(currentminstep)
     print("finish",i+1,"cubes, current results:",allcubestep,"average",sum(allcubestep)/len(allcubestep))
+    #print("finish",i+1,"cubes, average",sum(allcubestep)/len(allcubestep))
+    print("estimated time:",(t2-starttime)*(n-i-1)/(i+1),"s")
 endtime=time.time()
 print("total time",endtime-starttime,"s, average time",(endtime-starttime)/n,"s")
-print(allcubestep,"average number",sum(allcubestep)/n)
+print("two phase time",phasetime[0]/n,"s +",phasetime[1]/n,"s")
+print(allcubestep,"average",sum(allcubestep)/n,"max",max(allcubestep),"min",min(allcubestep))
