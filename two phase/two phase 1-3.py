@@ -110,7 +110,6 @@ def randomcube():
         r=str(random.randrange(0,6))+str(random.randrange(1,4))
         randomstring+=r
     do(randomstring)
-    print(randomstring)
     
 def do(s):
     for i in range(int(len(s)/2)):
@@ -141,7 +140,6 @@ def phase1(corner,cornerd,edge,edged):
                         newstep=previousstep+str(f)+str(t)
                         key=str([ncd[nc[i]] for i in range(7)]+[ned[ne[i]] for i in range(11)]+sorted([ne.index(i) for i in range(4,8)]))
                         if key in dict1:
-                            print("find solution")
                             furtherstep=dict1[key]
                             return newstep+furtherstep
                         elif step!=maxstep:
@@ -149,21 +147,22 @@ def phase1(corner,cornerd,edge,edged):
                             newcubes.append(newcubepack)
         cubes=newcubes.copy()
         newcubes.clear()
-        print(step,len(cubes))
     return ""
 
 
-n=10
+n=100000
 t1=time.time()
+solutionstep=[]
 for i in range(n):
-    print(i+1)
+    if i%10000==0:
+        print(i)
     randomcube()
-    print(corner,cornerd,edge,edged)
     solutionstring=phase1(corner,cornerd,edge,edged)
-    print("solution",i,len(solutionstring)/2,solutionstring)
+    #print("solution",i+1,len(solutionstring)/2,solutionstring)
+    solutionstep.append(int(len(solutionstring)/2))
 t2=time.time()
 print("time used",round(t2-t1,3),"s, average time",round((t2-t1)/n,3),"s")
-
+print(sum(solutionstep)/len(solutionstep),max(solutionstep),min(solutionstep))
 
 
 # randomcube()
