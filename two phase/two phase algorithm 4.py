@@ -133,22 +133,43 @@ dict1thread.start()
 dict1thread.join()
 dict2thread.join()
     
-print("finish",len(dict1),len(dict2))
+print("finish dicts",len(dict1),len(dict2))
 print("time",time.time()-tdict)
 
 
-def phase1(c,cd,e,ed,phase1solutionnum):
+def phase1(c,cd,e,ed,phase1solutionnum,threadid):
+    global facesolutions,minstep
+    #print("start thread",threadid)
     cubes=[[c,cd,e,ed,""]]
     newcubes=[]
     maxstep=6
-    phase1return=[]#
+    solutionnum=0
+    minstr="6"*64
+    
     #check first
-    key=str([cornerd[corner[i]] for i in range(7)]+[edged[edge[i]] for i in range(11)]+sorted([edge.index(i) for i in range(4,8)]))
+    key=str([cd[c[i]] for i in range(7)]+[ed[e[i]] for i in range(11)]+sorted([e.index(i) for i in range(4,8)]))
     if key in dict1:
+        solutionnum+=1
         furtherstep=dict1[key]
         if furtherstep=="":
             #phase 2
-            phase1return.append(furtherstep)
+            solution=phase2([c,cd,e,ed],"")
+            minstr=solution
+            minstep=steplen(solution)
+        else:
+            solution1=phase2([c,cd,e,ed],furtherstep+"1")
+            solution2=phase2([c,cd,e,ed],furtherstep+"3")
+            if len(solution1)<=len(solution2):
+                minstr=solution1
+                minstep=steplen(solution1)
+            else:
+                minstr=solution2
+                minstep=steplen(solution2)
+        if solutionnum>=phase1solutionnum:
+            facesolutions[threadid]=minstr
+            #print("finish thread",threadid,"verified phase 1 number",solutionnum,"its min solution len",steplen(minstr),",",minstr)
+            return
+    
     for step in range(1,maxstep+1):
         for cubepack in cubes:
             previousstep=cubepack[4]
@@ -164,31 +185,47 @@ def phase1(c,cd,e,ed,phase1solutionnum):
                         key=str([ncd[nc[i]] for i in range(7)]+[ned[ne[i]] for i in range(11)]+sorted([ne.index(i) for i in range(4,8)]))
                         if key in dict1:
                             furtherstep=dict1[key]
-                            phase1return.append(newstep+furtherstep)
-                            #phase 2
-                            if len(phase1return)>=phase1solutionnum:
-                                return phase1return
+                            phase2cube=newcubepack
+                            for i in range(int(len(furtherstep[:-1])/2)):
+                                phase2cube=rotatecube(int(furtherstep[2*i]),int(furtherstep[2*i+1]),*phase2cube)
+                            solution1=phase2(rotatecube(int(furtherstep[-1]),1,*phase2cube),newstep+furtherstep+"1")
+                            if solution1!="6" and steplen(solution1)<minstep:
+                                minstep=steplen(solution1)
+                                minstr=solution1
+                                print(threadid,minstep)
+                            solution2=phase2(rotatecube(int(furtherstep[-1]),3,*phase2cube),newstep+furtherstep+"3")
+                            if solution2!="6" and steplen(solution2)<minstep:
+                                minstep=steplen(solution2)
+                                minstr=solution2
+                                print(threadid,minstep)
+                            solutionnum+=1
+                            if solutionnum>=phase1solutionnum:
+                                facesolutions[threadid]=minstr
+                                #print("finish thread",threadid,"verified number",solutionnum,"solution",minstr)
+                                return
                         elif step!=maxstep:
                             newcubepack.append(newstep)
                             newcubes.append(newcubepack)
         cubes=newcubes.copy()
         newcubes.clear()
-    return phase1return
+    facesolutions[threadid]=minstr
+    #print("finish thread",threadid,"verified number",solutionnum,"solution",minstr)
+    return
 
-def phase2(cubepack,s,stepleft):
+def phase2(cubepack,s):
     c=cubepack[0]
     cd=cubepack[1]
     e=cubepack[2]
     ed=cubepack[3]
-    newcubes=[]
-    #if can't find solution within maxstep, directly return
-    maxstep=stepleft-dict2step-1
     #check first
     if str(c+e+ed[4:8]) in dict2:
         return s+dict2[str(c+e+ed[4:8])]
+    #if can't find solution within maxstep, directly return
+    maxstep=minstep-steplen(s)-dict2step-1
     if maxstep<1:
-        return "0"*100
+        return "6"
     cubes=[[c,cd,e,ed,s]]
+    newcubes=[]
     for step in range(1,maxstep+1):
         for cube in cubes:
             previousstep=cube[4]
@@ -208,7 +245,7 @@ def phase2(cubepack,s,stepleft):
                         newcubes.append([newcorner,newcornerd,newedge,newedged,previousstep+r])
         cubes=newcubes.copy()
         newcubes.clear()
-    return "0"*100
+    return "6"
 
 def steplen(s):
     return int(len(s)/2)
@@ -245,8 +282,6 @@ def rotatecube(f,t,oc,ocd,oe,oed):
     nc=oc.copy()
     ncd=ocd.copy()
     for n in range(4):
-        if n+t-4>3 or n+t-4<-4:
-            print(n,t,n+t-4)
         ne[re[n]]=oe[re[n+t-4]]
         nc[rc[n]]=oc[rc[n+t-4]]
         en=oe[re[n]]
@@ -257,19 +292,41 @@ def rotatecube(f,t,oc,ocd,oe,oed):
             ncd[cn]=adjf[adjf.index(ocd[cn])+t-4]
     return [nc,ncd,ne,ned]
 
-phase1solutionnum=100
-cubenumber=10
+phase1solutionnum=10000
+cubenumber=100
+allcubestep=[]
+starttime=time.time()
 for i in range(cubenumber):
+    t1=time.time()
     print("\ncube",i+1)
+    minstep=100
     randomstring=randomcube()
     unsolvedcubes=[]
     randomstrings=[]
     for base in range(3):
         getcubewithbasereturn=getcubewithbase(randomstring,base)
         unsolvedcubes.append(getcubewithbasereturn[0])
-        randomstring.append(getcubewithbasereturn[1])
-        print("random string",base,getcubewithbasereturn[1])
-    '''
-    3 threads
-    '''
-    
+        randomstrings.append(getcubewithbasereturn[1])
+        #print("random string",base,getcubewithbasereturn[1])
+    facesolutions=["","",""]
+    cubethread0=threading.Thread(target=phase1,args=(*unsolvedcubes[0],phase1solutionnum,0))
+    cubethread1=threading.Thread(target=phase1,args=(*unsolvedcubes[1],phase1solutionnum,1))
+    cubethread2=threading.Thread(target=phase1,args=(*unsolvedcubes[2],phase1solutionnum,2))
+    threads=[cubethread0,cubethread1,cubethread2]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+    print("finish all threads of cube",i+1)
+    print("min step",minstep)
+    for j in range(3):
+        print("thread",j,"length",steplen(facesolutions[j]),"solution",facesolutions[j])
+    allcubestep.append(minstep)
+    t2=time.time()
+    print("current results:",allcubestep,"average",sum(allcubestep)/len(allcubestep))
+    print("time:",t2-t1,"s")
+    print("estimated time left:",(t2-starttime)*(cubenumber-i-1)/(i+1),"s")
+endtime=time.time()
+print("dict depth used",dict1step,"+",dict2step)
+print("total time",endtime-starttime,"s, average time",(endtime-starttime)/cubenumber,"s")
+print(allcubestep,"average",sum(allcubestep)/cubenumber,"max",max(allcubestep),"min",min(allcubestep))
