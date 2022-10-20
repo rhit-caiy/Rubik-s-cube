@@ -125,7 +125,7 @@ def phase1(c,cd,e,ed,threadid):
             if solution and steplen(solution)<minstep:
                 minstr=solution
                 minstep=steplen(solution)
-                print("already satisfy for thread {}, step {} {}\n".format(threadid,minstep,solution),end="")
+                print("already satisfy phase one in thread {}, phase 2 step {} {}\n".format(threadid,minstep,solution),end="")
         else:
             phase2cube=[c,cd,e,ed]
             for i in range(int(len(furtherstep)/2)):
@@ -134,12 +134,12 @@ def phase1(c,cd,e,ed,threadid):
             if solution and steplen(solution)<minstep:
                 minstep=steplen(solution)
                 minstr=solution
-                print("directly in dict, thread {} {} {}\n".format(threadid,minstep,solution),end="")
+                print("directly in dict, thread {} {} = {}+{} {}\n".format(threadid,minstep,steplen(furtherstep),minstep-steplen(furtherstep),solution),end="")
             solution=phase2(rotatecube(int(furtherstep[-1]),3,*phase2cube),furtherstep+"3")
             if solution and steplen(solution)<minstep:
                 minstep=steplen(solution)
                 minstr=solution
-                print("directly in dict, thread {} {} {}\n".format(threadid,minstep,solution),end="")
+                print("directly in dict, thread {} {} = {}+{} {}\n".format(threadid,minstep,steplen(furtherstep),minstep-steplen(furtherstep),solution),end="")
             
     for step in range(1,phase1maxstep+1):
         tloop=time.time()
@@ -180,13 +180,12 @@ def phase1(c,cd,e,ed,threadid):
                             if solution and steplen(solution)<minstep:
                                 minstep=steplen(solution)
                                 minstr=solution
-                                print("thread {} find {} {}/{}  verified complete number {} {}\n".format(threadid,minstep,step,phase1maxstep,solutionnum,solution),end="")
-                            solution=phase2(rotatecube(int(furtherstep[-1]),2,*phase2cube),newstep+furtherstep[:-1]+"3")
+                                print("thread {} find {} = {}+{}+{}  {}/{}  verified complete number {} {}\n".format(threadid,minstep,steplen(newstep),steplen(furtherstep),minstep-steplen(newstep)-steplen(furtherstep),step,phase1maxstep,solutionnum,solution),end="")
+                            solution=phase2(rotatecube(int(furtherstep[-2]),2,*phase2cube),newstep+furtherstep[:-1]+"3")
                             if solution and steplen(solution)<minstep:
                                 minstep=steplen(solution)
                                 minstr=solution
-                                print("thread {} find {} {}/{}  verified complete number {} {}\n".format(threadid,minstep,step,phase1maxstep,solutionnum,solution),end="")
-                                # print(threadid,minstep,step,"/",phase1maxstep,"verified complete number",solutionnum,solution)
+                                print("thread {} find {} = {}+{}+{}  {}/{}  verified complete number {} {}\n".format(threadid,minstep,steplen(newstep),steplen(furtherstep),minstep-steplen(newstep)-steplen(furtherstep),step,phase1maxstep,solutionnum,solution),end="")
                             if solutionnum>=phase1solutionlimit:
                                 threadsolutions[threadid]=minstr
                                 verifiednum.append(solutionnum)
@@ -196,7 +195,7 @@ def phase1(c,cd,e,ed,threadid):
                             newcubes.append(newcubepack)
         cubes=newcubes.copy()
         newcubes.clear()
-        print("{}-{} cubes in list {} thread min {} time {:f}s\n".format(threadid,step,len(cubes),steplen(minstr),time.time()-tloop),end="")
+        print("{}-{} cubes in list {} verified {} thread min {} time {:f}s\n".format(threadid,step,len(cubes),solutionnum,steplen(minstr),time.time()-tloop),end="")
     threadsolutions[threadid]=minstr
     verifiednum.append(solutionnum)
     print("finish thread {}, thread min {} verified complete phase one number {} time {:f}s\n".format(threadid,steplen(minstr),solutionnum,time.time()-tstart),end="")
@@ -219,8 +218,7 @@ def phase2(cubepack,s):
         for cube in cubes:
             previousstep=cube[4]
             for r in phase2rotations:
-                f=r[0]
-                t=r[1]
+                f,t=r
                 if len(previousstep)==0 or f!=previousstep[-2] and not (step>2 and f==previousstep[-4] and previousstep[-4]+previousstep[-2] in ["05","50","13","31","24","42"]):
                     newcubepack=rotatecube(int(f),int(t),*cube[:4])
                     newcorner,newcornerd,newedge,newedged=newcubepack
@@ -351,7 +349,7 @@ for i in range(cubenumber):
         t.join()
         
     print("\nfinish all threads of cube",i+1)
-    print("completed phase 1 number",verifiednum[-3:])
+    print("completed phase one number",verifiednum[-threadn:])
     if minstep==stepshouldbelow:
         miss+=1
         print("no solution below",minstep,"steps for cube",randomstring)
