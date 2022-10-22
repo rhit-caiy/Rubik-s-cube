@@ -59,8 +59,8 @@ def getdict1(dict1step):
                             newpredictstate.append([nc,ncd,ne,ned,newstep])
         
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,step,len(newpredictstate),len(dict1),time.time()-t1),end="")
-        predictstate=newpredictstate.copy()
-        newpredictstate.clear()
+        predictstate=newpredictstate
+        newpredictstate=[]
     print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,"total",len(newpredictstate),len(dict1),time.time()-t0),end="")
 
 def getdict2(dict2step):
@@ -101,8 +101,8 @@ def getdict2(dict2step):
                         if step!=dict2step:
                             newpredictstate.append([nc,ne,nmed,newstep])
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,step,len(newpredictstate),len(dict2),time.time()-t1),end="")
-        predictstate=newpredictstate.copy()
-        newpredictstate.clear()
+        predictstate=newpredictstate
+        newpredictstate=[]
     print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,"total",len(newpredictstate),len(dict1),time.time()-t0),end="")
     
 
@@ -134,12 +134,12 @@ def phase1(c,cd,e,ed,threadid):
             if solution and steplen(solution)<minstep:
                 minstep=steplen(solution)
                 minstr=solution
-                print("directly in dict, thread {} {} = {}+{} {}\n".format(threadid,minstep,steplen(furtherstep),minstep-steplen(furtherstep),solution),end="")
+                print("directly in dict, thread {} {} = {} + {} {}\n".format(threadid,minstep,steplen(furtherstep),minstep-steplen(furtherstep),solution),end="")
             solution=phase2(rotatecube(int(furtherstep[-1]),3,*phase2cube),furtherstep+"3")
             if solution and steplen(solution)<minstep:
                 minstep=steplen(solution)
                 minstr=solution
-                print("directly in dict, thread {} {} = {}+{} {}\n".format(threadid,minstep,steplen(furtherstep),minstep-steplen(furtherstep),solution),end="")
+                print("directly in dict, thread {} {} = {} + {} {}\n".format(threadid,minstep,steplen(furtherstep),minstep-steplen(furtherstep),solution),end="")
             
     for step in range(1,phase1maxstep+1):
         tloop=time.time()
@@ -180,12 +180,22 @@ def phase1(c,cd,e,ed,threadid):
                             if solution and steplen(solution)<minstep:
                                 minstep=steplen(solution)
                                 minstr=solution
-                                print("thread {} find {} = {}+{}+{}  {}/{}  verified complete number {} {}\n".format(threadid,minstep,steplen(newstep),steplen(furtherstep),minstep-steplen(newstep)-steplen(furtherstep),step,phase1maxstep,solutionnum,solution),end="")
+                                fourparts=[steplen(newstep),steplen(furtherstep)]
+                                if minstep-sum(fourparts)>dict2step:
+                                    fourparts+=[minstep-sum(fourparts)-dict2step,dict2step]
+                                else:
+                                    fourparts+=[0,minstep-steplen(newstep)-steplen(furtherstep)]
+                                print("thread {} {}/{} find {} = {} + {} + {} + {}    succeed phase one {} {}\n".format(threadid,step,phase1maxstep,minstep,*fourparts,solutionnum,solution),end="")
                             solution=phase2(rotatecube(int(furtherstep[-2]),2,*phase2cube),newstep+furtherstep[:-1]+"3")
                             if solution and steplen(solution)<minstep:
                                 minstep=steplen(solution)
                                 minstr=solution
-                                print("thread {} find {} = {}+{}+{}  {}/{}  verified complete number {} {}\n".format(threadid,minstep,steplen(newstep),steplen(furtherstep),minstep-steplen(newstep)-steplen(furtherstep),step,phase1maxstep,solutionnum,solution),end="")
+                                fourparts=[steplen(newstep),steplen(furtherstep)]
+                                if minstep-sum(fourparts)>dict2step:
+                                    fourparts+=[minstep-sum(fourparts)-dict2step,dict2step]
+                                else:
+                                    fourparts+=[0,minstep-steplen(newstep)-steplen(furtherstep)]
+                                print("thread {} {}/{} find {} = {} + {} + {} + {}    succeed phase one {} {}\n".format(threadid,step,phase1maxstep,minstep,*fourparts,solutionnum,solution),end="")
                             if solutionnum>=phase1solutionlimit:
                                 threadsolutions[threadid]=minstr
                                 verifiednum.append(solutionnum)
@@ -193,9 +203,9 @@ def phase1(c,cd,e,ed,threadid):
                         elif step!=phase1maxstep:
                             newcubepack.append(newstep)
                             newcubes.append(newcubepack)
-        cubes=newcubes.copy()
-        newcubes.clear()
-        print("{}-{} cubes in list {} verified {} thread min {} time {:f}s\n".format(threadid,step,len(cubes),solutionnum,steplen(minstr),time.time()-tloop),end="")
+        cubes=newcubes
+        newcubes=[]
+        print("{:1}-{:<6}{:<16}{:<16}{:<16}{:<16f}\n".format(threadid,step,len(cubes),solutionnum,steplen(minstr),time.time()-tloop),end="")
     threadsolutions[threadid]=minstr
     verifiednum.append(solutionnum)
     print("finish thread {}, thread min {} verified complete phase one number {} time {:f}s\n".format(threadid,steplen(minstr),solutionnum,time.time()-tstart),end="")
@@ -226,8 +236,8 @@ def phase2(cubepack,s):
                     if key in dict2:
                         return previousstep+r+dict2[key]
                     newcubes.append([newcorner,newcornerd,newedge,newedged,previousstep+r])
-        cubes=newcubes.copy()
-        newcubes.clear()
+        cubes=newcubes
+        newcubes=[]
     return False
 
 def steplen(s):
@@ -237,7 +247,7 @@ def initialcube():
     return [cc,ccd,ce,ced]
 
 def randomcube():
-    a=random.randrange(64,128)
+    a=random.randrange(512,1024)
     randomstring=""
     for i in range(a):
         r=str(random.randrange(0,6))+str(random.randrange(1,4))
@@ -289,6 +299,13 @@ def reverserotation(s):
         r=s[2*i]+str(4-int(s[2*i+1]))+r
     return r
 
+# 5+7 5.564s
+# 6+7 16.06s
+# 6+8 41.24s
+# 7+8 164.2s
+# 7+9 325.6s
+# 8+9 3501s
+
 dict1={}
 dict2={}
 dict1step=8
@@ -297,13 +314,13 @@ dict1thread=threading.Thread(target=getdict1,args=(dict1step,))
 dict2thread=threading.Thread(target=getdict2,args=(dict2step,))
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 print("{:<8}{:<8}{:<16}{:<16}{:<16}\n".format("dict","step","cubes left","dict length","time"),end="")
-tdict=time.time()
+tdictstart=time.time()
 dict1thread.start()
 dict2thread.start()
 dict2thread.join()
 dict1thread.join()
-
-print("time",time.time()-tdict,"s")
+tdictend=time.time()
+print("time",tdictend-tdictstart,"s")
 print("finish dicts",len(dict1),len(dict2))
 
 phase1solutionlimit=100000000
@@ -320,9 +337,11 @@ threadn=6
 for i in range(cubenumber):
     t1=time.time()
     print("\n\ncube",i+1)
+    print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     minstep=stepshouldbelow
     randomstring=randomcube()
     print("random string",randomstring)
+    print("search depth",phase1maxstep,"+",dict1step,"+",phase2maxstep,"+",dict2step,"=",stepshouldbelow)
     reverserandomstring=reverserotation(randomstring)
     unsolvedcubes=[]
     randomstrings=[]
@@ -343,6 +362,8 @@ for i in range(cubenumber):
     cubethread4=threading.Thread(target=phase1,args=(*unsolvedcubes[4],4))
     cubethread5=threading.Thread(target=phase1,args=(*unsolvedcubes[5],5))
     threads=[cubethread0,cubethread1,cubethread2,cubethread3,cubethread4,cubethread5]
+    print("start",threadn,"threads")
+    print("{:<8}{:<16}{:<16}{:<16}{:<16}".format("thread","cube in list","solution num","thread min","time"))
     for t in threads:
         t.start()
     for t in threads:
@@ -373,20 +394,27 @@ for i in range(cubenumber):
         qtm.append(qtmvalue)
         t2=time.time()
         print("\nbest solution in thread",bestthread)
-        print("random string number format",randomstrings[bestthread])
-        print("random string rotate notation",rotatenumbertostring(randomstrings[bestthread]))
+        #print("random string number format",randomstrings[bestthread])
+        #print("random string rotate notation",rotatenumbertostring(randomstrings[bestthread]))
         print("min htm",minstep,", qtm",qtmvalue,"solution",threadsolutions[bestthread],rotatenumbertostring(threadsolutions[bestthread]))
-        print("current htm results:",htm,"average htm",sum(htm)/len(htm),"average qtm",sum(qtm)/len(qtm))
-        print("time:",t2-t1,"s ",time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
+        print("current htm results:",htm)
+        print("average htm",sum(htm)/len(htm))
+        print("average qtm",sum(qtm)/len(qtm))
+        print("time:",t2-t1,"s ","average time",(t2-starttime)/(i+1),time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
         print("estimated time left:",(t2-starttime)*(cubenumber-i-1)/(i+1),"s")
 endtime=time.time()
-print()
-#print("completed phase 1 number",verifiednum)
-print("average phase 1 completed number",sum(verifiednum)/len(verifiednum),"max",max(verifiednum),"required max phase 1 solution limit",phase1solutionlimit)
+
+print("\n\naverage phase 1 completed number",sum(verifiednum)/len(verifiednum),"max",max(verifiednum),"min",min(verifiednum),"required max phase 1 solution limit",phase1solutionlimit)
 print("search depth",phase1maxstep,"+",dict1step,"+",phase2maxstep,"+",dict2step,"=",stepshouldbelow)
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
+print("dict time",tdictend-tdictstart,"s")
 print("total time",endtime-starttime,"s, average time",(endtime-starttime)/cubenumber,"s")
-print(htm,"htm average",sum(htm)/len(htm),"range",min(htm),"-",max(htm))
-print(qtm,"qtm average",sum(qtm)/len(qtm),"range",min(qtm),"-",max(qtm))
+print("htm",htm)
+print("qtm",qtm)
+print("htm average",sum(htm)/len(htm),"range",min(htm),"-",max(htm))
+print("qtm average",sum(qtm)/len(qtm),"range",min(qtm),"-",max(qtm))
+print("move  number")
+for i in range(min(htm),max(htm)+1):
+    print(i,"  ",htm.count(i))
 if miss!=0:
-    print("no solution for",miss,"/",cubenumber)
+    print("no solution under this search depth",miss,"/",cubenumber)
