@@ -147,7 +147,6 @@ def phase1(corner,cornerd,edge,edged):
                             newcubes.append(newcubepack)
         cubes=newcubes.copy()
         newcubes.clear()
-    return ""
 
 
 n=100000
@@ -163,25 +162,3 @@ for i in range(n):
 t2=time.time()
 print("time used",round(t2-t1,3),"s, average time",round((t2-t1)/n,3),"s")
 print(sum(solutionstep)/len(solutionstep),max(solutionstep),min(solutionstep))
-
-
-# randomcube()
-# #do("3101330331013303")
-
-# print("corner =",corner)
-# print("cornerd =",cornerd)
-# print("edge =",edge)
-# print("edged =",edged)
-
-# solutionstring=phase1(corner,cornerd,edge,edged)
-# print("solution",solutionstring)
-# k1=[cornerd[corner[i]] for i in range(7)]
-# k2=[edged[edge[i]] for i in range(11)]
-# k3=sorted([edge[i] for i in range(4,8)])
-# key=str(k1+k2+k3)
-# print(key)
-
-# print("corner =",corner)
-# print("cornerd =",cornerd)
-# print("edge =",edge)
-# print("edged =",edged)

@@ -270,7 +270,7 @@ def display():
             for k in range(3):
                 canvas.create_rectangle(x+60*k,y+60*j+20,x+60*k+60,y+60*j+80,fill=color[cube[i][3*j+k]])
     canvas.update()
-    time.sleep(0.5)
+    time.sleep(0.1)
     
 def updatecube():
     global cube
@@ -531,12 +531,12 @@ def phase1(c,cd,e,ed,threadid):
             if solution and steplen(solution)<minstep:
                 minstep=steplen(solution)
                 minstr=solution
-                print("directly in dict, thread {} {} {}\n".format(threadid,minstep,solution),end="")
+                print("directly in dict, thread {}  {} = {} + {}  {}\n".format(threadid,minstep,steplen(furtherstep),minstep-steplen(furtherstep),solution),end="")
             solution=phase2(rotatecube(int(furtherstep[-1]),3,*phase2cube),furtherstep+"3")
             if solution and steplen(solution)<minstep:
                 minstep=steplen(solution)
                 minstr=solution
-                print("directly in dict, thread {} {} {}\n".format(threadid,minstep,solution),end="")
+                print("directly in dict, thread {}  {} = {} + {}  {}\n".format(threadid,minstep,steplen(furtherstep),minstep-steplen(furtherstep),solution),end="")
             
     for step in range(1,phase1maxstep+1):
         tloop=time.time()
@@ -580,12 +580,12 @@ def phase1(c,cd,e,ed,threadid):
                             if solution and steplen(solution)<minstep:
                                 minstep=steplen(solution)
                                 minstr=solution
-                                print("thread {} find {} {}/{}  verified complete number {} {}\n".format(threadid,minstep,step,phase1maxstep,solutionnum,solution),end="")
+                                print("thread {} find {}  succeed phase one {} {}\n".format(threadid,minstep,solutionnum,solution),end="")
                             solution=phase2(rotatecube(int(furtherstep[-1]),2,*phase2cube),newstep+furtherstep[:-1]+"3")
                             if solution and steplen(solution)<minstep:
                                 minstep=steplen(solution)
                                 minstr=solution
-                                print("thread {} find {} {}/{}  verified complete number {} {}\n".format(threadid,minstep,step,phase1maxstep,solutionnum,solution),end="")
+                                print("thread {} find {}  succeed phase one {} {}\n".format(threadid,minstep,solutionnum,solution),end="")
                                 # print(threadid,minstep,step,"/",phase1maxstep,"verified complete number",solutionnum,solution)
                         elif step!=phase1maxstep:
                             newcubepack.append(newstep)
@@ -664,8 +664,8 @@ dict1thread.join()
 print("time",time.time()-tdict,"s")
 print("finish dicts",len(dict1),len(dict2))
 
-phase1maxstep=5#6
-phase2maxstep=7#5
+phase1maxstep=5#5
+phase2maxstep=6#6
 stepshouldbelow=phase1maxstep+dict1step+phase2maxstep+dict2step
 minstep=stepshouldbelow
     

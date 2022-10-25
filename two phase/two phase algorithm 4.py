@@ -26,7 +26,7 @@ def getdict1(dict1step):
     global dict1
     predictstate=[[cc,ccd,ce,ced,""]]
     newpredictstate=[]
-    key=str([cornerd[corner[i]] for i in range(7)]+[edged[edge[i]] for i in range(11)]+sorted([edge[i] for i in range(4,8)]))
+    key=str([ccd[cc[i]] for i in range(7)]+[ced[ce[i]] for i in range(11)]+sorted([ce[i] for i in range(4,8)]))
     dict1[key]=""
     print("phase 1 dict")
     print("{:<8}{:<8}{:<16}{:<16}{:<16}".format("dict","step","cubes left","dict 1 length","time"))
@@ -90,7 +90,7 @@ def getdict2(dict2step):
             omed=cube[2]
             oldstep=cube[3]
             for j in phase2rotations:
-                if step==1 or oldstep[0]!=j[0] and not (step>2 and j[0]==oldstep[-4] and oldstep[-4]+oldstep[-2] in ["05","50","13","31","24","42"]):
+                if step==1 or oldstep[0]!=j[0] and not (step>2 and j[0]==oldstep[0] and oldstep[0]+oldstep[2] in ["05","50","13","31","24","42"]):
                     f=int(j[0])
                     t=int(j[1])
                     nc=oc.copy()
@@ -154,15 +154,18 @@ def phase1(c,cd,e,ed,phase1solutionnum,threadid):
         if furtherstep=="":
             #phase 2
             solution=phase2([c,cd,e,ed],"")
-            minstr=solution
-            minstep=steplen(solution)
+            if solution!="6":
+                minstr=solution
+                minstep=steplen(solution)
         else:
             solution1=phase2([c,cd,e,ed],furtherstep+"1")
             solution2=phase2([c,cd,e,ed],furtherstep+"3")
-            if len(solution1)<=len(solution2):
+            if solution1=="6" and solution2=="6":
+                pass
+            elif len(solution1)<=len(solution2) and solution1!="6":
                 minstr=solution1
                 minstep=steplen(solution1)
-            else:
+            elif solution2!="6":
                 minstr=solution2
                 minstep=steplen(solution2)
         if solutionnum>=phase1solutionnum:
@@ -188,6 +191,7 @@ def phase1(c,cd,e,ed,phase1solutionnum,threadid):
                             phase2cube=newcubepack
                             for i in range(int(len(furtherstep[:-1])/2)):
                                 phase2cube=rotatecube(int(furtherstep[2*i]),int(furtherstep[2*i+1]),*phase2cube)
+                            #print(threadid)
                             solution1=phase2(rotatecube(int(furtherstep[-1]),1,*phase2cube),newstep+furtherstep+"1")
                             if solution1!="6" and steplen(solution1)<minstep:
                                 minstep=steplen(solution1)
@@ -220,13 +224,17 @@ def phase2(cubepack,s):
     #check first
     if str(c+e+ed[4:8]) in dict2:
         return s+dict2[str(c+e+ed[4:8])]
+    elif steplen(s)+dict2step>20:
+        return "6"#unable to find in 20 steps
     #if can't find solution within maxstep, directly return
-    maxstep=minstep-steplen(s)-dict2step-1
+    maxstep=min(minstep-steplen(s)-dict2step-1,7)
     if maxstep<1:
         return "6"
     cubes=[[c,cd,e,ed,s]]
     newcubes=[]
     for step in range(1,maxstep+1):
+        if step>minstep-steplen(s)-dict2step-1:
+            break
         for cube in cubes:
             previousstep=cube[4]
             for r in phase2rotations:
@@ -292,22 +300,22 @@ def rotatecube(f,t,oc,ocd,oe,oed):
             ncd[cn]=adjf[adjf.index(ocd[cn])+t-4]
     return [nc,ncd,ne,ned]
 
-phase1solutionnum=10000
-cubenumber=100
+phase1solutionnum=10
+cubenumber=1
 allcubestep=[]
 starttime=time.time()
 for i in range(cubenumber):
     t1=time.time()
     print("\ncube",i+1)
-    minstep=100
+    minstep=30
     randomstring=randomcube()
+    print("randomstring",randomstring)
     unsolvedcubes=[]
     randomstrings=[]
     for base in range(3):
         getcubewithbasereturn=getcubewithbase(randomstring,base)
         unsolvedcubes.append(getcubewithbasereturn[0])
         randomstrings.append(getcubewithbasereturn[1])
-        #print("random string",base,getcubewithbasereturn[1])
     facesolutions=["","",""]
     cubethread0=threading.Thread(target=phase1,args=(*unsolvedcubes[0],phase1solutionnum,0))
     cubethread1=threading.Thread(target=phase1,args=(*unsolvedcubes[1],phase1solutionnum,1))

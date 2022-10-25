@@ -73,7 +73,7 @@ def getdict2(dict2step):
         for cube in predictstate:
             oc,oe,omed,oldstep=cube
             for j in phase2rotations:
-                if step==1 or oldstep[0]!=j[0] and not (step>2 and j[0]==oldstep[-4] and oldstep[-4]+oldstep[-2] in ["05","50","13","31","24","42"]):
+                if step==1 or oldstep[0]!=j[0] and not (step>2 and j[0]==oldstep[0] and oldstep[0]+oldstep[2] in ["05","50","13","31","24","42"]):
                     f=int(j[0])
                     t=int(j[1])
                     nc=oc.copy()
@@ -102,7 +102,7 @@ def getdict2(dict2step):
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,step,len(newpredictstate),len(dict2),time.time()-t1),end="")
         predictstate=newpredictstate
         newpredictstate=[]
-    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,"total",len(newpredictstate),len(dict1),time.time()-t0),end="")
+    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,"total",len(newpredictstate),len(dict2),time.time()-t0),end="")
     
 
 

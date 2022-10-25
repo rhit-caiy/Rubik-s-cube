@@ -33,8 +33,6 @@ def rotatecube(f,t,oc,ocd,oe,oed):
     nc=oc.copy()
     ncd=ocd.copy()
     for n in range(4):
-        if n+t-4>3 or n+t-4<-4:
-            print(n,t,n+t-4)
         ne[re[n]]=oe[re[n+t-4]]
         nc[rc[n]]=oc[rc[n+t-4]]
         en=oe[re[n]]
@@ -167,7 +165,7 @@ for step in range(1,dict2step+1):
         omed=cube[2]
         oldstep=cube[3]
         for j in phase2rotations:
-            if step==1 or oldstep[0]!=j[0] and not (step>2 and j[0]==oldstep[-4] and oldstep[-4]+oldstep[-2] in ["05","50","13","31","24","42"]):
+            if step==1 or oldstep[0]!=j[0] and not (step>2 and j[0]==oldstep[0] and oldstep[0]+oldstep[2] in ["05","50","13","31","24","42"]):
                 f=int(j[0])
                 t=int(j[1])
                 nc=oc.copy()
@@ -207,7 +205,6 @@ def phase2(cubepack,s,stepleft):
     cd=cubepack[1]
     e=cubepack[2]
     ed=cubepack[3]
-    
     newcubes=[]
     #if can't find solution within maxstep, directly return
     maxstep=stepleft-dict2step-1
@@ -254,8 +251,8 @@ def rotatewithbase(randomstring,base):
         newrandomstring+=str(changebasetable[base][int(randomstring[2*i])])+randomstring[2*i+1]
     do(newrandomstring)
     
-phase1solutionnum=10000
-n=10
+phase1solutionnum=100000
+n=100
 print("phase 1 max predict step",dict1step)
 print("phase 2 max predict step",dict2step)
 print("number of phase 1 solution",phase1solutionnum,"total cube",n)
@@ -267,16 +264,15 @@ for i in range(n):
     print("\ncube",i+1)
     print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     randomstring=randomcube()
-    #print("random string:",randomstring)
+    print("random string:",randomstring)
     t1=time.time()
     #max expected step number
     currentminstep=30
+    minstring=""
     for f in range(3):
         tp0=time.time()
         rotatewithbase(randomstring,5-f)
-        #print("phase 1")
         p1solutions=phase1(corner,cornerd,edge,edged)
-        #print("phase 2")
         tp1=time.time()
         print(f,"/ 3, len",len(p1solutions),end=", ")
         for j in range(len(p1solutions)):
@@ -303,8 +299,11 @@ for i in range(n):
             stepsum=min(stepsum1,stepsum2)
             if stepsum<currentminstep:
                 currentminstep=stepsum
+                if stepsum1>=stepsum2:
+                    minstring=solution1
+                else:
+                    minstring=solution2
                 print(stepsum,end=" ")
-            #print(p1length,"+",p2length,"=",stepsum,"current min",currentminstep)
         tp2=time.time()
         phasetime[0]+=tp1-tp0
         phasetime[1]+=tp2-tp1
@@ -316,6 +315,7 @@ for i in range(n):
     print("finish",i+1,"cubes, current results:",allcubestep,"average",sum(allcubestep)/len(allcubestep))
     #print("finish",i+1,"cubes, average",sum(allcubestep)/len(allcubestep))
     print("estimated time:",(t2-starttime)*(n-i-1)/(i+1),"s")
+    print("min solution",minstring)
 endtime=time.time()
 print("total time",endtime-starttime,"s, average time",(endtime-starttime)/n,"s")
 print("two phase time",phasetime[0]/n,"s +",phasetime[1]/n,"s")

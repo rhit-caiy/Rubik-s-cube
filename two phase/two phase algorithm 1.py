@@ -345,7 +345,7 @@ for c in range(1,phase2maxstep+1):
         for j in phase2rotations:
             f=int(j[0])
             t=int(j[1])
-            if c==1 or oldstep[0]!=j[0] and not (c>2 and str(f)==oldstep[-4] and oldstep[-4]+oldstep[-2] in ["05","50","13","31","24","42"]):
+            if c==1 or oldstep[0]!=j[0] and not (c>2 and str(f)==oldstep[0] and oldstep[0]+oldstep[2] in ["05","50","13","31","24","42"]):
                 #rotate
                 nc=oc.copy()
                 ne=oe.copy()

@@ -21,7 +21,7 @@ def getdict1(dict1step):
     global dict1
     predictstate=[[cc,ccd,ce,ced,""]]
     newpredictstate=[]
-    key=str([cornerd[corner[i]] for i in range(7)]+[edged[edge[i]] for i in range(11)]+sorted([edge[i] for i in range(4,8)]))
+    key=str([ccd[cc[i]] for i in range(7)]+[ced[ce[i]] for i in range(11)]+sorted([ce[i] for i in range(4,8)]))
     dict1[key]=""
     print("phase 1 dict")
     print("{:<8}{:<8}{:<16}{:<16}{:<16}".format("dict","step","cubes left","dict 1 length","time"))
@@ -85,7 +85,7 @@ def getdict2(dict2step):
             omed=cube[2]
             oldstep=cube[3]
             for j in phase2rotations:
-                if step==1 or oldstep[0]!=j[0] and not (step>2 and j[0]==oldstep[-4] and oldstep[-4]+oldstep[-2] in ["05","50","13","31","24","42"]):
+                if step==1 or oldstep[0]!=j[0] and not (step>2 and j[0]==oldstep[0] and oldstep[0]+oldstep[2] in ["05","50","13","31","24","42"]):
                     f=int(j[0])
                     t=int(j[1])
                     nc=oc.copy()
@@ -131,24 +131,26 @@ def phase1(c,cd,e,ed,threadid):
         solutionnum+=1
         furtherstep=dict1[key]
         if furtherstep=="":
-            #phase 2
             solution=phase2([c,cd,e,ed],"")
             if solution and steplen(solution)<minstep:
                 minstr=solution
                 minstep=steplen(solution)
-                print(threadid,minstep)
+                print(threadid,minstep,solution)
         else:
-            solution1=phase2([c,cd,e,ed],furtherstep+"1")
-            solution2=phase2([c,cd,e,ed],furtherstep+"3")
-            if len(solution1)<=len(solution2) and solution1 and steplen(solution1)<minstep:
-                minstr=solution1
-                minstep=steplen(solution1)
-                print(threadid,minstep)
-            elif solution2 and steplen(solution2)<minstep:
-                minstr=solution2
-                minstep=steplen(solution2)
-                print(threadid,minstep)
-    
+            phase2cube=[c,cd,e,ed]
+            for i in range(int(len(furtherstep)/2)):
+                phase2cube=rotatecube(int(furtherstep[2*i]),int(furtherstep[2*i+1]),*phase2cube)
+            solution=phase2(rotatecube(int(furtherstep[-1]),1,*phase2cube),furtherstep+"1")
+            if solution and steplen(solution)<minstep:
+                minstep=steplen(solution)
+                minstr=solution
+                print(threadid,minstep,solution)
+            solution=phase2(rotatecube(int(furtherstep[-1]),3,*phase2cube),furtherstep+"3")
+            if solution and steplen(solution)<minstep:
+                minstep=steplen(solution)
+                minstr=solution
+                print(threadid,minstep,solution)
+            
     for step in range(1,phase1maxstep+1):
         for cubepack in cubes:
             previousstep=cubepack[4]
@@ -164,20 +166,38 @@ def phase1(c,cd,e,ed,threadid):
                         key=str([ncd[nc[i]] for i in range(7)]+[ned[ne[i]] for i in range(11)]+sorted([ne.index(i) for i in range(4,8)]))
                         if key in dict1:
                             solutionnum+=1
-                            furtherstep=dict1[key]
-                            phase2cube=newcubepack
-                            for i in range(int(len(furtherstep[:-1])/2)):
-                                phase2cube=rotatecube(int(furtherstep[2*i]),int(furtherstep[2*i+1]),*phase2cube)
-                            solution1=phase2(rotatecube(int(furtherstep[-1]),1,*phase2cube),newstep+furtherstep+"1")
-                            if solution1 and steplen(solution1)<minstep:
-                                minstep=steplen(solution1)
-                                minstr=solution1
-                                print(threadid,minstep)
-                            solution2=phase2(rotatecube(int(furtherstep[-1]),3,*phase2cube),newstep+furtherstep+"3")
-                            if solution2 and steplen(solution2)<minstep:
-                                minstep=steplen(solution2)
-                                minstr=solution2
-                                print(threadid,minstep)
+                            furtherstep=dict1[key]+"1"
+                            for i in range(int(len(furtherstep)/2)):
+                                #phase2cube=rotatecube(int(furtherstep[2*i]),int(furtherstep[2*i+1]),*phase2cube)
+                                oc=nc.copy()
+                                ocd=ncd.copy()
+                                oe=ne.copy()
+                                oed=ned.copy()
+                                f1=int(furtherstep[2*i])
+                                t1=int(furtherstep[2*i+1])
+                                re=faceedge[f1]
+                                rc=facecorner[f1]
+                                adjf=adj[f1]
+                                for n in range(4):
+                                    ne[re[n]]=oe[re[n+t1-4]]
+                                    nc[rc[n]]=oc[rc[n+t1-4]]
+                                    en=oe[re[n]]
+                                    if oed[en]!=f1:
+                                        ned[en]=adjf[adjf.index(oed[en])+t1-4]
+                                    cn=oc[rc[n]]
+                                    if ocd[cn]!=f1:
+                                        ncd[cn]=adjf[adjf.index(ocd[cn])+t1-4]
+                            phase2cube=[nc,ncd,ne,ned]
+                            solution=phase2(phase2cube,newstep+furtherstep)
+                            if solution and steplen(solution)<minstep:
+                                minstep=steplen(solution)
+                                minstr=solution
+                                print(threadid,minstep,step,"/",phase1maxstep,"verified complete number",solutionnum,solution)
+                            solution=phase2(rotatecube(int(furtherstep[-1]),2,*phase2cube),newstep+furtherstep[:-1]+"3")
+                            if solution and steplen(solution)<minstep:
+                                minstep=steplen(solution)
+                                minstr=solution
+                                print(threadid,minstep,step,"/",phase1maxstep,"verified complete number",solutionnum,solution)
                             if solutionnum>=phase1solutionlimit:
                                 facesolutions[threadid]=minstr
                                 verifiednum.append(solutionnum)
@@ -187,6 +207,7 @@ def phase1(c,cd,e,ed,threadid):
                             newcubes.append(newcubepack)
         cubes=newcubes.copy()
         newcubes.clear()
+        print(threadid,step,len(cubes))
     facesolutions[threadid]=minstr
     verifiednum.append(solutionnum)
     return
@@ -202,11 +223,11 @@ def phase2(cubepack,s):
         return s+dict2[str(c+e+ed[4:8])]
     elif phase1len+dict2step+1>=minstep:
         return False
-    maxstep=min(minstep-steplen(s)-dict2step-1,phase2maxstep)
+    maxstep=min(minstep-phase1len-dict2step-1,phase2maxstep)
     cubes=[[c,cd,e,ed,s]]
     newcubes=[]
     for step in range(1,maxstep+1):
-        if steplen(s)+step+dict2step>=minstep:
+        if phase1len+step+dict2step>=minstep:
             break
         for cube in cubes:
             previousstep=cube[4]
@@ -272,32 +293,28 @@ def rotatecube(f,t,oc,ocd,oe,oed):
 
 dict1={}
 dict2={}
-
-print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
-tdict=time.time()
-dict1step=7
-dict2step=9
+dict1step=8
+dict2step=8
 dict1thread=threading.Thread(target=getdict1,args=(dict1step,))#kwargs={"dict1step":dict1step})
 dict2thread=threading.Thread(target=getdict2,args=(dict2step,))#kwargs={"dict2step":dict2step})
-
-dict2thread.start()
+print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
+tdict=time.time()
 dict1thread.start()
-dict1thread.join()
+dict2thread.start()
 dict2thread.join()
-    
-print("finish dicts",len(dict1),len(dict2))
-print("time",time.time()-tdict)
+dict1thread.join()
 
-phase1solutionlimit=10000000
-cubenumber=100
+print("time",time.time()-tdict,"s")
+print("finish dicts",len(dict1),len(dict2))
+
+phase1solutionlimit=1000000
+cubenumber=10
 allcubestep=[]
 verifiednum=[]
 starttime=time.time()
 phase1maxstep=6#6
-phase2maxstep=6#6 or even lower
-stepshouldbelow=22#22
-miss=0
-missedstring=[]
+phase2maxstep=5#5 or even lower
+stepshouldbelow=32#22
 for i in range(cubenumber):
     t1=time.time()
     print("\ncube",i+1)
@@ -321,19 +338,13 @@ for i in range(cubenumber):
     print("finish all threads of cube",i+1)
     print("each thread verified number",verifiednum[-3:])
     minstr=""
-    if minstep==stepshouldbelow:
-        miss+=1
-        missedstring.append(randomstring)
-        print("don't have solution step <",stepshouldbelow)
-    else:
-        for j in range(3):
-            print("thread",j,"length",steplen(facesolutions[j]),"solution",facesolutions[j])
-            if steplen(facesolutions[j])==minstep:
-                minstr=facesolutions[j]
-        allcubestep.append(minstep)
-        print("min step length",minstep,"solution",minstr)
+    for j in range(3):
+        print("thread",j,"length",steplen(facesolutions[j]),"solution",facesolutions[j])
+        if steplen(facesolutions[j])==minstep:
+            minstr=facesolutions[j]
+    allcubestep.append(minstep)
+    print("min step length",minstep,"solution",minstr)
     t2=time.time()
-    
     print("current results:",allcubestep,"average",sum(allcubestep)/len(allcubestep))
     print("time:",t2-t1,"s",time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     print("estimated time left:",(t2-starttime)*(cubenumber-i-1)/(i+1),"s")
@@ -344,6 +355,3 @@ print("average verified number",sum(verifiednum)/len(verifiednum),"required max 
 print("search depth",phase1maxstep,"+",dict1step,"+",phase2maxstep,"+",dict2step,"    step should below",stepshouldbelow)
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),"total time",endtime-starttime,"s, average time",(endtime-starttime)/cubenumber,"s")
 print(allcubestep,"average",sum(allcubestep)/len(allcubestep),"range",min(allcubestep),"-",max(allcubestep))
-if miss!=0:
-    print("cube that don't have solution below",stepshouldbelow,":",miss,"/",cubenumber)
-    print(missedstring)
