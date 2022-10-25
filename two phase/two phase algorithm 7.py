@@ -1,5 +1,4 @@
-import random,time
-import threading
+import random,time,threading,sys
 corner=[i for i in range(8)]
 cornerd=[0,0,0,0,5,5,5,5]
 edge=[i for i in range(12)]
@@ -330,8 +329,18 @@ dict2thread.join()
 dict1thread.join()
 tdictend=time.time()
 print("time",tdictend-tdictstart,"s")
+def printdictsize(d):
+    a=sys.getsizeof(d)
+    b=0
+    for i in d.keys():
+        b+=sys.getsizeof(i)
+    for i in d.values():
+        b+=sys.getsizeof(i)
+    print("dict",a,"values and keys",b,"total",(a+b)/1000000000,"GB")
 print("dict1 size",len(dict1))
+printdictsize(dict1)
 print("dict2 size",len(dict2))
+printdictsize(dict2)
 
 htm=[]
 qtm=[]
