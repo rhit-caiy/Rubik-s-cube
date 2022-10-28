@@ -20,7 +20,7 @@ t=time.time()
 
 def getdict1(dict1step):
     global dict1
-    predictstate=[(cc,ccd,ce,ced,0)]
+    predictstate=[(cc,ccd,ce,ced,1)]
     newpredictstate=[]
     key=getkey1(cc,ccd,ce,ced)
     dict1[key]=0
@@ -59,7 +59,7 @@ def getdict1(dict1step):
                     key=getkey1(nc,ncd,ne,ned)
                     if key not in dict1:
                         if step==1:
-                            newstep=f
+                            newstep=oldstep*18+3*f
                         else:
                             newstep=oldstep*18+3*f+3-t
                         dict1[key]=newstep
@@ -223,20 +223,12 @@ def getkey2(c,e,med):
     k4=medsimplify[str(med)]
     return ((k1*40320+k2)*24+k3)*6+k4
 
-
-def decodephase1value(n):
-    if n<18:
-        return str(n)
-    else:
-        a=n%18
-        return str(a//3)+str(a%3+1)+decodephase1value(n//18)
-    
-def decodephase2value(n):
+def decodedictvalue(n):
     if n==1:
         return ""
     else:
         a=n%18
-        return str(a//3)+str(a%3+1)+decodephase2value(n//18)
+        return str(a//3)+str(a%3+1)+decodedictvalue(n//18)
 
 def phase1(c,cd,e,ed,threadid):
     global threadsolutions,minstep,verifiednum
@@ -251,9 +243,9 @@ def phase1(c,cd,e,ed,threadid):
     step=0
     if key in dict1:
         m1=1
-        solutionnum+=1
+        #solutionnum+=1
         m1_2=dict1[key]
-        if m1_2==1:
+        if m1_2==0:
             solution=phase2((c,cd,e,ed),m1_2)
             if solution!=False and numsteplen(solution)<minstep:
                 minstr=solution
@@ -262,15 +254,13 @@ def phase1(c,cd,e,ed,threadid):
                 print("{:<8}{:<24}{:<20}{:<16f}{}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution),end="")
         else:
             phase2cube=[c,cd,e,ed]
-            while m1_2>=18:
+            while m1_2>=324:
                 ft=m1_2%18
-                m1*=18+ft
-                f=ft//3
-                t=ft%3+1
+                m1=18*m1+ft
                 m1_2//=18
-                phase2cube=rotatecube(f,t,*phase2cube)
-            f=m1_2
-            m1*=18+f*6
+                phase2cube=rotatecube(ft//3,ft%3+1,*phase2cube)
+            f=(m1_2-18)//3
+            m1=18*m1+f*3
             
             solution=phase2(rotatecube(f,1,*phase2cube),m1)
             if solution!=False and numsteplen(solution)<minstep:
@@ -292,16 +282,16 @@ def phase1(c,cd,e,ed,threadid):
         f2=previousstep//18%18//3
         for f in range(6):
             if step==1 or not (f==f1 or (f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1) or (step>2 and f==f2 and (f==0 and f1==5 or f==1 and f1==3 or f==2 and f1==4))):
-                for t in range(1,4):
+                for t in range(3):
                     m1_1=previousstep*18+3*f+t
                     # if step>=4 and (m1_1[-1]==m1_1[-3]==m1_1[-5]==m1_1[-7]=="2" and m1_1[-8]+m1_1[-6]+m1_1[-4]+m1_1[-2] in ["0513","1324","2405"]):
                     #     continue
-                    totalnum+=1
-                    newcubepack=rotatecube(f,t,oc,ocd,oe,oed)
+                    newcubepack=rotatecube(f,t+1,oc,ocd,oe,oed)
                     if step<phase1maxstep:
                         newcubepack+=(m1_1,step)
                         cubes.append(newcubepack)
                     else:
+                        totalnum+=1
                         key=getkey1(*newcubepack)
                         if key in dict1:
                             solutionnum+=1
@@ -316,16 +306,14 @@ def phase1(c,cd,e,ed,threadid):
                                     print("{:<8}{:<24}{:<20}{:<16f}{}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution),end="")
                             else:
                                 m1=m1_1
-                                while m1_2>=18:
+                                while m1_2>=324:
                                     ft=m1_2%18
-                                    m1*=18+ft
-                                    f=ft//3
-                                    t=ft%3+1
+                                    m1=18*m1+ft
                                     m1_2//=18
-                                    phase2cube=rotatecube(f,t,*phase2cube)
-                                f=m1_2
-                                m1*=18+f*6
-                                
+                                    phase2cube=rotatecube(ft//3,ft%3+1,*phase2cube)
+                                f=(m1_2-18)//3
+                                m1=18*m1+f*3
+                                    
                                 solution=phase2(rotatecube(f,1,*phase2cube),m1)
                                 if solution!=False and numsteplen(solution)<minstep:
                                     minstep=numsteplen(solution)
@@ -338,7 +326,6 @@ def phase1(c,cd,e,ed,threadid):
                                     minstr=solution
                                     fourparts=fourpartmove(m1+2,solution)
                                     print("{:<8}{:<24}{:<20}{:<16f}{}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution),end="")
-                    
     threadsolutions[threadid]=minstr
     verifiednum.append(solutionnum)
     print("finish thread {}    thread min {}    {}/{}    time {:f}s\n".format(threadid,numsteplen(minstr),solutionnum,totalnum,time.time()-tstart),end="")
@@ -350,7 +337,10 @@ def phase2(cubepack,s):
     #check first
     if getkey2(c,e,ed[4:8]) in dict2:
         m2=dict2[getkey2(c,e,ed[4:8])]
-        return s*18**numsteplen(m2)+m2
+        while m2>=18:
+            s=s*18+m2%18
+            m2//=18
+        return s
     elif phase1len+dict2step+1>=minstep:
         return False
     maxstep=min(minstep-phase1len-dict2step-1,phase2maxstep)
@@ -362,16 +352,19 @@ def phase2(cubepack,s):
         for cube in cubes:
             previousstep=cube[4]
             for r in phase2rotations:
-                f,t=r//3,r%3+1
+                f,t=r//3,r%3
                 f1=previousstep%18//3
                 f2=previousstep//18%18//3
                 if previousstep==1 or not (f==f1 or (f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1) or (step>2 and f==f2 and (f==0 and f1==5 or f==1 and f1==3 or f==2 and f1==4))):
-                    newcorner,newcornerd,newedge,newedged=rotatecube(f,t,*cube[:4])
+                    newcorner,newcornerd,newedge,newedged=rotatecube(f,t+1,*cube[:4])
                     key=getkey2(newcorner,newedge,newedged[4:8])
-                    newstep=previousstep*18+3*f+t
+                    newstep=previousstep*18+r
                     if key in dict2:
                         m2_2=dict2[key]
-                        return newstep*18**numsteplen(m2_2)+m2_2
+                        while m2_2>=18:
+                            newstep=newstep*18+m2_2%18
+                            m2_2//=18
+                        return newstep
                     newcubes.append((newcorner,newcornerd,newedge,newedged,newstep))
         cubes=newcubes
         newcubes=[]
@@ -505,14 +498,14 @@ printdictsize(dict1)
 print("dict2 size",len(dict2))
 printdictsize(dict2)
 
-# print("other dicts")
-# printdictsize(cpsimplify)
-# printdictsize(epsimplify)
-# printdictsize(mepsimplify)
-# printdictsize(cornersimplify)
-# printdictsize(udesimplify)
-# printdictsize(mesimplify)
-# printdictsize(medsimplify)
+print("other dicts")
+printdictsize(cpsimplify)
+printdictsize(epsimplify)
+printdictsize(mepsimplify)
+printdictsize(cornersimplify)
+printdictsize(udesimplify)
+printdictsize(mesimplify)
+printdictsize(medsimplify)
 
 
 htm=[]
@@ -525,7 +518,7 @@ stepshouldbelow=phase1maxstep+dict1step+phase2maxstep+dict2step
 miss=0
 threadn=6
 
-cubenumber=10
+cubenumber=1
 for i in range(cubenumber):
     t1=time.time()
     print("\n\ncube",i+1)
@@ -533,10 +526,10 @@ for i in range(cubenumber):
     minstep=stepshouldbelow
     
     randomstring=randomcube()
-    
+    randomstring=rotatestringtonumber("R L U2 F U' D F2 R2 B2 L U2 F' B' U R2 D F2 U R2 U")
     # randomstring=rotatestringtonumber(strings[i])
+    print("random string",randomstring)
     
-    #print("random string",randomstring)
     print("random with",steplen(randomstring),"move")
     print("search depth",phase1maxstep,"+",dict1step,"+",phase2maxstep,"+",dict2step,"=",stepshouldbelow)
     
@@ -554,7 +547,7 @@ for i in range(cubenumber):
         #randomstrings.append(reverserotation(basereturn[1]))
     threadsolutions=[0]*threadn
     
-    # phase1(*unsolvedcubes[0],0)
+    #phase1(*unsolvedcubes[0],0)
     
     cubethread0=threading.Thread(target=phase1,args=(*unsolvedcubes[0],0))
     cubethread1=threading.Thread(target=phase1,args=(*unsolvedcubes[1],1))
