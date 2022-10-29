@@ -15,7 +15,7 @@ t=time.time()
 
 def getdict1(dict1step):
     global dict1
-    predictstate=[(cc,ccd,ce,ced,1)]
+    predictstate=[(cc,ccd,ce,ced,1,-1,-1)]
     newpredictstate=[]
     key=(cpsimplify[str([positionsimplify[ccd[cc[i]]] for i in range(7)])]*177147+epsimplify[str([positionsimplify[ced[ce[i]]] for i in range(11)])])*495+mepsimplify[str(sorted([ce.index(i) for i in range(4,8)]))]
     dict1[key]=0
@@ -23,10 +23,8 @@ def getdict1(dict1step):
     for step in range(1,dict1step+1):
         t1=time.time()
         for cube in predictstate:
-            oc,ocd,oe,oed,oldstep=cube
+            oc0,ocd0,oe0,oed0,oldstep,f1,f2=cube
             for f in range(6):
-                f1=oldstep%18//3
-                f2=oldstep//18%18//3
                 if step==1 or f1!=f and not (step>2 and f==f2 and (f==0 and f1==5 or 
                                                                    f==5 and f1==0 or 
                                                                    f==1 and f1==3 or 
@@ -36,29 +34,29 @@ def getdict1(dict1step):
                     re=faceedge[f]
                     rc=facecorner[f]
                     adjf=adj[f]
+                    newstep=oldstep*18+3*f+2
+                    oc,ocd,oe,oed=oc0,ocd0,oe0,oed0
                     for t in range(1,4):
                         ne=oe.copy()
                         ned=oed.copy()
                         nc=oc.copy()
                         ncd=ocd.copy()
                         for n in range(4):
-                            ne[re[n]]=oe[re[n+t-4]]
-                            nc[rc[n]]=oc[rc[n+t-4]]
+                            ne[re[n]]=oe[re[n-3]]
+                            nc[rc[n]]=oc[rc[n-3]]
                             en=oe[re[n]]
                             if oed[en]!=f:
-                                ned[en]=adjf[adjf.index(oed[en])+t-4]
+                                ned[en]=adjf[adjf.index(oed[en])-3]
                             cn=oc[rc[n]]
                             if ocd[cn]!=f:
-                                ncd[cn]=adjf[adjf.index(ocd[cn])+t-4]
+                                ncd[cn]=adjf[adjf.index(ocd[cn])-3]
+                        oc,ocd,oe,oed=nc,ncd,ne,ned
                         key=(cpsimplify[str([positionsimplify[ncd[nc[i]]] for i in range(7)])]*177147+epsimplify[str([positionsimplify[ned[ne[i]]] for i in range(11)])])*495+mepsimplify[str(sorted([ne.index(i) for i in range(4,8)]))]
                         if key not in dict1:
-                            if step==1:
-                                newstep=oldstep*18+3*f
-                            else:
-                                newstep=oldstep*18+3*f+3-t
                             dict1[key]=newstep
                             if step!=dict1step:
-                                newpredictstate.append((nc,ncd,ne,ned,newstep))
+                                newpredictstate.append((nc,ncd,ne,ned,newstep,f,f1))
+                        newstep-=1
         
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,step,len(newpredictstate),len(dict1),time.time()-t1),end="")
         predictstate=newpredictstate
@@ -103,7 +101,7 @@ print("length of mepsimplify",len(mepsimplify))
 phase2rotations=[0,1,2,4,7,10,13,15,16,17]
 def getdict2(dict2step):
     global dict2
-    predictstate=[(cc,ce,cmed,1)]
+    predictstate=[(cc,ce,cmed,1,-1,-1)]
     newpredictstate=[]
     key=((cornersimplify[str(cc)]*40320+udesimplify[str(ce[0:4]+ce[8:12])])*24+mesimplify[str(ce[4:8])])*6+medsimplify[str(cmed)]
     dict2[key]=1
@@ -111,12 +109,10 @@ def getdict2(dict2step):
     for step in range(1,dict2step+1):
         t1=time.time()
         for cube in predictstate:
-            oc,oe,omed,oldstep=cube
+            oc,oe,omed,oldstep,f1,f2=cube
             for r in phase2rotations:
                 f=r//3
                 t=r%3+1
-                f1=oldstep%18//3
-                f2=oldstep//18%18//3
                 if step==1 or f1!=f and not (step>2 and f==f2 and (f==0 and f1==5 or 
                                                                    f==5 and f1==0 or 
                                                                    f==1 and f1==3 or 
@@ -145,7 +141,7 @@ def getdict2(dict2step):
                         newstep=oldstep*18+3*f+3-t
                         dict2[key]=newstep
                         if step!=dict2step:
-                            newpredictstate.append((nc,ne,nmed,newstep))
+                            newpredictstate.append((nc,ne,nmed,newstep,f,f1))
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,step,len(newpredictstate),len(dict2),time.time()-t1),end="")
         predictstate=newpredictstate
         newpredictstate=[]
@@ -212,46 +208,46 @@ def phase1(c,cd,e,ed,threadid):
     minstr=18**stepshouldbelow
     
     #check first, rarely useful but won't take little time
-    key=(cpsimplify[str([positionsimplify[cd[c[i]]] for i in range(7)])]*177147+epsimplify[str([positionsimplify[ed[e[i]]] for i in range(11)])])*495+mepsimplify[str(sorted([e.index(i) for i in range(4,8)]))]
-    step=0
-    if key in dict1:
-        m1=1
-        m1_2=dict1[key]
-        if m1_2==1:
-            solution=phase2(c,e,ed[4:8],m1_2,-1,-1)
-            if solution!=0 and solution<minmove:
-                minstep=int(log(solution,18))
-                minmove=minstr=solution
-                fourparts=fourpartmove(1,m1_2,solution)
-                print("{:<8}{:<24}{:<20}{:<16f}1     {} {}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,decodevalue(solution)),end="")
-        elif m1_2<324:
-            phase2cube=[c,cd,e,ed]
-            f2=-1
-            while m1_2>=324:
-                ft=m1_2%18
-                m1=18*m1+ft
-                m1_2//=18
-                f2=ft//3
-                phase2cube=rotatecube(f2,ft%3+1,*phase2cube)
-            f=(m1_2-18)//3
-            m1=18*m1+f*3
-            cubepack=rotatecube(f,1,*phase2cube)
-            solution=phase2(cubepack[0],cubepack[2],cubepack[3][4:8],m1,f,f2)
-            if solution!=0 and solution<minmove:
-                minstep=int(log(solution,18))
-                minmove=minstr=solution
-                fourparts=fourpartmove(1,m1,solution)
-                print("{:<8}{:<24}{:<20}{:<16f}2     {} {}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,decodevalue(solution)),end="")
-            cubepack=rotatecube(f,3,*phase2cube)
-            solution=phase2(cubepack[0],cubepack[2],cubepack[3][4:8],m1+2,f,f2)
-            if solution!=0 and solution<minmove:
-                minstep=int(log(solution,18))
-                minmove=minstr=solution
-                fourparts=fourpartmove(1,m1+2,solution)
-                print("{:<8}{:<24}{:<20}{:<16f}3     {} {}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,decodevalue(solution)),end="")
+    # key=(cpsimplify[str([positionsimplify[cd[c[i]]] for i in range(7)])]*177147+epsimplify[str([positionsimplify[ed[e[i]]] for i in range(11)])])*495+mepsimplify[str(sorted([e.index(i) for i in range(4,8)]))]
+    # step=0
+    # if key in dict1:
+    #     m1=1
+    #     m1_2=dict1[key]
+    #     if m1_2==1:
+    #         solution=phase2(c,e,ed[4:8],m1_2,-1,-1)
+    #         if solution!=0 and solution<minmove:
+    #             minstep=int(log(solution,18))
+    #             minmove=minstr=solution
+    #             fourparts=fourpartmove(1,m1_2,solution)
+    #             print("{:<8}{:<24}{:<20}{:<16f}1     {} {}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,decodevalue(solution)),end="")
+    #     elif m1_2<324:
+    #         phase2cube=[c,cd,e,ed]
+    #         f2=-1
+    #         while m1_2>=324:
+    #             ft=m1_2%18
+    #             m1=18*m1+ft
+    #             m1_2//=18
+    #             f2=ft//3
+    #             phase2cube=rotatecube(f2,ft%3+1,*phase2cube)
+    #         f=(m1_2-18)//3
+    #         m1=18*m1+f*3
+    #         cubepack=rotatecube(f,1,*phase2cube)
+    #         solution=phase2(cubepack[0],cubepack[2],cubepack[3][4:8],m1,f,f2)
+    #         if solution!=0 and solution<minmove:
+    #             minstep=int(log(solution,18))
+    #             minmove=minstr=solution
+    #             fourparts=fourpartmove(1,m1,solution)
+    #             print("{:<8}{:<24}{:<20}{:<16f}2     {} {}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,decodevalue(solution)),end="")
+    #         cubepack=rotatecube(f,3,*phase2cube)
+    #         solution=phase2(cubepack[0],cubepack[2],cubepack[3][4:8],m1+2,f,f2)
+    #         if solution!=0 and solution<minmove:
+    #             minstep=int(log(solution,18))
+    #             minmove=minstr=solution
+    #             fourparts=fourpartmove(1,m1+2,solution)
+    #             print("{:<8}{:<24}{:<20}{:<16f}3     {} {}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,decodevalue(solution)),end="")
                 
     while cubes:
-        oc,ocd,oe,oed,previousstep,step,f1,f2=cubes.pop()
+        oc0,ocd0,oe0,oed0,previousstep,step,f1,f2=cubes.pop()
         step+=1
         for f in range(6):
             if step==1 or not (f==f1 or (f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1) or (step>2 and f==f2 and (f==0 and f1==5 or f==1 and f1==3 or f==2 and f1==4))):
@@ -260,6 +256,7 @@ def phase1(c,cd,e,ed,threadid):
                 adjf=adj[f]
                 m1_1=previousstep*18+3*f
                 totalnum+=3
+                oc,ocd,oe,oed=oc0,ocd0,oe0,oed0
                 for t in range(1,4):
                     # if step>=4 and (m1_1[-1]==m1_1[-3]==m1_1[-5]==m1_1[-7]=="2" and m1_1[-8]+m1_1[-6]+m1_1[-4]+m1_1[-2] in ["0513","1324","2405"]):
                     #     continue
@@ -277,38 +274,57 @@ def phase1(c,cd,e,ed,threadid):
                         cn=oc[rc[n]]
                         if ocd[cn]!=f:
                             ncd[cn]=adjf[adjf.index(ocd[cn])-3]
-                    oc=nc
-                    ocd=ncd
-                    oe=ne
-                    oed=ned
+                    oc,ocd,oe,oed=nc,ncd,ne,ned
                     
                     key=(cpsimplify[str([positionsimplify[ncd[nc[i]]] for i in range(7)])]*177147+epsimplify[str([positionsimplify[ned[ne[i]]] for i in range(11)])])*495+mepsimplify[str(sorted([ne.index(i) for i in range(4,8)]))]
                     if key in dict1:
                         solutionnum+=1
                         m1_2=dict1[key]
                         if m1_2!=1:
-                            phase2cube=(nc,ncd,ne,ned)
-                            m1=m1_1 
-                            while m1_2>=324:
+                            # phase2cube=(nc,ncd,ne,ned)
+                            nc1,ncd1,ne1,ned1=oc1,ocd1,oe1,oed1=nc,ncd,ne,ned
+                            m1=m1_1
+                            while m1_2>=18:
                                 ft=m1_2%18
                                 m1=18*m1+ft
                                 m1_2//=18
-                                phase2cube=rotatecube(ft//3,ft%3+1,*phase2cube)
-                            f0=(m1_2-18)//3
-                            m1=18*m1+f0*3
-                            cubepack=rotatecube(f0,1,*phase2cube)
-                            solution=phase2(cubepack[0],cubepack[2],cubepack[3][4:8],m1,f,f2)
+                                # phase2cube=rotatecube(ft//3,ft%3+1,*phase2cube)
+                                f0=ft//3
+                                t0=ft%3+1
+                                re1=faceedge[f0]
+                                rc1=facecorner[f0]
+                                adjf1=adj[f0]
+                                ne1=oe1.copy()
+                                ned1=oed1.copy()
+                                nc1=oc1.copy()
+                                ncd1=ocd1.copy()
+                                for n in range(4):
+                                    ne1[re1[n]]=oe1[re1[n+t0-4]]
+                                    nc1[rc1[n]]=oc1[rc1[n+t0-4]]
+                                    en=oe1[re1[n]]
+                                    if oed1[en]!=f0:
+                                        ned1[en]=adjf1[adjf1.index(oed1[en])+t0-4]
+                                    cn=oc1[rc1[n]]
+                                    if ocd1[cn]!=f0:
+                                        ncd1[cn]=adjf1[adjf1.index(ocd1[cn])+t0-4]
+                                oc1,ocd1,oe1,oed1=nc1,ncd1,ne1,ned1
+                            cubepack=(nc1,ncd1,ne1,ned1)
+                            
+                            # f0=(m1_2-18)//3
+                            # m1=18*m1+f0*3
+                            # cubepack=rotatecube(f0,1,*phase2cube)
+                            solution=phase2(cubepack[0],cubepack[2],cubepack[3][4:8],m1,f0,f0)
                             if solution!=0 and solution<minmove:
                                 minstep=int(log(solution,18))
                                 minmove=minstr=solution
                                 fourparts=fourpartmove(m1_1,m1,solution)
                                 print("{:<8}{:<24}{:<20}{:<16f}4     {} {}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,decodevalue(solution)),end="")
-                            cubepack=rotatecube(f0,3,*phase2cube)
-                            solution=phase2(cubepack[0],cubepack[2],cubepack[3][4:8],m1+2,f,f2)
+                            cubepack=rotatecube(f0,2,*cubepack)
+                            solution=phase2(cubepack[0],cubepack[2],cubepack[3][4:8],m1-2,f0,f0)
                             if solution!=0 and solution<minmove:
                                 minstep=int(log(solution,18))
                                 minmove=minstr=solution
-                                fourparts=fourpartmove(m1_1,m1+2,solution)
+                                fourparts=fourpartmove(m1_1,m1-2,solution)
                                 print("{:<8}{:<24}{:<20}{:<16f}5     {} {}\n".format(threadid,fourparts,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,decodevalue(solution)),end="")
                     if step<phase1maxstep:
                         newcubepack=(nc,ncd,ne,ned,m1_1,step,f,f1)
@@ -320,8 +336,8 @@ def phase1(c,cd,e,ed,threadid):
     return
 
 def phase2(c,e,med,s,f1,f2):
-    phase1len=int(log(s,18))
-    #check first
+    # phase1len=int(log(s,18))
+    #only check first
     key=((cornersimplify[str(c)]*40320+udesimplify[str(e[0:4]+e[8:12])])*24+mesimplify[str(e[4:8])])*6+medsimplify[str(med)]
     if key in dict2:
         m2=dict2[key]
@@ -329,48 +345,49 @@ def phase2(c,e,med,s,f1,f2):
             s=s*18+m2%18
             m2//=18
         return s
-    elif phase1len+dict2step+1>=minstep:
-        return 0
-    cubes=[(c,e,med,s,f1,f2)]
-    newcubes=[]
-    for step in range(1,min(minstep-phase1len-dict2step,phase2maxstep+1)):
-        if phase1len+step+dict2step>=minstep:
-            return 0
-        for cube in cubes:
-            oc,oe,omed,previousstep,f1,f2=cube
-            for r in phase2rotations:
-                f,t=r//3,r%3
-                if f!=f1 and not ((f2!=-1 and (f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1)) or (f==f2 and (f==0 and f1==5 or f==1 and f1==3 or f==2 and f1==4))):
-                    #nc,ncd,ne,ned=rotatecube(f,t+1,oc,ocd,oe,oed)
-                    nc=oc.copy()
-                    ne=oe.copy()
-                    nmed=omed.copy()
-                    fe=faceedge[f]
-                    fc=facecorner[f]
-                    if f==0 or f==5:
-                        for k in range(4):
-                            ne[fe[k]]=oe[fe[(k+t)-4]]
-                            nc[fc[k]]=oc[fc[(k+t)-4]]
-                    else:
-                        for k in range(4):
-                            ne[fe[k]]=oe[fe[k-2]]
-                            nc[fc[k]]=oc[fc[k-2]]
-                        for e in [fe[1],fe[3]]:
-                            en=oe[e]-4
-                            if omed[en]!=f:
-                                nmed[en]=antithesis[omed[en]]
-                    key=((cornersimplify[str(nc)]*40320+udesimplify[str(ne[0:4]+ne[8:12])])*24+mesimplify[str(ne[4:8])])*6+medsimplify[str(nmed)]
-                    newstep=previousstep*18+r
-                    if key in dict2:
-                        m2_2=dict2[key]
-                        while m2_2>=18:
-                            newstep=newstep*18+m2_2%18
-                            m2_2//=18
-                        return newstep
-                    newcubes.append((nc,ne,nmed,newstep,f,f1))
-        cubes=newcubes
-        newcubes=[]
     return 0
+    # elif phase1len+dict2step+1>=minstep:
+    #     return 0
+    # cubes=[(c,e,med,s,f1,f2)]
+    # newcubes=[]
+    # for step in range(1,min(minstep-phase1len-dict2step,phase2maxstep+1)):
+    #     if phase1len+step+dict2step>=minstep:
+    #         return 0
+    #     for cube in cubes:
+    #         oc,oe,omed,previousstep,f1,f2=cube
+    #         for r in phase2rotations:
+    #             f,t=r//3,r%3
+    #             if f!=f1 and not ((f2!=-1 and (f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1)) or (f==f2 and (f==0 and f1==5 or f==1 and f1==3 or f==2 and f1==4))):
+    #                 #nc,ncd,ne,ned=rotatecube(f,t+1,oc,ocd,oe,oed)
+    #                 nc=oc.copy()
+    #                 ne=oe.copy()
+    #                 nmed=omed.copy()
+    #                 fe=faceedge[f]
+    #                 fc=facecorner[f]
+    #                 if f==0 or f==5:
+    #                     for k in range(4):
+    #                         ne[fe[k]]=oe[fe[(k+t)-4]]
+    #                         nc[fc[k]]=oc[fc[(k+t)-4]]
+    #                 else:
+    #                     for k in range(4):
+    #                         ne[fe[k]]=oe[fe[k-2]]
+    #                         nc[fc[k]]=oc[fc[k-2]]
+    #                     for e in [fe[1],fe[3]]:
+    #                         en=oe[e]-4
+    #                         if omed[en]!=f:
+    #                             nmed[en]=antithesis[omed[en]]
+    #                 key=((cornersimplify[str(nc)]*40320+udesimplify[str(ne[0:4]+ne[8:12])])*24+mesimplify[str(ne[4:8])])*6+medsimplify[str(nmed)]
+    #                 newstep=previousstep*18+r
+    #                 if key in dict2:
+    #                     m2_2=dict2[key]
+    #                     while m2_2>=18:
+    #                         newstep=newstep*18+m2_2%18
+    #                         m2_2//=18
+    #                     return newstep
+    #                 newcubes.append((nc,ne,nmed,newstep,f,f1))
+    #     cubes=newcubes
+    #     newcubes=[]
+    # return 0
 
 def fourpartmove(p11,p1,p):
     p11=int(log(p11,18))
@@ -499,13 +516,13 @@ htm=[]
 qtm=[]
 verifiednum=[]
 starttime=time.time()
-phase1maxstep=5#6
-phase2maxstep=6#6
+phase1maxstep=6#6
+phase2maxstep=0#6
 stepshouldbelow=phase1maxstep+dict1step+phase2maxstep+dict2step
 miss=0
 threadn=6
 
-cubenumber=1000
+cubenumber=10
 for i in range(cubenumber):
     t1=time.time()
     print("\n\ncube",i+1)
