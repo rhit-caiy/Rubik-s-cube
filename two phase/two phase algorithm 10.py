@@ -98,7 +98,7 @@ def getdict1(dict1step):
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,step,len(newpredictstate),len(dict1),time.time()-t1),end="")
         predictstate=newpredictstate
         newpredictstate=[]
-    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,"total",len(newpredictstate),len(dict1),time.time()-t0),end="")
+    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,"total","",len(dict1),time.time()-t0),end="")
 
 def getdict2(dict2step):
     global dict2
@@ -141,7 +141,7 @@ def getdict2(dict2step):
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,step,len(newpredictstate),len(dict2),time.time()-t1),end="")
         predictstate=newpredictstate
         newpredictstate=[]
-    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,"total",len(newpredictstate),len(dict2),time.time()-t0),end="")
+    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,"total","",len(dict2),time.time()-t0),end="")
 
 def solve(c,cd,e,ed,threadid):
     global threadsolutions,htm,qtm,minmove,verifiednum
@@ -226,7 +226,7 @@ def solve(c,cd,e,ed,threadid):
                                             qtmvalue+=1
                                     if qtmvalue<qtm:
                                         qtm=qtmvalue
-                                    print("{:<8}{:<18}{:<6}{:<20}{:<14f}1     {:<36}{}\n".format(threadid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+                                    print("{:<8}{:<18}{:<6}{:<24}{:<14f}1     {:<36}{}\n".format(threadid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
                             if key in dict2 and int(log(solution,18))-1<=htm or int(log(m1,18))+dict2step<=htm:
                                 re1=faceedge[f0]
                                 rc1=facecorner[f0]
@@ -260,7 +260,7 @@ def solve(c,cd,e,ed,threadid):
                                                 qtmvalue+=1
                                         if qtmvalue<qtm:
                                             qtm=qtmvalue
-                                        print("{:<8}{:<18}{:<6}{:<20}{:<14f}2     {:<36}{}\n".format(threadid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+                                        print("{:<8}{:<18}{:<6}{:<24}{:<14f}2     {:<36}{}\n".format(threadid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
                     m1_1+=1
     threadsolutions[threadid]=minstr
     verifiednum.append(solutionnum)
@@ -359,12 +359,12 @@ dict2thread.join()
 dict1thread.join()
 tdictend=time.time()
 print("time",tdictend-tdictstart,"s")
-
+'''
 print("dict1 size",len(dict1))
 printdictsize(dict1)
 print("dict2 size",len(dict2))
 printdictsize(dict2)
-
+'''
 htms=[]
 qtms=[]
 verifiednum=[]
@@ -383,8 +383,9 @@ for i in range(cubenumber):
     minmove=eighteen[stepshouldbelow]
     
     randomstring=randomcube()
-    # randomstring=rotatestringtonumber("R L U2 F U' D F2 R2 B2 L U2 F' B' U R2 D F2 U R2 U")
+    #randomstring=rotatestringtonumber("R L U2 F U' D F2 R2 B2 L U2 F' B' U R2 D F2 U R2 U")
     print("random with",int(len(randomstring)/2),"moves")
+    #print(randomstring)
     print("search depth",phase1maxstep,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
     
     unsolvedcubes=[]
@@ -395,14 +396,19 @@ for i in range(cubenumber):
         unsolvedcubes.append(getcubewithbase(reverserandomstring,base))
     threadsolutions=[eighteen[stepshouldbelow]]*threadn
     
-    #solve(*unsolvedcubes[0],0)
-    threads=[threading.Thread(target=solve,args=(*unsolvedcubes[t],t)) for t in range(threadn)]
     print("start",threadn,"threads")
-    print("{:<8}{:<18}{:<6}{:<20}{:<14}{:<6}{:<36}".format("thread","htm","qtm","in dict1/total","time/s","type","solution"))
+    print("{:<8}{:<18}{:<6}{:<24}{:<14}{:<6}{:<36}".format("thread","htm","qtm","in dict1/total","time/s","type","solution"))
+    
+    threads=[threading.Thread(target=solve,args=(*unsolvedcubes[t],t)) for t in range(threadn)]
     for t in threads:
         t.start()
     for t in threads:
         t.join()
+    '''
+    #solve(*unsolvedcubes[0],0)
+    for j in range(6):
+        solve(*unsolvedcubes[j],j)
+    '''
     print("\nfinish all threads of cube",i+1)
     print("completed phase one number",verifiednum[-threadn:])
     
@@ -443,7 +449,7 @@ print("average phase 1 completed number",sum(verifiednum)/len(verifiednum),"max"
 print("search depth",phase1maxstep,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
 print("htm",htms)
 print("qtm",qtms)
-if len(htm)>0:
+if len(htms)>0:
     print("htm average",sum(htms)/len(htms),"range",min(htms),"-",max(htms))
     print("qtm average",sum(qtms)/len(qtms),"range",min(qtms),"-",max(qtms))
     print("\nmove  number")
