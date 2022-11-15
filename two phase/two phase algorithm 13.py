@@ -199,7 +199,7 @@ def solve(c,co,eo,e1,e2,e3,mep,threadid):
         oc,oco,oeo,oe1,oe2,oe3,omep,previousstep,step,f1,f2=cubes.pop()
         step+=1
         for f in range(6):
-            if step==1 or f!=f1 and not ((f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1) or (step>2 and f==f2 and (f==0 and f1==5 or f==1 and f1==3 or f==2 and f1==4))):
+            if f!=f1 and not ((f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1) or (step>2 and f==f2 and (f==0 and f1==5 or f==1 and f1==3 or f==2 and f1==4))):
                 m1_1=previousstep*18+3*f
                 totalnum+=3
                 for t in range(3):
@@ -237,7 +237,7 @@ def solve(c,co,eo,e1,e2,e3,mep,threadid):
                                     qtmvalue=htm
                                     numstr=decodevalue(solution)
                                     for i in range(int(len(numstr)/2)):
-                                        if numstr[2*i+1]=="2":
+                                        if numstr[2*i+1]=="1":
                                             qtmvalue+=1
                                     if qtmvalue<qtm:
                                         qtm=qtmvalue
@@ -245,7 +245,7 @@ def solve(c,co,eo,e1,e2,e3,mep,threadid):
                             if int(log(m1,18))+dict2step<=htm or key2 in dict2 and int(log(solution,18))-1<=htm:
                                 #rotatecubeblock(f0,2,nc1,ne1)
                                 nc1,ne11,ne21,ne31=cr[f0][1][nc1],ep4r[f0][1][ne11],ep4r[f0][1][ne21],ep4r[f0][1][ne31]
-                                key2=((nc*11880+ne1)*11880+ne2)*11880+ne3
+                                key2=((nc1*11880+ne11)*11880+ne21)*11880+ne31
                                 if key2 in dict2:
                                     m2=dict2[key2]
                                     solution=(m1-3)*eighteen[int(log(m2,18))]+m2
@@ -256,7 +256,7 @@ def solve(c,co,eo,e1,e2,e3,mep,threadid):
                                         qtmvalue=htm
                                         numstr=decodevalue(solution)
                                         for i in range(int(len(numstr)/2)):
-                                            if numstr[2*i+1]=="2":
+                                            if numstr[2*i+1]=="1":
                                                 qtmvalue+=1
                                         if qtmvalue<qtm:
                                             qtm=qtmvalue
@@ -267,62 +267,47 @@ def solve(c,co,eo,e1,e2,e3,mep,threadid):
     print("finish thread {}    thread min htm {}    {}/{}    time {:f}s\n".format(threadid,int(log(minstr,18)),solutionnum,totalnum,time.time()-tstart),end="")
 
 def randomcube():
-    a=random.randrange(51,102)
+    a=random.randrange(512,1024)
     randomstring=""
     for i in range(a):
         r=str(random.randrange(0,6))+str(random.randrange(0,3))
         randomstring+=r
     return randomstring
 
-changebasetable=[[1,5,2,0,4,3],[2,1,5,3,0,4],[0,1,2,3,4,5]]
+changebasetable=[[0,1,2,3,4,5],[1,5,2,0,4,3],[2,1,5,3,0,4]]
 def getcubewithbase(randomstring,base):
     l=int(len(randomstring)/2)
-    #cubepack=(list(cc),list(cco),list(ce),list(ceo))
     c,co,eo,e1,e2,e3,mep=ccn,ccon,ceon,cen1,cen2,cen3,cmepn
     for i in range(l):
         f,t=changebasetable[base][int(randomstring[2*i])],int(randomstring[2*i+1])
-        #print(i,f,t)
         c,co,eo,e1,e2,e3,mep=cr[f][t][c],cor[f][t][co],eor[f][t][eo],ep4r[f][t][e1],ep4r[f][t][e2],ep4r[f][t][e3],mepr[f][t][mep]
     return c,co,eo,e1,e2,e3,mep
-
-def rotatecubeaddress(f,t,c,cd,e,ed):
-    c1,c2,c3,c4=facecorner[f]
-    nc1,nc2,nc3,nc4=facetimecorner[f][t]
-    cn1,cn2,cn3,cn4=c[c1],c[c2],c[c3],c[c4]=c[nc1],c[nc2],c[nc3],c[nc4]
-    
-    e1,e2,e3,e4=faceedge[f]
-    ne1,ne2,ne3,ne4=facetimeedge[f][t]
-    en1,en2,en3,en4=e[e1],e[e2],e[e3],e[e4]=e[ne1],e[ne2],e[ne3],e[ne4]
-    
-    ftd=facetimedirection[f][t]
-    cd[cn1],cd[cn2],cd[cn3],cd[cn4]=ftd[cd[cn1]],ftd[cd[cn2]],ftd[cd[cn3]],ftd[cd[cn4]]
-    ed[en1],ed[en2],ed[en3],ed[en4]=ftd[ed[en1]],ftd[ed[en2]],ftd[ed[en3]],ftd[ed[en4]]  
     
 def decodevalue(n):
     s=""
     while n>=18:
         ft=n%18
         n//=18
-        s=str(ft//3)+str(ft%3+1)+s
+        s=str(ft//3)+str(ft%3)+s
     return s
     
 allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","R","R2","R'","B","B2","B'","D","D2","D'"]
 def rotatenumbertostring(s):
     r=""
     for i in range(int(len(s)/2)):
-        r+=allrotation[3*int(s[2*i])+int(s[2*i+1])-1]
+        r+=allrotation[3*int(s[2*i])+int(s[2*i+1])]
     return r
 
 def rotatestringtonumber(s):
     r=""
     for c in s:
         if c=="2":
-            r=r[:-1]+"2"
+            r=r[:-1]+"1"
         elif c=="'" or c=="3":
-            r=r[:-1]+"3"
+            r=r[:-1]+"2"
         elif c in allrotation:
             i=allrotation.index(c)
-            r+=str(i//3)+"1"
+            r+=str(i//3)+"0"
     return r
 
 def reverserotation(s):
@@ -357,7 +342,7 @@ phase1maxstep=5#6
 stepshouldbelow=phase1maxstep+dict1step+dict2step+1
 miss=0
 threadn=6
-cubenumber=10
+cubenumber=100
 
 for i in range(cubenumber):
     t1=time.time()
@@ -368,6 +353,7 @@ for i in range(cubenumber):
     minmove=eighteen[stepshouldbelow]
     
     randomstring=randomcube()
+    #randomstring=rotatestringtonumber("R L U2 F U' D F2 R2 B2 L U2 F' B' U R2 D F2 U R2 U")
     print("random with",int(len(randomstring)/2),"moves")
     #print(randomstring)
     print("search depth",phase1maxstep,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
@@ -380,7 +366,6 @@ for i in range(cubenumber):
     for base in range(3):
         unsolvedcubes.append(getcubewithbase(reverserandomstring,base))
     threadsolutions=[eighteen[stepshouldbelow]]*threadn
-    
     print("start",threadn,"threads")
     print("{:<8}{:<18}{:<6}{:<24}{:<14}{:<6}{:<36}".format("thread","htm","qtm","in dict1/total","time/s","type","solution"))
     
@@ -426,7 +411,7 @@ for i in range(cubenumber):
     print("estimated time for rest",cubenumber-i-1,"cubes:",(t2-starttime)*(cubenumber-i-1)/(i+1),"s")
 endtime=time.time()
 
-print("\n\ntwo phase algorithm version 12")
+print("\n\ntwo phase algorithm version 13")
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 print("dict time",tdictend-tdictstart,"s")
 print("total time",endtime-starttime,"s, average time",(endtime-starttime)/cubenumber,"s")
