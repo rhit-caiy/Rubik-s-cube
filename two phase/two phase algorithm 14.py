@@ -32,9 +32,8 @@ def printdictsize(d):
     print([name for name in globals() if globals()[name] is d][0],len(d),"dict space",a,"B    values and keys space",b,"B    total",(a+b)/2**30,"GB ",(a+b)/2**20,"MB ",time.time()-t,"s")
 
 t1=time.time()
-cdict,codict,meodict,ep6dict={},{},{},{}
-rcdict,rcodict,rmeodict,rep6dict={},{},{},{}
-
+cdict,codict,ep6dict,eodict,reodict,meodict={},{},{},{},{},{}
+rcdict,rcodict,rep6dict,mepdict,rmepdict,rmeodict={},{},{},{},{},{}
 #cdict, (0,1,2,3,4,5,6,7),(0,1,2,3,4,5,7,6) 40320 8!
 n=0
 for i in permutations(range(8)):
@@ -51,7 +50,13 @@ for i in product(range(3),repeat=8):
         codict[a]=n
         rcodict[n]=a
         n+=1
-'''
+#ep6dict,(0,1,2,3,4,5),(6,7,8,9,10,11) 665280 P(12,6)
+n=0
+for i in combinations(range(12),r=6):
+    for j in permutations(i):
+        ep6dict[j]=n
+        rep6dict[n]=j
+        n+=1
 #eodict, (0,0,0,0,1,1,3,3,5,5,5,5),(0,0,0,0,1,1,3,3,5,5,2,3) 2048 2**11
 n=0
 for i in product(range(2),repeat=12):
@@ -62,23 +67,13 @@ for i in product(range(2),repeat=12):
         eodict[a]=n
         reodict[n]=a
         n+=1
-'''
-#ep6dict,(0,1,2,3,4,5),(6,7,8,9,10,11) 665280 P(12,6)
-n=0
-for i in combinations(range(12),r=6):
-    for j in permutations(i):
-        ep6dict[j]=n
-        rep6dict[n]=j
-        n+=1
-'''
 #mepdict, (4,5,6,7) 495 C(12,4)
 n=0
 for i in combinations(range(12),r=4):
     mepdict[i]=n
     rmepdict[n]=i
     n+=1
-'''
-#meodict, eo*mep 1013760 2**11*C(12,4)
+#meodict, eo*mep (0,0,0,0,1,1,3,3,5,5,5,5,4,5,6,7),(0,0,0,0,1,1,3,3,5,5,2,3,0,1,2,3) 1013760 2**11*C(12,4)
 n=0
 j1=[i for i in combinations(range(12),r=4)]
 for i in product(range(2),repeat=12):
@@ -91,53 +86,50 @@ for i in product(range(2),repeat=12):
             rmeodict[n]=a+j
             n+=1
 
-cr,cor,meor,ep6r=[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)]
-
+cr,cor,ep6r,eor,mepr,meor=[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)]
 for f in range(6):
-    c1,c2,c3,c4=facecorner[f]
-    e1,e2,e3,e4=faceedge[f]
+    c1,c2,c3,c4=fc=facecorner[f]
+    e1,e2,e3,e4=fe=faceedge[f]
     for t in range(3):
-        nc1,nc2,nc3,nc4=facetimecorner[f][t]
-        ne1,ne2,ne3,ne4=facetimeedge[f][t]
+        nc1,nc2,nc3,nc4=ftc=facetimecorner[f][t]
+        ne1,ne2,ne3,ne4=fte=facetimeedge[f][t]
         ftd=facetimedirection[f][t]
+        
+        d=cr[f][t]
         for dc in cdict.keys():
             c=list(dc)
             c[c1],c[c2],c[c3],c[c4]=c[nc1],c[nc2],c[nc3],c[nc4]
-            cr[f][t][cdict[dc]]=cdict[tuple(c)]
+            d[cdict[dc]]=cdict[tuple(c)]
+        d=cor[f][t]
         for dco in codict.keys():
             co=list(dco)
             co[c1],co[c2],co[c3],co[c4]=ftd[co[nc1]],ftd[co[nc2]],ftd[co[nc3]],ftd[co[nc4]]
-            cor[f][t][codict[dco]]=codict[tuple(co)]
-            '''
-        for deo in eodict.keys():
-            eo=list(deo)
-            eo[e1],eo[e2],eo[e3],eo[e4]=ftd[eo[ne1]],ftd[eo[ne2]],ftd[eo[ne3]],ftd[eo[ne4]]
-            eor[f][t][eodict[deo]]=eodict[tuple(eo)]
-            '''
+            d[codict[dco]]=codict[tuple(co)]
+        d=ep6r[f][t]
         for dep in ep6dict.keys():
             ep=list(dep)
             for i in range(6):
-                if ep[i] in faceedge[f]:
-                    ep[i]=faceedge[f][facetimeedge[f][t].index(ep[i])]
-            ep6r[f][t][ep6dict[dep]]=ep6dict[tuple(ep)]
-            '''
+                if ep[i] in fe:
+                    ep[i]=fe[fte.index(ep[i])]
+            d[ep6dict[dep]]=ep6dict[tuple(ep)]
+            
+        d1=eor[f][t]
+        for deo in eodict.keys():
+            eo=list(deo)
+            eo[e1],eo[e2],eo[e3],eo[e4]=ftd[eo[ne1]],ftd[eo[ne2]],ftd[eo[ne3]],ftd[eo[ne4]]
+            d1[eodict[deo]]=eodict[tuple(eo)]
+        d2=mepr[f][t]
         for dmep in mepdict.keys():
             mep=list(dmep)
             for i in range(4):
-                if mep[i] in faceedge[f]:
-                    mep[i]=faceedge[f][facetimeedge[f][t].index(mep[i])]
+                if mep[i] in fe:
+                    mep[i]=fe[fte.index(mep[i])]
             mep.sort()
-            mepr[f][t][mepdict[dmep]]=mepdict[tuple(mep)]
-            '''
-        for dmeo in meodict.keys():
-            eo=list(dmeo[:12])
-            mep=list(dmeo[12:])
-            eo[e1],eo[e2],eo[e3],eo[e4]=ftd[eo[ne1]],ftd[eo[ne2]],ftd[eo[ne3]],ftd[eo[ne4]]
-            for i in range(4):
-                if mep[i] in faceedge[f]:
-                    mep[i]=faceedge[f][facetimeedge[f][t].index(mep[i])]
-            mep.sort()
-            meor[f][t][meodict[dmeo]]=meodict[tuple(eo+mep)]
+            d2[mepdict[dmep]]=mepdict[tuple(mep)]
+        d=meor[f][t]
+        for i in eodict.values():
+            for j in mepdict.values():
+                d[i*495+j]=d1[i]*495+d2[j]
 
 ccn,ccon,cmeon,cen1,cen2=cdict[cc],codict[cco],meodict[ceo+ce[4:8]],ep6dict[ce[0:6]],ep6dict[ce[6:12]]
 print(time.time()-t1,"s")
@@ -341,7 +333,7 @@ phase1maxstep=5#6
 stepshouldbelow=phase1maxstep+dict1step+dict2step+1
 miss=0
 threadn=6
-cubenumber=100
+cubenumber=10
 
 for i in range(cubenumber):
     t1=time.time()
