@@ -1,6 +1,6 @@
 import time
 from random import randint
-from threading import Thread
+#from threading import Thread
 from math import log
 from itertools import permutations,product,combinations
 from sys import getsizeof
@@ -103,7 +103,7 @@ cr1,ep4r1=[i[1] for i in cr],[i[1] for i in ep4r]
 
 def getdict1(dict1step):
     global dict1
-    predictstate=[(ccon,ceon,cen2,1,-1,-1)]
+    predictstate=[(ccon,ceon,cen2,1,-1)]
     newpredictstate=[]
     key1=(ccon*2048+ceon)*495+cen2//24
     dict1[key1]=1
@@ -111,7 +111,7 @@ def getdict1(dict1step):
     for step in range(1,dict1step+1):
         t1=time.time()
         for cube in predictstate:
-            oco,oeo,oe2,oldstep,f1,f2=cube
+            oco,oeo,oe2,oldstep,f1=cube
             for f in [0,1,2,3,4,5]:
                 if f1!=f and not (f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1):
                     newstep=oldstep*18+3*f+2
@@ -123,7 +123,7 @@ def getdict1(dict1step):
                         if key1 not in dict1:
                             dict1[key1]=newstep
                             if step!=dict1step:
-                                newpredictstate.append((nco,neo,ne2,newstep,f,f1))
+                                newpredictstate.append((nco,neo,ne2,newstep,f))
                         newstep-=1
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,step,len(newpredictstate),len(dict1),time.time()-t1),end="")
         predictstate,newpredictstate=newpredictstate,[]
@@ -131,7 +131,7 @@ def getdict1(dict1step):
 
 def getdict2(dict2step):
     global dict2
-    predictstate=[(ccn,cen1,cen2,cen3,0,-1,-1)]
+    predictstate=[(ccn,cen1,cen2,cen3,0,-1)]
     newpredictstate=[]
     key2=((ccn*11880+cen1)*11880+cen2)*11880+cen3
     dict2[key2]=1
@@ -139,7 +139,7 @@ def getdict2(dict2step):
     for step in range(1,dict2step+1):
         t1=time.time()
         for cube in predictstate:
-            oc,oe1,oe2,oe3,oldstep,f1,f2=cube
+            oc,oe1,oe2,oe3,oldstep,f1=cube
             for f,t in [(0,0),(0,1),(0,2),(1,1),(2,1),(3,1),(4,1),(5,0),(5,1),(5,2)]:
                 if f1!=f and not (f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1):
                     nc,ne1,ne2,ne3=cr[f][t][oc],ep4r[f][t][oe1],ep4r[f][t][oe2],ep4r[f][t][oe3]
@@ -148,7 +148,7 @@ def getdict2(dict2step):
                         newstep=oldstep+(3*f+2-t)*eighteen[step-1]
                         dict2[key2]=newstep+eighteen[step]
                         if step!=dict2step:
-                            newpredictstate.append((nc,ne1,ne2,ne3,newstep,f,f1))
+                            newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,step,len(newpredictstate),len(dict2),time.time()-t1),end="")
         predictstate,newpredictstate=newpredictstate,[]
     print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,"total","",len(dict2),time.time()-t0),end="")
@@ -156,13 +156,13 @@ def getdict2(dict2step):
 def solve(c,co,eo,e1,e2,e3,threadid):
     global threadsolutions,htm,qtm,minmove,verifiednum
     tstart=time.time()
-    cubes=[(c,co,eo,e1,e2,e3,1,0,-1,-1)]
+    cubes=[(c,co,eo,e1,e2,e3,1,0,-1)]
     solutionnum=0
     totalnum=1
     minstr=eighteen[stepshouldbelow]
     #phase 1
     while cubes:
-        oc,oco,oeo,oe1,oe2,oe3,previousstep,step,f1,f2=cubes.pop()
+        oc,oco,oeo,oe1,oe2,oe3,previousstep,step,f1=cubes.pop()
         step+=1
         for f in [0,1,2,3,4,5]:
             if f!=f1 and not (f1==5 and f==0 or f1==4 and f==2 or f1==3 and f==1):
@@ -173,7 +173,7 @@ def solve(c,co,eo,e1,e2,e3,threadid):
                 for t in [0,1,2]:
                     nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
                     if step<phase1maxstep:
-                        cubes.append((nc,nco,neo,ne1,ne2,ne3,m1_1,step,f,f1))
+                        cubes.append((nc,nco,neo,ne1,ne2,ne3,m1_1,step,f))
                     key1=(nco*2048+neo)*495+ne2//24
                     if key1 in dict1:
                         solutionnum+=1
@@ -281,9 +281,9 @@ def reverserotation(s):
 dict1,dict2={},{}
 dict1step=7#8
 dict2step=8#9
+'''
 dict1thread=Thread(target=getdict1,args=(dict1step,))
 dict2thread=Thread(target=getdict2,args=(dict2step,))
-print("{} + {}\n{:<8}{:<8}{:<16}{:<16}{:<16}\n".format(dict1step,dict2step,"dict","step","cubes left","dict length","time/s"),end="")
 tdictstart=time.time()
 dict1thread.start()
 dict2thread.start()
@@ -291,6 +291,14 @@ dict2thread.join()
 dict1thread.join()
 tdictend=time.time()
 print("time",tdictend-tdictstart,"s")
+'''
+print("{} + {}\n{:<8}{:<8}{:<16}{:<16}{:<16}\n".format(dict1step,dict2step,"dict","step","cubes left","dict length","time/s"),end="")
+tdictstart=time.time()
+getdict1(dict1step)
+getdict2(dict2step)
+tdictend=time.time()
+print("time",tdictend-tdictstart,"s")
+
 printdictsize(dict1)
 printdictsize(dict2)
 
@@ -301,10 +309,9 @@ phase1maxstep=5#6
 stepshouldbelow=phase1maxstep+dict1step+dict2step+1
 miss=0
 threadn=6
-cubenumber=10
+cubenumber=100
 
 for i in range(cubenumber):
-    t1=time.time()
     print("\n\ncube",i+1)
     print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     htm=stepshouldbelow
@@ -324,17 +331,20 @@ for i in range(cubenumber):
     threadsolutions=[eighteen[stepshouldbelow]]*threadn
     print("start",threadn,"threads")
     print("{:<8}{:<18}{:<6}{:<24}{:<14}{:<6}{:<36}".format("thread","htm","qtm","in dict1/total","time/s","type","solution"))
-    
+    '''
     threads=[Thread(target=solve,args=(*unsolvedcubes[t],t)) for t in range(threadn)]
     for t in threads:
         t.start()
     for t in threads:
         t.join()
-    
-    #solve(*unsolvedcubes[0],0)
-    #for j in range(threadn):
-    #    solve(*unsolvedcubes[j],j)
-    
+        '''
+    htm=stepshouldbelow
+    qtm=htm*2
+    minmove=eighteen[stepshouldbelow]
+    t1=time.time()
+    for j in range(threadn):
+        solve(*unsolvedcubes[j],j)
+    t2=time.time()
     print("\nfinish all threads of cube",i+1)
     print("completed phase one number",verifiednum[-threadn:],sum(verifiednum[-threadn:]))
     
@@ -362,7 +372,6 @@ for i in range(cubenumber):
         print("current htm results:",htms)
         print("average htm",sum(htms)/len(htms))
         print("average qtm",sum(qtms)/len(qtms))
-    t2=time.time()
     print("time:",t2-t1,"s ","average time",(t2-starttime)/(i+1),time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     print("estimated time for rest",cubenumber-i-1,"cubes:",(t2-starttime)*(cubenumber-i-1)/(i+1),"s")
 endtime=time.time()
