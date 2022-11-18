@@ -291,8 +291,8 @@ if __name__=="__main__":
     getdicts()
     print(time.time()-t1,"s")
     dict1,dict2={},{}
-    dict1step=6#8
-    dict2step=7#9
+    dict1step=7#8
+    dict2step=8#9
     print("{} + {}\n{:<8}{:<8}{:<16}{:<16}{:<16}\n".format(dict1step,dict2step,"dict","step","cubes left","dict length","time/s"),end="")
     tdictstart=time.time()
     getdict1(dict1step)
@@ -310,11 +310,11 @@ if __name__=="__main__":
     lock=Lock()
     
     starttime=time.time()
-    phase1maxstep=5#6
+    phase1maxstep=6#6
     stepshouldbelow=phase1maxstep+dict1step+dict2step+1
     miss=0
     threadn=6
-    cubenumber=2
+    cubenumber=4
     
     for i in range(cubenumber):
         print("\n\ncube",i+1)
@@ -395,7 +395,7 @@ if __name__=="__main__":
         print("estimated time for rest",cubenumber-i-1,"cubes:",(t2-starttime)*(cubenumber-i-1)/(i+1),"s")
     endtime=time.time()
     
-    print("\n\ntwo phase algorithm version 15")
+    print("\n\ntwo phase algorithm version 16")
     print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     print("dict time",tdictend-tdictstart,"s")
     print("total time",endtime-starttime,"s, average time",(endtime-starttime)/cubenumber,"s")
