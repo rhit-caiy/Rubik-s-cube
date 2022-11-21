@@ -21,7 +21,7 @@ def getdicts():
     cdict,codict,ep4dict,eodict={},{},{},{}
     #cdict, (0,1,2,3,4,5,6,7),(0,1,2,3,4,5,7,6) 40320 8!
     n=0
-    for i in permutations(range(8)):
+    for i in permutations(cc):
         cdict[i]=n
         n+=1
     #codict, (0,0,0,0,5,5,5,5),(0,0,0,0,5,5,4,4) 2187 3**7
@@ -32,7 +32,7 @@ def getdicts():
             n+=1
     #ep4dict,up edge,middle edge,bottom edge, (0,1,2,3),(0,1,2,11),(0,1,3,2) 11880 P(12,4)
     n=0
-    for i in combinations(range(12),r=4):
+    for i in combinations(ce,r=4):
         for j in permutations(i):
             ep4dict[j]=n
             n+=1
@@ -65,7 +65,7 @@ def getdicts():
             d=ep4r[f][t]
             for dep in ep4dict:
                 ep=list(dep)
-                for i in range(4):
+                for i in [0,1,2,3]:
                     if ep[i] in sfe:
                         ep[i]=fe[fte.index(ep[i])]
                 d[ep4dict[dep]]=ep4dict[tuple(ep)]
@@ -88,9 +88,10 @@ def getdict1(dict1step):
         t1=time.time()
         for cube in predictstate:
             oco,oeo,oe2,oldstep,f1=cube
+            oldstep*=18
             for f in [0,1,2,3,4,5]:
                 if f1!=f and f1-f!=3:
-                    newstep=oldstep*18+3*f+2
+                    newstep=oldstep+3*f+2
                     nco,neo,ne2=oco,oeo,oe2
                     corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
                     for t in [0,0,0]:
@@ -103,6 +104,7 @@ def getdict1(dict1step):
                         newstep-=1
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,step,len(newpredictstate),len(dict1),time.time()-t1),end="")
         predictstate,newpredictstate=newpredictstate,[]
+    dict1.pop((ccon*2048+ceon)*495+cen2//24)
     print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,"total","",len(dict1),time.time()-t0),end="")
     return dict1
 
@@ -150,11 +152,12 @@ def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
     totalnum=1
     #phase 1
     while cubes:
-        oc,oco,oeo,oe1,oe2,oe3,previousstep,step,f1=cubes.pop()
+        oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
         step+=1
+        oldstep*=18
         for f in [0,1,2,3,4,5]:
             if f!=f1 and f1-f!=3:
-                m1_1=previousstep*18+3*f
+                m1_1=oldstep+3*f
                 totalnum+=3
                 crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
                 nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
@@ -166,53 +169,51 @@ def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
                     if key1 in dict1:
                         solutionnum+=1
                         m1_2=dict1[key1]
-                        if m1_2!=1:
-                            nc1,ne11,ne21,ne31=nc,ne1,ne2,ne3
-                            m1=m1_1
-                            f0=f
-                            while m1_2>=18:
-                                ft=m1_2%18
-                                m1_2//=18
-                                m1=18*m1+ft
-                                f0,t0=ft//3,ft%3
-                                ep4rf0t0=ep4r[f0][t0]
-                                nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
-                            #phase 2
-                            key2=((nc1*11880+ne11)*11880+ne21)*11880+ne31
-                            if key2 in dict2:
-                                m2=dict2[key2]
-                                solution=(m1-1)*eighteen[int(log(m2,18))]+m2
-                                if solution<minmove:
-                                    minmove=solution
-                                    qtmvalue=htm=int(log(solution,18))
-                                    p2=int(log(m2,18))
-                                    numstr=decodevalue(solution)
-                                    for i in range(int(len(numstr)/2)):
-                                        if numstr[2*i+1]=="1":
-                                            qtmvalue+=1
-                                    if qtmvalue<qtm:
-                                        qtm=qtmvalue
-                                    print("{:<8}{:<18}{:<6}{:<24}{:<14f}1     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
-                                if solution<eighteen[htm+1]:
-                                    ep4rf01=ep4r1[f0]
-                                    nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
-                                    key2=((nc1*11880+ne11)*11880+ne21)*11880+ne31
-                                    if key2 in dict2:
-                                        m2=dict2[key2]
-                                        solution=(m1-3)*eighteen[int(log(m2,18))]+m2
-                                        if solution<minmove:
-                                            minmove=solution
-                                            qtmvalue=htm=int(log(solution,18))
-                                            p2=int(log(m2,18))
-                                            numstr=decodevalue(solution)
-                                            for i in range(int(len(numstr)/2)):
-                                                if numstr[2*i+1]=="1":
-                                                    qtmvalue+=1
-                                            if qtmvalue<qtm:
-                                                qtm=qtmvalue
-                                            print("{:<8}{:<18}{:<6}{:<24}{:<14f}2     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+                        nc1,ne11,ne21,ne31=nc,ne1,ne2,ne3
+                        m1=m1_1
+                        f0=f
+                        while m1_2>=18:
+                            f0,t0=(m1_2//3)%6,m1_2%3
+                            m1=18*m1+m1_2%18
+                            m1_2//=18
+                            ep4rf0t0=ep4r[f0][t0]
+                            nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
+                        #phase 2
+                        key2=((nc1*11880+ne11)*11880+ne21)*11880+ne31
+                        if key2 in dict2:
+                            m2=dict2[key2]
+                            solution=(m1-1)*eighteen[int(log(m2,18))]+m2
+                            if solution<minmove:
+                                minmove=solution
+                                qtmvalue=htm=int(log(solution,18))
+                                p2=int(log(m2,18))
+                                numstr=decodevalue(solution)
+                                for i in range(int(len(numstr)/2)):
+                                    if numstr[2*i+1]=="1":
+                                        qtmvalue+=1
+                                if qtmvalue<qtm:
+                                    qtm=qtmvalue
+                                print("{:<8}{:<18}{:<6}{:<24}{:<14f}1     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+                            if solution<eighteen[htm+1]:
+                                ep4rf01=ep4r1[f0]
+                                nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
+                                key2=((nc1*11880+ne11)*11880+ne21)*11880+ne31
+                                if key2 in dict2:
+                                    m2=dict2[key2]
+                                    solution=(m1-3)*eighteen[int(log(m2,18))]+m2
+                                    if solution<minmove:
+                                        minmove=solution
+                                        qtmvalue=htm=int(log(solution,18))
+                                        p2=int(log(m2,18))
+                                        numstr=decodevalue(solution)
+                                        for i in range(int(len(numstr)/2)):
+                                            if numstr[2*i+1]=="1":
+                                                qtmvalue+=1
+                                        if qtmvalue<qtm:
+                                            qtm=qtmvalue
+                                        print("{:<8}{:<18}{:<6}{:<24}{:<14f}2     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
                     m1_1+=1
-    print("finish thread {}    current min htm {}    {}/{}    time {:f}s\n".format(solveid,int(log(minmove,18)),solutionnum,totalnum,time.time()-tstart),end="")
+    print("finish thread {}    current min htm {}    {}/{}    time {:f}s    {}\n".format(solveid,int(log(minmove,18)),solutionnum,totalnum,time.time()-tstart,time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())),end="")
     return htm,qtm,minmove,solutionnum
 
 def randomcube():
@@ -245,14 +246,14 @@ def decodevalue(n):
     return s
     
 def rotatenumbertostring(s):
-    allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","R","R2","R'","B","B2","B'","D","D2","D'"]
+    allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'"]
     r=""
     for i in range(int(len(s)/2)):
         r+=allrotation[3*int(s[2*i])+int(s[2*i+1])]
     return r
 '''
 def rotatestringtonumber(s):
-    allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","R","R2","R'","B","B2","B'","D","D2","D'"]
+    allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'"]
     r=""
     for c in s:
         if c=="2":
@@ -278,8 +279,8 @@ t1=time.time()
 cdict,codict,ep4dict,eodict,cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t1
 print("initial time",tinit,"s")
-dict1step=8#8
-dict2step=9#9
+dict1step=7#8
+dict2step=8#9
 print("{} + {}\n{:<8}{:<8}{:<16}{:<16}{:<16}\n".format(dict1step,dict2step,"dict","step","cubes left","dict length","time/s"),end="")
 tdict0=time.time()
 dict1=getdict1(dict1step)
@@ -293,10 +294,10 @@ print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 htms,qtms=[],[]
 verifiednum=[]
 times=[]
-phase1maxstep=6#6
+phase1maxstep=7#6
 stepshouldbelow=phase1maxstep+dict1step+dict2step+1
 miss=0
-threadn=6
+n=6
 cubenumber=100
 
 starttime=time.time()
@@ -315,18 +316,18 @@ for i in range(cubenumber):
         unsolvedcubes.append(getcubewithbase(randomstring,base))
     for base in range(3):
         unsolvedcubes.append(getcubewithbase(reverserandomstring,base))
-    threadsolutions=[eighteen[stepshouldbelow]]*threadn
+    solutions=[eighteen[stepshouldbelow]]*n
     print("{:<8}{:<18}{:<6}{:<24}{:<14}{:<6}{:<36}".format("thread","htm","qtm","in dict1/total","time/s","type","solution"))
     
     t1=time.time()
-    for j in range(threadn):
+    for j in range(n):
         htm,qtm,minmove,solutionnum=solve(*unsolvedcubes[j],j,htm,qtm,minmove)
-        threadsolutions[j]=minmove
+        solutions[j]=minmove
         verifiednum.append(solutionnum)
     t2=time.time()
     times.append(t2-t1)
     print("\nfinish all threads of cube",i+1)
-    print("completed phase one number",verifiednum[-threadn:],sum(verifiednum[-threadn:]))
+    print("completed phase one number",verifiednum[-n:],sum(verifiednum[-n:]))
     
     if htm>=stepshouldbelow:
         miss+=1
@@ -334,8 +335,8 @@ for i in range(cubenumber):
         print("miss rate",miss,"/",i+1)
     else:
         print("{:<8}{:<8}{}".format("thread","htm","solution"))
-        for j in range(threadn):
-            print("{:<8}{:<8}{:<36}{}".format(j,int(log(threadsolutions[j],18)),threadsolutions[j],decodevalue(threadsolutions[j])))
+        for j in range(n):
+            print("{:<8}{:<8}{:<36}{}".format(j,int(log(solutions[j],18)),solutions[j],decodevalue(solutions[j])))
         
         htms.append(htm)
         qtms.append(qtm)
