@@ -2,7 +2,6 @@ import time
 from random import randint
 from math import log
 from itertools import permutations,product,combinations
-#from sys import getsizeof
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 eighteen=[18**i for i in range(28)]
 
@@ -19,24 +18,20 @@ def getdicts():
     cornerdirection=[(0,5,1),(0,4,5),(0,1,2),(0,2,4),(3,2,1),(3,4,2),(3,1,5),(3,5,4)]
     edgedirection=[(0,5),(0,1),(0,2),(0,4),(1,5),(1,2),(4,2),(4,5),(3,5),(3,1),(3,2),(3,4)]
     cdict,codict,ep4dict,eodict={},{},{},{}
-    #cdict, (0,1,2,3,4,5,6,7),(0,1,2,3,4,5,7,6) 40320 8!
     n=0
     for i in permutations(cc):
         cdict[i]=n
         n+=1
-    #codict, (0,0,0,0,5,5,5,5),(0,0,0,0,5,5,4,4) 2187 3**7
     n=0
     for i in product(range(3),repeat=8):
         if sum(i)%3==0:
             codict[tuple([cornerdirection[j][i[j]] for j in range(8)])]=n
             n+=1
-    #ep4dict,up edge,middle edge,bottom edge, (0,1,2,3),(0,1,2,11),(0,1,3,2) 11880 P(12,4)
     n=0
     for i in combinations(ce,r=4):
         for j in permutations(i):
             ep4dict[j]=n
             n+=1
-    #eodict, (0,0,0,0,1,1,3,3,5,5,5,5),(0,0,0,0,1,1,3,3,5,5,2,3) 2048 2**11
     n=0
     for i in product(range(2),repeat=12):
         if sum(i)%2==0:
@@ -51,7 +46,6 @@ def getdicts():
             nc1,nc2,nc3,nc4=facetimecorner[f][t]
             ne1,ne2,ne3,ne4=fte=facetimeedge[f][t]
             ftd=facetimedirection[f][t]
-            
             d=cr[f][t]
             for dc in cdict:
                 c=list(dc)
@@ -150,7 +144,6 @@ def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
     cubes=[(c,co,eo,e1,e2,e3,1,0,-1)]
     solutionnum=0
     totalnum=1
-    #phase 1
     while cubes:
         oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
         step+=1
@@ -178,43 +171,42 @@ def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
                             m1_2//=18
                             ep4rf0t0=ep4r[f0][t0]
                             nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
-                        #phase 2
                         key2=((nc1*11880+ne11)*11880+ne21)*11880+ne31
                         if key2 in dict2:
                             m2=dict2[key2]
-                            solution=(m1-1)*eighteen[int(log(m2,18))]+m2
-                            if solution<minmove:
-                                minmove=solution
-                                qtmvalue=htm=int(log(solution,18))
+                            l=int(log(m1,18))+int(log(m2,18))
+                            if l<htm:
+                                minmove=(m1-1)*eighteen[int(log(m2,18))]+m2
+                                qtmvalue=htm=l
                                 p2=int(log(m2,18))
-                                numstr=decodevalue(solution)
-                                for i in range(int(len(numstr)/2)):
+                                numstr=decodevalue(minmove)
+                                for i in range(len(numstr)//2):
                                     if numstr[2*i+1]=="1":
                                         qtmvalue+=1
                                 if qtmvalue<qtm:
                                     qtm=qtmvalue
-                                print("{:<8}{:<18}{:<6}{:<24}{:<14f}1     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
-                            if solution<eighteen[htm+1]:
+                                print("{:<8}{:<18}{:<6}{:<24}{:<14f}1     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,minmove,numstr),end="")
+                            if l==htm:
                                 ep4rf01=ep4r1[f0]
                                 nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
                                 key2=((nc1*11880+ne11)*11880+ne21)*11880+ne31
                                 if key2 in dict2:
                                     m2=dict2[key2]
-                                    solution=(m1-3)*eighteen[int(log(m2,18))]+m2
-                                    if solution<minmove:
-                                        minmove=solution
-                                        qtmvalue=htm=int(log(solution,18))
+                                    l=int(log(m1,18))+int(log(m2,18))
+                                    if l<htm:
+                                        minmove=(m1-3)*eighteen[int(log(m2,18))]+m2
+                                        qtmvalue=htm=l
                                         p2=int(log(m2,18))
-                                        numstr=decodevalue(solution)
-                                        for i in range(int(len(numstr)/2)):
+                                        numstr=decodevalue(minmove)
+                                        for i in range(len(numstr)//2):
                                             if numstr[2*i+1]=="1":
                                                 qtmvalue+=1
                                         if qtmvalue<qtm:
                                             qtm=qtmvalue
-                                        print("{:<8}{:<18}{:<6}{:<24}{:<14f}2     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+                                        print("{:<8}{:<18}{:<6}{:<24}{:<14f}2     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-p2} + {p2}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,minmove,numstr),end="")
                     m1_1+=1
     print("finish thread {}    current min htm {}    {}/{}    time {:f}s    {}\n".format(solveid,int(log(minmove,18)),solutionnum,totalnum,time.time()-tstart,time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())),end="")
-    return htm,qtm,minmove,solutionnum
+    return htm,qtm,minmove,solutionnum,time.time()-tstart
 
 def randomcube():
     a=randint(512,1024)
@@ -227,9 +219,8 @@ def randomcube():
         reverserandomstring=str(f)+str(2-t)+reverserandomstring
     return randomstring,reverserandomstring
 
-def getcubewithbase(randomstring,base):
+def getcubewithbase(randomstring,base,l):
     direction=[[0,1,2,3,4,5],[1,2,0,4,5,3],[2,0,1,5,3,4]][base]
-    l=int(len(randomstring)/2)
     c,co,eo,e1,e2,e3=ccn,ccon,ceon,cen1,cen2,cen3
     for i in range(l):
         f,t=direction[int(randomstring[2*i])],int(randomstring[2*i+1])
@@ -248,39 +239,18 @@ def decodevalue(n):
 def rotatenumbertostring(s):
     allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'"]
     r=""
-    for i in range(int(len(s)/2)):
+    for i in range(len(s)//2):
         r+=allrotation[3*int(s[2*i])+int(s[2*i+1])]
     return r
-'''
-def rotatestringtonumber(s):
-    allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'"]
-    r=""
-    for c in s:
-        if c=="2":
-            r=r[:-1]+"1"
-        elif c=="'" or c=="3":
-            r=r[:-1]+"2"
-        elif c in allrotation:
-            i=allrotation.index(c)
-            r+=str(i//3)+"0"
-    return r
 
-def printdictsize(d):
-    t=time.time()
-    a=getsizeof(d)
-    b=0
-    for i in d:
-        b+=getsizeof(i)
-    for i in d.values():
-        b+=getsizeof(i)
-    print([name for name in globals() if globals()[name] is d][0],len(d),"dict space",a,"B    values and keys space",b,"B    total",(a+b)/2**30,"GB ",(a+b)/2**20,"MB ",time.time()-t,"s")
-'''
 t1=time.time()
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t1
 print("initialize time",tinit,"s")
-dict1step=8#8
-dict2step=9#9
+phase1maxstep=5#6
+dict1step=7#8
+dict2step=8#9
+stepshouldbelow=phase1maxstep+dict1step+dict2step+1
 print("{} + {}\n{:<8}{:<8}{:<16}{:<16}{:<16}\n".format(dict1step,dict2step,"dict","step","cubes left","dict length","time/s"),end="")
 tdict0=time.time()
 dict1=getdict1(dict1step)
@@ -288,17 +258,11 @@ tdict1=time.time()
 dict2=getdict2(dict2step)
 tdict2=time.time()
 print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
-#printdictsize(dict1)
-#printdictsize(dict2)
 
-htms,qtms=[],[]
-verifiednum=[]
-times=[]
-phase1maxstep=7#6
-stepshouldbelow=phase1maxstep+dict1step+dict2step+1
+htms,qtms,verifiednum,times=[],[],[],[]
 miss=0
 n=6
-cubenumber=100
+cubenumber=10
 
 starttime=time.time()
 for i in range(cubenumber):
@@ -309,23 +273,18 @@ for i in range(cubenumber):
     qtm=htm*2
     minmove=eighteen[stepshouldbelow]
     
-    randomstring,reverserandomstring=randomcube()
-    print("random with",int(len(randomstring)/2),"moves")
-    unsolvedcubes=[]
-    for base in range(3):
-        unsolvedcubes.append(getcubewithbase(randomstring,base))
-    for base in range(3):
-        unsolvedcubes.append(getcubewithbase(reverserandomstring,base))
-    solutions=[eighteen[stepshouldbelow]]*n
+    randomstrings=randomcube()
+    l=len(randomstrings[0])//2
+    print("random with",l,"moves")
     print("{:<8}{:<18}{:<6}{:<24}{:<14}{:<6}{:<36}".format("thread","htm","qtm","in dict1/total","time/s","type","solution"))
-    
-    t1=time.time()
-    for j in range(n):
-        htm,qtm,minmove,solutionnum=solve(*unsolvedcubes[j],j,htm,qtm,minmove)
-        solutions[j]=minmove
+    solutions=[eighteen[stepshouldbelow]]*n
+    t=0
+    for base in range(n):
+        htm,qtm,minmove,solutionnum,t1=solve(*getcubewithbase(randomstrings[base//3],base%3,l),base,htm,qtm,minmove)
+        solutions[base]=minmove
         verifiednum.append(solutionnum)
-    t2=time.time()
-    times.append(t2-t1)
+        t+=t1
+    times.append(t)
     print("\nfinish all threads of cube",i+1)
     print("completed phase one number",verifiednum[-n:],sum(verifiednum[-n:]))
     
@@ -345,8 +304,8 @@ for i in range(cubenumber):
             print("current htm results:",htms)
         print("average htm",sum(htms)/len(htms))
         print("average qtm",sum(qtms)/len(qtms))
-    print("time:",t2-t1,"s ","average time",sum(times)/(i+1),time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
-    print("estimated time for rest",cubenumber-i-1,"cubes:",(t2-starttime)*(cubenumber-i-1)/(i+1),"s")
+    print("time:",t,"s ","average time",sum(times)/(i+1),time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
+    print("estimated time for rest",cubenumber-i-1,"cubes:",(time.time()-starttime)*(cubenumber-i-1)/(i+1),"s")
 endtime=time.time()
 
 print("\n\ntwo phase algorithm version 17")
