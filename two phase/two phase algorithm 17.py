@@ -76,7 +76,7 @@ def getdicts():
                 d[eodict[deo]]=eodict[tuple(eo)]
     ccn,ccon,cen1,cen2,cen3,ceon=cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo]
     cr0,cor0,eor0,ep4r0,cr1,ep4r1=[i[0] for i in cr],[i[0] for i in cor],[i[0] for i in eor],[i[0] for i in ep4r],[i[1] for i in cr],[i[1] for i in ep4r]
-    return cdict,codict,ep4dict,eodict,cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1
+    return cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1
 
 def getdict1(dict1step):
     dict1={}
@@ -276,11 +276,11 @@ def printdictsize(d):
     print([name for name in globals() if globals()[name] is d][0],len(d),"dict space",a,"B    values and keys space",b,"B    total",(a+b)/2**30,"GB ",(a+b)/2**20,"MB ",time.time()-t,"s")
 '''
 t1=time.time()
-cdict,codict,ep4dict,eodict,cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
+cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t1
 print("initial time",tinit,"s")
-dict1step=7#8
-dict2step=8#9
+dict1step=8#8
+dict2step=9#9
 print("{} + {}\n{:<8}{:<8}{:<16}{:<16}{:<16}\n".format(dict1step,dict2step,"dict","step","cubes left","dict length","time/s"),end="")
 tdict0=time.time()
 dict1=getdict1(dict1step)
