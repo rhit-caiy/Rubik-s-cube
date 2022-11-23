@@ -35,32 +35,74 @@ def getdicts():
         c1,c2,c3,c4=facecorner[f]
         e1,e2,e3,e4=fe=faceedge[f]
         sfe=set(fe)
-        for t in [0,1,2]:#
-            nc1,nc2,nc3,nc4=facetimecorner[f][t]
-            ne1,ne2,ne3,ne4=fte=facetimeedge[f][t]
-            ftd=facetimedirection[f][t]
-            d=cr[f][t]
-            for dc in cdict:
+        
+        nc1,nc2,nc3,nc4=facetimecorner[f][1]
+        ne1,ne2,ne3,ne4=fte=facetimeedge[f][1]
+        ftd=facetimedirection[f][1]
+        d=cr[f][1]
+        for dc in cdict:
+            a=cdict[dc]
+            if a not in d:
                 c=list(dc)
                 c[c1],c[c2],c[c3],c[c4]=c[nc1],c[nc2],c[nc3],c[nc4]
-                d[cdict[dc]]=cdict[tuple(c)]
-            d=cor[f][t]
-            for dco in codict:
+                b=cdict[tuple(c)]
+                d[a],d[b]=b,a
+        d=cor[f][1]
+        for dco in codict:
+            a=codict[dco]
+            if a not in d:
                 co=list(dco)
                 co[c1],co[c2],co[c3],co[c4]=ftd[co[nc1]],ftd[co[nc2]],ftd[co[nc3]],ftd[co[nc4]]
-                d[codict[dco]]=codict[tuple(co)]
-            d=ep4r[f][t]
-            for dep in ep4dict:
+                b=codict[tuple(co)]
+                d[a],d[b]=b,a
+        d=ep4r[f][1]
+        for dep in ep4dict:
+            a=ep4dict[dep]
+            if a not in d:
                 ep=list(dep)
                 for i in [0,1,2,3]:
                     if ep[i] in sfe:
                         ep[i]=fe[fte.index(ep[i])]
-                d[ep4dict[dep]]=ep4dict[tuple(ep)]
-            d=eor[f][t]
-            for deo in eodict:
+                b=ep4dict[tuple(ep)]
+                d[a],d[b]=b,a
+        d=eor[f][1]
+        for deo in eodict:
+            a=eodict[deo]
+            if a not in d:
                 eo=list(deo)
                 eo[e1],eo[e2],eo[e3],eo[e4]=ftd[eo[ne1]],ftd[eo[ne2]],ftd[eo[ne3]],ftd[eo[ne4]]
-                d[eodict[deo]]=eodict[tuple(eo)]
+                b=eodict[tuple(eo)]
+                d[a],d[b]=b,a
+        
+        nc1,nc2,nc3,nc4=facetimecorner[f][0]
+        ne1,ne2,ne3,ne4=fte=facetimeedge[f][0]
+        ftd=facetimedirection[f][0]
+        d0,d2=cr[f][0],cr[f][2]
+        for dc in cdict:
+            c=list(dc)
+            c[c1],c[c2],c[c3],c[c4]=c[nc1],c[nc2],c[nc3],c[nc4]
+            a,b=cdict[dc],cdict[tuple(c)]
+            d0[a],d2[b]=b,a
+        d0,d2=cor[f][0],cor[f][2]
+        for dco in codict:
+            co=list(dco)
+            co[c1],co[c2],co[c3],co[c4]=ftd[co[nc1]],ftd[co[nc2]],ftd[co[nc3]],ftd[co[nc4]]
+            a,b=codict[dco],codict[tuple(co)]
+            d0[a],d2[b]=b,a
+        d0,d2=ep4r[f][0],ep4r[f][2]
+        for dep in ep4dict:
+            ep=list(dep)
+            for i in [0,1,2,3]:
+                if ep[i] in sfe:
+                    ep[i]=fe[fte.index(ep[i])]
+            a,b=ep4dict[dep],ep4dict[tuple(ep)]
+            d0[a],d2[b]=b,a
+        d0,d2=eor[f][0],eor[f][2]
+        for deo in eodict:
+            eo=list(deo)
+            eo[e1],eo[e2],eo[e3],eo[e4]=ftd[eo[ne1]],ftd[eo[ne2]],ftd[eo[ne3]],ftd[eo[ne4]]
+            a,b=eodict[deo],eodict[tuple(eo)]
+            d0[a],d2[b]=b,a
     ccn,ccon,cen1,cen2,cen3,ceon=cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo]
     cr0,cor0,eor0,ep4r0,cr1,ep4r1=[i[0] for i in cr],[i[0] for i in cor],[i[0] for i in eor],[i[0] for i in ep4r],[i[1] for i in cr],[i[1] for i in ep4r]
     return cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1
@@ -86,11 +128,12 @@ def getdict1(dict1step):
                             dict1[key1]=newstep
                             if step is not dict1step:
                                 newpredictstate.append((nco,neo,ne2,newstep,f))
-        print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,step,len(newpredictstate),len(dict1),time.time()-t1),end="")
+        print("{:<8}{:<16}{:<16}{:<16f}\n".format(step,len(newpredictstate),len(dict1),time.time()-t1),end="")
         predictstate,newpredictstate=newpredictstate,[]
     dict1.pop((ccon*2048+ceon)*495+cen2//24)
-    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(1,"total","",len(dict1),time.time()-t0),end="")
+    print("{:<8}{:<16}{:<16}{:<16f}\n".format("total","",len(dict1),time.time()-t0),end="")
     return dict1
+
 def getdict2(dict2step):
     dict2={((ccn*11880+cen1)*11880+cen2)*11880+cen3:1}
     predictstate,newpredictstate=[(ccn,cen1,cen2,cen3,0,-1)],[]
@@ -124,7 +167,7 @@ def getdict2(dict2step):
                             newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
         print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,step,len(newpredictstate),len(dict2),time.time()-t1),end="")
         predictstate,newpredictstate=newpredictstate,[]
-    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,"total","",len(dict2),time.time()-t0),end="")
+    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format("","total","",len(dict2),time.time()-t0),end="")
     return dict2
 
 def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
@@ -194,8 +237,7 @@ def randomcube():
         reverserandomstring=str(f)+str(2-t)+reverserandomstring
     return randomstring,reverserandomstring
 def getcubewithbase(randomstring,base,l):
-    direction=[[0,1,2,3,4,5],[1,2,0,4,5,3],[2,0,1,5,3,4]][base]
-    c,co,eo,e1,e2,e3=ccn,ccon,ceon,cen1,cen2,cen3
+    direction,c,co,eo,e1,e2,e3=[[0,1,2,3,4,5],[1,2,0,4,5,3],[2,0,1,5,3,4]][base],ccn,ccon,ceon,cen1,cen2,cen3
     for i in range(l):
         f,t=direction[int(randomstring[2*i])],int(randomstring[2*i+1])
         ep4rft=ep4r[f][t]
@@ -208,8 +250,7 @@ def decodevalue(n):
         s=str(ft//3)+str(ft%3)+s
     return s
 def rotatenumbertostring(s):
-    allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'"]
-    r=""
+    allrotation,r=["U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'"],""
     for i in range(len(s)//2):
         r+=allrotation[3*int(s[2*i])+int(s[2*i+1])]
     return r
@@ -224,16 +265,17 @@ phase1maxstep=5#6
 dict1step=7#8
 dict2step=8#9
 stepshouldbelow=phase1maxstep+dict1step+dict2step+1
-print("{} + {} + {}\n{:<8}{:<8}{:<16}{:<16}{:<16}\n".format(phase1maxstep,dict1step,dict2step,"dict","step","cubes left","dict length","time/s"),end="")
+print("{} + {} + {}".format(phase1maxstep,dict1step,dict2step))
+print("\ndict1\n{:<8}{:<16}{:<16}{:<16}\n".format("step","cubes left","dict length","time/s"),end="")
 tdict0=time.time()
 dict1=getdict1(dict1step)
 tdict1=time.time()
+print("\ndict2\n{:<8}{:<16}{:<16}{:<16}\n".format("step","cubes left","dict length","time/s"),end="")
 dict2=getdict2(dict2step)
 tdict2=time.time()
 print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 
-htms,qtms,verifiednum,times=[],[],[],[]
-miss=0
+htms,qtms,verifiednum,times,miss=[],[],[],[],0
 n=6
 cubenumber=10
 
@@ -272,8 +314,7 @@ for i in range(cubenumber):
         print("\nmin htm",htm,", qtm",qtm,"solution",minmove,decodevalue(minmove),rotatenumbertostring(decodevalue(minmove)))
         if i<100:
             print("current htm results:",htms)
-        print("average htm",sum(htms)/len(htms))
-        print("average qtm",sum(qtms)/len(qtms))
+        print("average htm",sum(htms)/len(htms),"\naverage qtm",sum(qtms)/len(qtms))
     print("time:",t,"s ","average time",sum(times)/(i+1),time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     print("estimated time for rest",cubenumber-i-1,"cubes:",(time.time()-starttime)*(cubenumber-i-1)/(i+1),"s")
 endtime=time.time()
@@ -289,13 +330,11 @@ if cubenumber<=100:
     print("htm",htms,"\nqtm",qtms)
 print(cubenumber,"cubes")
 if len(htms)>0:
-    print("htm average",sum(htms)/len(htms),"range",min(htms),"-",max(htms))
-    print("qtm average",sum(qtms)/len(qtms),"range",min(qtms),"-",max(qtms))
-    print("\nhtm     number")
+    print("\nhtm average",sum(htms)/len(htms),"range",min(htms),"-",max(htms),"\nhtm     number")
     for i in range(min(htms),max(htms)+1):
         print("{:<8}{:<8}{}".format(i,htms.count(i),"-"*int(100*htms.count(i)/cubenumber)))
-    print("\nqtm     number")
+    print("\nqtm average",sum(qtms)/len(qtms),"range",min(qtms),"-",max(qtms),"\nqtm     number")
     for i in range(min(qtms),max(qtms)+1):
         print("{:<8}{:<8}{}".format(i,qtms.count(i),"-"*int(100*qtms.count(i)/cubenumber)))
 if miss!=0:
-    print("there are",miss,"of",cubenumber,"cubes has no solution under this search depth")
+    print("miss rate",miss,"/",cubenumber)
