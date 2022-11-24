@@ -172,9 +172,10 @@ def getdict2(dict2step):
     print("{:<8}{:<16}{:<16}{:<16f}\n".format("total","",len(dict2),time.time()-t0),end="")
     return dict2
 
-def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
+def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,minmove):
     tstart=time.time()
-    cubes,solutionnum,totalnum=[(c,co,eo,e1,e2,e3,1,0,-1)],0,1
+    print("{}\n{:<18}{:<6}{:<24}{:<14}{:<6}{:<36}".format("thread "+str(threadid),"htm","qtm","dict2/dict1/total","time/s","type","solution"))
+    cubes,totalnum,phase1num,phase2num=[(c,co,eo,e1,e2,e3,1,0,-1)],1,0,0
     while cubes:
         oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
         step,oldstep=1+step,18*oldstep
@@ -185,18 +186,16 @@ def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
                 nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
                 for m1 in [m1_1,m1_1+1,m1_1+2]:
                     nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                    if step is not phase1maxstep:
+                    if step is not phase1step:
                         cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
-                    key1=ne2//24+neo+nco
-                    if key1 in dict1:
-                        solutionnum,m1_2,f0,nc1,ne11,ne21,ne31=1+solutionnum,dict1[key1],f,nc,ne1,ne2,ne3
+                    if ne2//24+neo+nco in dict1:
+                        phase1num,m1_2,f0,nc1,ne11,ne21,ne31=1+phase1num,dict1[ne2//24+neo+nco],f,nc,ne1,ne2,ne3
                         while m1_2>=18:
                             f0,t0,m1,m1_2=(m1_2//3)%6,m1_2%3,18*m1+m1_2%18,m1_2//18
                             ep4rf0t0=ep4r[f0][t0]
                             nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
-                        key2=nc+ne31+11880*(ne21+11880*ne11)
-                        if key2 in dict2:
-                            m2=dict2[key2]
+                        if nc1+ne31+11880*(ne21+11880*ne11) in dict2:
+                            phase2num,m2=1+phase2num,dict2[nc1+ne31+11880*(ne21+11880*ne11)]
                             l=int(log(m1,18))+int(log(m2,18))
                             if l<=htm:
                                 solution=(m1-1)*eighteen[int(log(m2,18))]+m2
@@ -209,12 +208,11 @@ def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
                                         qtmvalue+=1
                                 if qtmvalue<qtm:
                                     qtm=qtmvalue
-                                print("{:<8}{:<18}{:<6}{:<24}{:<14f}1     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+                                print("{:<18}{:<6}{:<24}{:<14f}1     {:<36}{}\n".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,str(phase2num)+"/"+str(phase1num)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
                                 ep4rf01=ep4r1[f0]
                                 nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
-                                key2=nc+ne31+11880*(ne21+11880*ne11)
-                                if key2 in dict2:
-                                    m2=dict2[key2]
+                                if nc1+ne31+11880*(ne21+11880*ne11) in dict2:
+                                    m2=dict2[nc1+ne31+11880*(ne21+11880*ne11)]
                                     l=int(log(m1,18))+int(log(m2,18))
                                     if l<=htm:
                                         solution=(m1-1)*eighteen[int(log(m2,18))]+m2
@@ -227,9 +225,9 @@ def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
                                                 qtmvalue+=1
                                         if qtmvalue<qtm:
                                             qtm=qtmvalue
-                                        print("{:<8}{:<18}{:<6}{:<24}{:<14f}2     {:<36}{}\n".format(solveid,f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,str(solutionnum)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
-    print("finish thread {}    min htm {}  qtm {}  {}/{}    time {:f}s    {}\n".format(solveid,htm,qtm,solutionnum,totalnum,time.time()-tstart,time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())),end="")
-    return htm,qtm,minmove,solutionnum,time.time()-tstart
+                                        print("{:<18}{:<6}{:<24}{:<14f}2     {:<36}{}\n".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,str(phase2num)+"/"+str(phase1num)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+    print("finish thread {}    min htm {}  qtm {}  {}/{}/{}    time {:f}s    {}\n\n".format(threadid,htm,qtm,phase2num,phase1num,totalnum,time.time()-tstart,time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())),end="")
+    return htm,qtm,minmove,phase1num,phase2num,time.time()-tstart
 
 def randomcube():
     randomstring=reverserandomstring=""
@@ -263,11 +261,11 @@ t1=time.time()
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t1
 print("initialize time",tinit,"s")
-phase1maxstep=5#7
-dict1step=7#8
-dict2step=8#9
-stepshouldbelow=phase1maxstep+dict1step+dict2step+1
-print("{} + {} + {}".format(phase1maxstep,dict1step,dict2step))
+phase1step=6#7
+dict1step=8#8
+dict2step=9#9
+stepshouldbelow=phase1step+dict1step+dict2step+1
+print("{} + {} + {}".format(phase1step,dict1step,dict2step))
 print("\ndict1\n{:<8}{:<16}{:<16}{:<16}\n".format("step","cubes left","dict length","time/s"),end="")
 tdict0=time.time()
 dict1=getdict1(dict1step)
@@ -277,7 +275,7 @@ dict2=getdict2(dict2step)
 tdict2=time.time()
 print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 
-htms,qtms,verifiednum,times,miss=[],[],[],[],0
+totalnums,htms,qtms,p1,p2,times,miss=[1,19,262,3502,46756,624124,8331112,111207592,1484451136,19815150304,264501924112,3530695794832,47129384172016,629105134371184,8397590527550512],[],[],[],[],[],0
 n=6
 cubenumber=10
 
@@ -285,24 +283,25 @@ starttime=time.time()
 for i in range(cubenumber):
     print("\n\ncube",i+1)
     print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
-    print("search depth",phase1maxstep,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
+    print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
     htm,qtm,minmove=stepshouldbelow,stepshouldbelow*2,eighteen[stepshouldbelow]
     
     randomstrings=randomcube()
     l=len(randomstrings[0])//2
     print("random with",l,"moves\n")
-    print("{:<8}{:<18}{:<6}{:<24}{:<14}{:<6}{:<36}".format("thread","htm","qtm","in dict1/total","time/s","type","solution"))
     solutions=[eighteen[stepshouldbelow]]*n
     t=0
     for base in range(n):
-        htm,qtm,minmove,solutionnum,t1=solve(*getcubewithbase(randomstrings[base//3],base%3,l),base,htm,qtm,minmove)
+        htm,qtm,minmove,phase1num,phase2num,t1=solve(*getcubewithbase(randomstrings[base//3],base%3,l),base,htm,qtm,minmove)
         solutions[base]=minmove
-        verifiednum.append(solutionnum)
+        p1.append(phase1num)
+        p2.append(phase2num)
         t+=t1
     times.append(t)
-    print("\nfinish solve cube",i+1)
-    print("completed phase one number",verifiednum[-n:],sum(verifiednum[-n:]))
-    
+    print("finish solve cube",i+1)
+    print("phase 1 number",p1[-n:],sum(p1[-n:]),"\nphase 2 number",p2[-n:],sum(p2[-n:]))
+    if sum(p1[-n:])!=0:
+        print("phase1/total",sum(p1[-n:])/n/totalnums[phase1step],"phase2/phase1",sum(p2[-n:])/sum(p1[-n:]))
     if htm>=stepshouldbelow:
         miss+=1
         print("no solution below",htm,"steps for this cube")
@@ -326,8 +325,10 @@ print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 print("initialize time",tinit,"s")
 print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 print(f"total time {endtime-starttime}s, actual time {sum(times)}s, average time {sum(times)/cubenumber}s")
-print("average phase 1 completed number per thread",sum(verifiednum)/len(verifiednum),"max",max(verifiednum),"min",min(verifiednum))
-print("search depth",phase1maxstep,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
+print("average phase 1 completed number per thread",sum(p1)/len(p1),"max",max(p1),"min",min(p1))
+print("average phase 2 completed number per thread",sum(p2)/len(p2),"max",max(p2),"min",min(p2))
+print("phase1/total",sum(p1)/len(p1)/totalnums[phase1step],"\nphase2/phase1",(sum(p1)/len(p1))/(sum(p2)/len(p2)))
+print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
 if cubenumber<=100:
     print("htm",htms,"\nqtm",qtms)
 print(cubenumber,"cubes")
