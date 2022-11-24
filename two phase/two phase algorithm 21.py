@@ -107,69 +107,6 @@ def getdicts():
     cr0,cor0,eor0,ep4r0,cr1,ep4r1=[i[0] for i in cr],[i[0] for i in cor],[i[0] for i in eor],[i[0] for i in ep4r],[i[1] for i in cr],[i[1] for i in ep4r]
     return cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1
 
-def getdict1(dict1step):
-    dict1={(ccon,ceon,cen2//24):1}
-    predictstate,newpredictstate=[(ccon,ceon,cen2,1,-1)],[]
-    t0=time.time()
-    for step in range(1,dict1step+1):
-        t1=time.time()
-        for cube in predictstate:
-            oco,oeo,oe2,oldstep,f1=cube
-            oldstep=18*oldstep
-            for f in [0,1,2,3,4,5]:
-                if f1 is not f and f1-f!=3:
-                    newstep=oldstep+3*f
-                    nco,neo,ne2=oco,oeo,oe2
-                    corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
-                    for newstep in [newstep+2,newstep+1,newstep]:
-                        nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
-                        key1=(nco*2048+neo)*495+ne2//24
-                        if key1 not in dict1:
-                            dict1[key1]=newstep
-                            if step is not dict1step:
-                                newpredictstate.append((nco,neo,ne2,newstep,f))
-        print("{:<8}{:<16}{:<16}{:<16f}\n".format(step,len(newpredictstate),len(dict1),time.time()-t1),end="")
-        predictstate,newpredictstate=newpredictstate,[]
-    dict1.pop((ccon,ceon,cen2//24))
-    print("{:<8}{:<16}{:<16}{:<16f}\n".format("total","",len(dict1),time.time()-t0),end="")
-    return dict1
-
-def getdict2(dict2step):
-    dict2={(ccn,cen1,cen2,cen3):1}
-    predictstate,newpredictstate=[(ccn,cen1,cen2,cen3,0,-1)],[]
-    t0=time.time()
-    for step in range(1,dict2step+1):
-        t1=time.time()
-        eighteen0,eighteen1=eighteen[step-1],eighteen[step]
-        for cube in predictstate:
-            oc,oe1,oe2,oe3,oldstep,f1=cube
-            for f in [0,3]:
-                if f1 is not f and (f1!=3 or f!=3):
-                    crf0,ep4rf0=cr0[f],ep4r0[f]
-                    nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
-                    for t in [2,1,0]:
-                        nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                        key2=(nc,ne1,ne2,ne3)
-                        if key2 not in dict2:
-                            newstep=oldstep+(3*f+t)*eighteen0
-                            dict2[key2]=newstep+eighteen1
-                            if step is not dict2step:
-                                newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
-            for f in [1,2,4,5]:
-                if f1 is not f and f1-f!=3:
-                    ep4rf1=ep4r1[f]
-                    nc,ne1,ne2,ne3=cr1[f][oc],ep4rf1[oe1],ep4rf1[oe2],ep4rf1[oe3]
-                    key2=(nc,ne1,ne2,ne3)
-                    if key2 not in dict2:
-                        newstep=oldstep+(3*f+1)*eighteen0
-                        dict2[key2]=newstep+eighteen1
-                        if step is not dict2step:
-                            newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
-        print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format(2,step,len(newpredictstate),len(dict2),time.time()-t1),end="")
-        predictstate,newpredictstate=newpredictstate,[]
-    print("{:<8}{:<8}{:<16}{:<16}{:<16f}\n".format("","total","",len(dict2),time.time()-t0),end="")
-    return dict2
-
 def solve(c,co,eo,e1,e2,e3,solveid,htm,qtm,minmove):
     tstart=time.time()
     cubes,solutionnum,totalnum=[(c,co,eo,e1,e2,e3,1,0,-1)],0,1
@@ -261,17 +198,72 @@ t1=time.time()
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t1
 print("initialize time",tinit,"s")
-phase1maxstep=5#6
+phase1maxstep=7#6
 dict1step=7#8
 dict2step=8#9
 stepshouldbelow=phase1maxstep+dict1step+dict2step+1
 print("{} + {} + {}".format(phase1maxstep,dict1step,dict2step))
 print("\ndict1\n{:<8}{:<16}{:<16}{:<16}\n".format("step","cubes left","dict length","time/s"),end="")
 tdict0=time.time()
-dict1=getdict1(dict1step)
+dict1={(ccon,ceon,cen2//24):1}
+predictstate,newpredictstate=[(ccon,ceon,cen2,1,-1)],[]
+t0=time.time()
+for step in range(1,dict1step+1):
+    t1=time.time()
+    for cube in predictstate:
+        oco,oeo,oe2,oldstep,f1=cube
+        oldstep=18*oldstep
+        for f in [0,1,2,3,4,5]:
+            if f1 is not f and f1-f!=3:
+                newstep=oldstep+3*f
+                nco,neo,ne2=oco,oeo,oe2
+                corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
+                for newstep in [newstep+2,newstep+1,newstep]:
+                    nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
+                    key1=(nco,neo,ne2//24)
+                    if key1 not in dict1:
+                        dict1[key1]=newstep
+                        if step is not dict1step:
+                            newpredictstate.append((nco,neo,ne2,newstep,f))
+    print("{:<8}{:<16}{:<16}{:<16f}\n".format(step,len(newpredictstate),len(dict1),time.time()-t1),end="")
+    predictstate,newpredictstate=newpredictstate,[]
+dict1.pop((ccon,ceon,cen2//24))
+print("{:<8}{:<16}{:<16}{:<16f}\n".format("total","",len(dict1),time.time()-t0),end="")
 tdict1=time.time()
 print("\ndict2\n{:<8}{:<16}{:<16}{:<16}\n".format("step","cubes left","dict length","time/s"),end="")
-dict2=getdict2(dict2step)
+dict2={(ccn,cen1,cen2,cen3):1}
+predictstate,newpredictstate=[(ccn,cen1,cen2,cen3,0,-1)],[]
+t0=time.time()
+for step in range(1,dict2step+1):
+    t1=time.time()
+    eighteen0,eighteen1=eighteen[step-1],eighteen[step]
+    for cube in predictstate:
+        oc,oe1,oe2,oe3,oldstep,f1=cube
+        for f in [0,3]:
+            if f1 is not f and (f1!=3 or f!=3):
+                crf0,ep4rf0=cr0[f],ep4r0[f]
+                nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
+                for t in [2,1,0]:
+                    nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                    key2=(nc,ne1,ne2,ne3)
+                    if key2 not in dict2:
+                        newstep=oldstep+(3*f+t)*eighteen0
+                        dict2[key2]=newstep+eighteen1
+                        if step is not dict2step:
+                            newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
+        for f in [1,2,4,5]:
+            if f1 is not f and f1-f!=3:
+                ep4rf1=ep4r1[f]
+                nc,ne1,ne2,ne3=cr1[f][oc],ep4rf1[oe1],ep4rf1[oe2],ep4rf1[oe3]
+                key2=(nc,ne1,ne2,ne3)
+                if key2 not in dict2:
+                    newstep=oldstep+(3*f+1)*eighteen0
+                    dict2[key2]=newstep+eighteen1
+                    if step is not dict2step:
+                        newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
+    print("{:<8}{:<16}{:<16}{:<16f}\n".format(step,len(newpredictstate),len(dict2),time.time()-t1),end="")
+    predictstate,newpredictstate=newpredictstate,[]
+print("{:<8}{:<16}{:<16}{:<16f}\n".format("total","",len(dict2),time.time()-t0),end="")
 tdict2=time.time()
 print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 
