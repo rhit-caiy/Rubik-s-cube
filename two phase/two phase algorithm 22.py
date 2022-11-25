@@ -19,7 +19,7 @@ def getdicts():
         n=1676676672000+n
     n=0
     for i in product(range(3),repeat=8):
-        if sum(i)%3==0:
+        if not sum(i)%3:
             codict[tuple([cornerdirection[j][i[j]] for j in range(8)])]=n
             n=1013760+n#495+n#
     n=0
@@ -29,7 +29,7 @@ def getdicts():
             n=1+n
     n=0
     for i in product(range(2),repeat=12):
-        if sum(i)%2==0:
+        if not sum(i)%2:
             eodict[tuple([edgedirection[j][i[j]] for j in range(12)])]=n
             n=495+n#1082565+n#
     cr,cor,ep4r,eor=[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)],[[{},{},{}] for i in range(6)]
@@ -262,8 +262,8 @@ cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdi
 tinit=time.time()-t1
 print("initialize time",tinit,"s")
 phase1step=6#7
-dict1step=8#8
-dict2step=9#9
+dict1step=7#8
+dict2step=8#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
 print("{} + {} + {}".format(phase1step,dict1step,dict2step))
 print("\ndict1\n{:<8}{:<16}{:<16}{:<16}\n".format("step","cubes left","dict length","time/s"),end="")
@@ -275,7 +275,8 @@ dict2=getdict2(dict2step)
 tdict2=time.time()
 print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 
-totalnums,htms,qtms,p1,p2,times,miss=[1,19,262,3502,46756,624124,8331112,111207592,1484451136,19815150304,264501924112,3530695794832,47129384172016,629105134371184,8397590527550512],[],[],[],[],[],0
+htms,qtms,p1,p2,times,miss=[],[],[],[],[],0
+totalnums=sum([round((-(6-3*6**0.5)**n*(-3+6**0.5)+(3*(2+6**0.5))**n*(3+6**0.5))/4) for n in range(phase1step+1)])-1#correct for n<=12, from sum of series OEIS A333298, real should be sum of A080583 from A080601
 n=6
 cubenumber=10
 
@@ -285,7 +286,6 @@ for i in range(cubenumber):
     print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
     print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
     htm,qtm,minmove=stepshouldbelow,stepshouldbelow*2,eighteen[stepshouldbelow]
-    
     randomstrings=randomcube()
     l=len(randomstrings[0])//2
     print("random with",l,"moves\n")
@@ -299,17 +299,16 @@ for i in range(cubenumber):
         t+=t1
     times.append(t)
     print("finish solve cube",i+1)
-    print("phase 1 number",p1[-n:],sum(p1[-n:]),"\nphase 2 number",p2[-n:],sum(p2[-n:]))
-    if sum(p1[-n:])!=0:
-        print("phase1/total",sum(p1[-n:])/n/totalnums[phase1step],"phase2/phase1",sum(p2[-n:])/sum(p1[-n:]))
+    print("{:<8}{:<8}{:<8}{:<8}{}".format("thread","htm","phase1","phase2","solution"))
+    for j in range(n):
+        print("{:<8}{:<8}{:<8}{:<8}{:<36}{}".format(j,int(log(solutions[j],18)),p1[-n+j],p2[-n+j],solutions[j],decodevalue(solutions[j])))
+    print("phase 1 number",sum(p1[-n:]),"\nphase 2 number",sum(p2[-n:]))
+    if sum(p1[-n:]):
+        print("phase1/total",sum(p1[-n:])/n/totalnums,"phase2/phase1",sum(p2[-n:])/sum(p1[-n:]))
     if htm>=stepshouldbelow:
         miss+=1
-        print("no solution below",htm,"steps for this cube")
-        print("miss rate",miss,"/",i+1)
+        print("no solution below",htm,"steps for this cube\nmiss rate",miss,"/",i+1)
     else:
-        print("{:<8}{:<8}{}".format("thread","htm","solution"))
-        for j in range(n):
-            print("{:<8}{:<8}{:<36}{}".format(j,int(log(solutions[j],18)),solutions[j],decodevalue(solutions[j])))
         htms.append(htm)
         qtms.append(qtm)
         print("\nmin htm",htm,", qtm",qtm,"solution",minmove,decodevalue(minmove),rotatenumbertostring(decodevalue(minmove)))
@@ -327,7 +326,7 @@ print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 print(f"total time {endtime-starttime}s, actual time {sum(times)}s, average time {sum(times)/cubenumber}s")
 print("average phase 1 completed number per thread",sum(p1)/len(p1),"max",max(p1),"min",min(p1))
 print("average phase 2 completed number per thread",sum(p2)/len(p2),"max",max(p2),"min",min(p2))
-print("phase1/total",sum(p1)/len(p1)/totalnums[phase1step],"\nphase2/phase1",(sum(p1)/len(p1))/(sum(p2)/len(p2)))
+print("phase1/total",sum(p1)/len(p1)/totalnums,"\nphase2/phase1",(sum(p2)/len(p2))/(sum(p1)/len(p1)))
 print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
 if cubenumber<=100:
     print("htm",htms,"\nqtm",qtms)
