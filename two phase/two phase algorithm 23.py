@@ -5,11 +5,9 @@ from itertools import permutations,product,combinations
 
 def getdicts():
     cc,cco,ce,ceo=(0,1,2,3,4,5,6,7),(0,0,0,0,3,3,3,3),(0,1,2,3,4,5,6,7,8,9,10,11),(0,0,0,0,1,1,4,4,3,3,3,3)
-    facetimecorner=[[(2,3,1,0),(3,1,0,2),(1,0,2,3)],[(6,4,2,0),(4,2,0,6),(2,0,6,4)],[(4,5,3,2),(5,3,2,4),(3,2,4,5)],[(6,7,5,4),(7,5,4,6),(5,4,6,7)],[(5,7,1,3),(7,1,3,5),(1,3,5,7)],[(7,6,0,1),(6,0,1,7),(0,1,7,6)]]
-    facetimeedge=[[(1,2,3,0),(2,3,0,1),(3,0,1,2)],[(4,9,5,1),(9,5,1,4),(5,1,4,9)],[(5,10,6,2),(10,6,2,5),(6,2,5,10)],[(9,8,11,10),(8,11,10,9),(11,10,9,8)],[(6,11,7,3),(11,7,3,6),(7,3,6,11)],[(7,8,4,0),(8,4,0,7),(4,0,7,8)]]
     facecorner=[(0,2,3,1),(0,6,4,2),(2,4,5,3),(4,6,7,5),(3,5,7,1),(1,7,6,0)]
     faceedge=[(0,1,2,3),(1,4,9,5),(2,5,10,6),(10,9,8,11),(3,6,11,7),(0,7,8,4)]
-    facetimedirection=[[[0,5,1,3,2,4],[0,4,5,3,1,2],[0,2,4,3,5,1]],[[2,1,3,5,4,0],[3,1,5,0,4,2],[5,1,0,2,4,3]],[[4,0,2,1,3,5],[3,4,2,0,1,5],[1,3,2,4,0,5]],[[0,2,4,3,5,1],[0,4,5,3,1,2],[0,5,1,3,2,4]],[[5,1,0,2,4,3],[3,1,5,0,4,2],[2,1,3,5,4,0]],[[1,3,2,4,0,5],[3,4,2,0,1,5],[4,0,2,1,3,5]]]
+    facetimedirection=[[[0,5,1,3,2,4],[0,4,5,3,1,2]],[[2,1,3,5,4,0],[3,1,5,0,4,2]],[[4,0,2,1,3,5],[3,4,2,0,1,5]],[[0,2,4,3,5,1],[0,4,5,3,1,2]],[[5,1,0,2,4,3],[3,1,5,0,4,2]],[[1,3,2,4,0,5],[3,4,2,0,1,5]]]
     cornerdirection=[(0,5,1),(0,4,5),(0,1,2),(0,2,4),(3,2,1),(3,4,2),(3,1,5),(3,5,4)]
     edgedirection=[(0,5),(0,1),(0,2),(0,4),(1,5),(1,2),(4,2),(4,5),(3,5),(3,1),(3,2),(3,4)]
     cdict,codict,ep4dict,eodict={},{},{},{}
@@ -37,61 +35,29 @@ def getdicts():
         c1,c2,c3,c4=facecorner[f]
         e1,e2,e3,e4=fe=faceedge[f]
         sfe=set(fe)
-        
-        nc1,nc2,nc3,nc4=facetimecorner[f][1]
-        ne1,ne2,ne3,ne4=fte=facetimeedge[f][1]
-        ftd=facetimedirection[f][1]
-        d=cr[f][1]
-        for dc in cdict:
-            a=cdict[dc]
-            if a not in d:
-                c=list(dc)
-                c[c1],c[c2],c[c3],c[c4]=c[nc1],c[nc2],c[nc3],c[nc4]
-                b=cdict[tuple(c)]
-                d[a],d[b]=b,a
-        d=cor[f][1]
-        for dco in codict:
-            a=codict[dco]
-            if a not in d:
-                co=list(dco)
-                co[c1],co[c2],co[c3],co[c4]=ftd[co[nc1]],ftd[co[nc2]],ftd[co[nc3]],ftd[co[nc4]]
-                b=codict[tuple(co)]
-                d[a],d[b]=b,a
-        d=ep4r[f][1]
-        for dep in ep4dict:
-            a=ep4dict[dep]
-            if a not in d:
-                ep=list(dep)
-                for i in [0,1,2,3]:
-                    if ep[i] in sfe:
-                        ep[i]=fe[fte.index(ep[i])]
-                b=ep4dict[tuple(ep)]
-                d[a],d[b]=b,a
-        d=eor[f][1]
-        for deo in eodict:
-            a=eodict[deo]
-            if a not in d:
-                eo=list(deo)
-                eo[e1],eo[e2],eo[e3],eo[e4]=ftd[eo[ne1]],ftd[eo[ne2]],ftd[eo[ne3]],ftd[eo[ne4]]
-                b=eodict[tuple(eo)]
-                d[a],d[b]=b,a
-        
-        nc1,nc2,nc3,nc4=facetimecorner[f][0]
-        ne1,ne2,ne3,ne4=fte=facetimeedge[f][0]
-        ftd=facetimedirection[f][0]
-        d0,d2=cr[f][0],cr[f][2]
+        fte=e2,e3,e4,e1
+        ftd0,ftd1=facetimedirection[f]
+        d0,d1,d2=cr[f]
         for dc in cdict:
             c=list(dc)
-            c[c1],c[c2],c[c3],c[c4]=c[nc1],c[nc2],c[nc3],c[nc4]
+            c[c1],c[c2],c[c3],c[c4]=c[c2],c[c3],c[c4],c[c1]
             a,b=cdict[dc],cdict[tuple(c)]
             d0[a],d2[b]=b,a
-        d0,d2=cor[f][0],cor[f][2]
+            if a not in d1:
+                c[c1],c[c2],c[c3],c[c4]=c[c2],c[c3],c[c4],c[c1]
+                b=cdict[tuple(c)]
+                d1[a],d1[b]=b,a
+        d0,d1,d2=cor[f]
         for dco in codict:
             co=list(dco)
-            co[c1],co[c2],co[c3],co[c4]=ftd[co[nc1]],ftd[co[nc2]],ftd[co[nc3]],ftd[co[nc4]]
+            co[c1],co[c2],co[c3],co[c4]=ftd0[co[c2]],ftd0[co[c3]],ftd0[co[c4]],ftd0[co[c1]]
             a,b=codict[dco],codict[tuple(co)]
             d0[a],d2[b]=b,a
-        d0,d2=ep4r[f][0],ep4r[f][2]
+            if a not in d1:
+                co[c1],co[c2],co[c3],co[c4]=ftd0[co[c2]],ftd0[co[c3]],ftd0[co[c4]],ftd0[co[c1]]
+                b=codict[tuple(co)]
+                d1[a],d1[b]=b,a
+        d0,d1,d2=ep4r[f]
         for dep in ep4dict:
             ep=list(dep)
             for i in [0,1,2,3]:
@@ -99,12 +65,22 @@ def getdicts():
                     ep[i]=fe[fte.index(ep[i])]
             a,b=ep4dict[dep],ep4dict[tuple(ep)]
             d0[a],d2[b]=b,a
-        d0,d2=eor[f][0],eor[f][2]
+            if a not in d1:
+                for i in [0,1,2,3]:
+                    if ep[i] is not dep[i]:
+                        ep[i]=fe[fte.index(ep[i])]
+                b=ep4dict[tuple(ep)]
+                d1[a],d1[b]=b,a
+        d0,d1,d2=eor[f]
         for deo in eodict:
             eo=list(deo)
-            eo[e1],eo[e2],eo[e3],eo[e4]=ftd[eo[ne1]],ftd[eo[ne2]],ftd[eo[ne3]],ftd[eo[ne4]]
+            eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
             a,b=eodict[deo],eodict[tuple(eo)]
             d0[a],d2[b]=b,a
+            if a not in d1:
+                eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
+                b=eodict[tuple(eo)]
+                d1[a],d1[b]=b,a
     ccn,ccon,cen1,cen2,cen3,ceon=cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo]
     cr0,cor0,eor0,ep4r0,cr1,ep4r1=[i[0] for i in cr],[i[0] for i in cor],[i[0] for i in eor],[i[0] for i in ep4r],[i[1] for i in cr],[i[1] for i in ep4r]
     return cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1
@@ -273,11 +249,11 @@ t=time.time()
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t
 print("initialize time",tinit,"s")
-phase1step=6#7
+phase1step=5#7
 dict1step=7#8
 dict2step=8#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
-print("{} + {} + {}".format(phase1step,dict1step,dict2step))
+print(phase1step,"+",dict1step,"+",dict2step)
 tdict0=time.time()
 dict1=getdict1(dict1step)
 tdict1=time.time()
@@ -340,7 +316,7 @@ print("average phase 2 completed number per thread",sum(p2)/len(p2),"max",max(p2
 print("phase1/total",sum(p1)/len(p1)/totalnums,"\nphase2/phase1",(sum(p2)/len(p2))/(sum(p1)/len(p1)))
 print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
 if cubenumber<=100:
-    print("htm",htms,"\nqtm",qtms)
+    print("htm",htms,"\nqtm",qtms,"\nstm",stms)
 print(cubenumber,"cubes")
 if len(htms)>0:
     print("\nhtm average",sum(htms)/len(htms),"range",min(htms),"-",max(htms),"\nhtm     number")
