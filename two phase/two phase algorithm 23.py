@@ -95,8 +95,20 @@ def getdict1(dict1step):
         for cube in predictstate:
             oco,oeo,oe2,oldstep,f1=cube
             oldstep=18*oldstep
-            for f in [0,1,2,3,4,5]:
+            for f in [0,1,2]:
                 if f1 is not f and f1-f!=3:
+                    newstep=oldstep+3*f
+                    nco,neo,ne2=oco,oeo,oe2
+                    corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
+                    for newstep in [newstep+2,newstep+1,newstep]:
+                        nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
+                        key1=ne2//24+neo+nco
+                        if key1 not in dict1:
+                            dict1[key1]=newstep
+                            if step is not dict1step:
+                                newpredictstate.append((nco,neo,ne2,newstep,f))
+            for f in [3,4,5]:
+                if f1 is not f:
                     newstep=oldstep+3*f
                     nco,neo,ne2=oco,oeo,oe2
                     corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
@@ -123,19 +135,17 @@ def getdict2(dict2step):
         eighteen0,eighteen1=eighteen[step-1],eighteen[step]
         for cube in predictstate:
             oc,oe1,oe2,oe3,oldstep,f1=cube
-            for f in [0,3]:
-                if f1 is not f and (f1!=3 or f!=3):
-                    crf0,ep4rf0=cr0[f],ep4r0[f]
-                    nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
-                    for t in [2,1,0]:
-                        nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                        key2=nc+ne3+11880*(ne2+11880*ne1)
-                        if key2 not in dict2:
-                            newstep=oldstep+(3*f+t)*eighteen0
-                            dict2[key2]=newstep+eighteen1
-                            if step is not dict2step:
-                                newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
-            for f in [1,2,4,5]:
+            for f in [4,5]:
+                if f1 is not f:
+                    ep4rf1=ep4r1[f]
+                    nc,ne1,ne2,ne3=cr1[f][oc],ep4rf1[oe1],ep4rf1[oe2],ep4rf1[oe3]
+                    key2=nc+ne3+11880*(ne2+11880*ne1)
+                    if key2 not in dict2:
+                        newstep=oldstep+(3*f+1)*eighteen0
+                        dict2[key2]=newstep+eighteen1
+                        if step is not dict2step:
+                            newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
+            for f in [1,2]:
                 if f1 is not f and f1-f!=3:
                     ep4rf1=ep4r1[f]
                     nc,ne1,ne2,ne3=cr1[f][oc],ep4rf1[oe1],ep4rf1[oe2],ep4rf1[oe3]
@@ -145,6 +155,28 @@ def getdict2(dict2step):
                         dict2[key2]=newstep+eighteen1
                         if step is not dict2step:
                             newpredictstate.append((nc,ne1,ne2,ne3,newstep,f))
+            if f1!=3:
+                crf0,ep4rf0=cr0[3],ep4r0[3]
+                nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
+                for t in [2,1,0]:
+                    nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                    key2=nc+ne3+11880*(ne2+11880*ne1)
+                    if key2 not in dict2:
+                        newstep=oldstep+(9+t)*eighteen0
+                        dict2[key2]=newstep+eighteen1
+                        if step is not dict2step:
+                            newpredictstate.append((nc,ne1,ne2,ne3,newstep,3))
+                if f1!=0:
+                    crf0,ep4rf0=cr0[0],ep4r0[0]
+                    nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
+                    for t in [2,1,0]:
+                        nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                        key2=nc+ne3+11880*(ne2+11880*ne1)
+                        if key2 not in dict2:
+                            newstep=oldstep+t*eighteen0
+                            dict2[key2]=newstep+eighteen1
+                            if step is not dict2step:
+                                newpredictstate.append((nc,ne1,ne2,ne3,newstep,0))
         print("{:<8}{:<16}{:<16}{:<16f}\n".format(step,len(newpredictstate),len(dict2),time.time()-t1),end="")
         predictstate,newpredictstate=newpredictstate,[]
     print("{:<8}{:<16}{:<16}{:<16f}\n".format("total","",len(dict2),time.time()-t0),end="")
@@ -157,8 +189,65 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove):
     while cubes:
         oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
         step,oldstep=1+step,18*oldstep
-        for f in [0,1,2,3,4,5]:
+        for f in [0,1,2]:
             if f is not f1 and f1-f!=3:
+                m1_1,totalnum=oldstep+3*f,3+totalnum
+                crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
+                nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
+                for m1 in [m1_1,m1_1+1,m1_1+2]:
+                    nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                    if step is not phase1step:
+                        cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
+                    if ne2//24+neo+nco in dict1:
+                        phase1num,m1_2,f0,nc1,ne11,ne21,ne31=1+phase1num,dict1[ne2//24+neo+nco],f,nc,ne1,ne2,ne3
+                        while m1_2>=18:
+                            f0,t0,m1,m1_2=(m1_2//3)%6,m1_2%3,18*m1+m1_2%18,m1_2//18
+                            ep4rf0t0=ep4r[f0][t0]
+                            nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
+                        if nc1+ne31+11880*(ne21+11880*ne11) in dict2:
+                            phase2num,m2=1+phase2num,dict2[nc1+ne31+11880*(ne21+11880*ne11)]
+                            l=int(log(m1,18))+int(log(m2,18))
+                            if l<=htm:
+                                solution=(m1-1)*eighteen[int(log(m2,18))]+m2
+                                if solution<minmove:
+                                    minmove=solution
+                                qtmvalue=stmvalue=htm=l
+                                numstr=decodevalue(solution)
+                                for i in range(1,len(numstr),2):
+                                    if numstr[i]=="1":
+                                        qtmvalue+=1
+                                for i in range(0,len(numstr)-2,2):
+                                    if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
+                                        stmvalue-=1
+                                if qtmvalue<qtm:
+                                    qtm=qtmvalue
+                                if stmvalue<stm:
+                                    stm=stmvalue
+                                print("{:<18}{:<6}{:<6}{:<24}{:<14f}1     {:<36}{}\n".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,str(phase2num)+"/"+str(phase1num)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+                                ep4rf01=ep4r1[f0]
+                                nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
+                                if nc1+ne31+11880*(ne21+11880*ne11) in dict2:
+                                    m2=dict2[nc1+ne31+11880*(ne21+11880*ne11)]
+                                    l=int(log(m1,18))+int(log(m2,18))
+                                    if l<=htm:
+                                        solution=(m1-1)*eighteen[int(log(m2,18))]+m2
+                                        if solution<minmove:
+                                            minmove=solution
+                                        qtmvalue=stmvalue=htm=l
+                                        numstr=decodevalue(solution)
+                                        for i in range(1,len(numstr),2):
+                                            if numstr[i]=="1":
+                                                qtmvalue+=1
+                                        for i in range(0,len(numstr)-2,2):
+                                            if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
+                                                stmvalue-=1
+                                        if qtmvalue<qtm:
+                                            qtm=qtmvalue
+                                        if stmvalue<stm:
+                                            stm=stmvalue
+                                        print("{:<18}{:<6}{:<6}{:<24}{:<14f}2     {:<36}{}\n".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,str(phase2num)+"/"+str(phase1num)+"/"+str(totalnum),time.time()-tstart,solution,numstr),end="")
+        for f in [3,4,5]:
+            if f is not f1:
                 m1_1,totalnum=oldstep+3*f,3+totalnum
                 crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
                 nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
@@ -249,9 +338,9 @@ t=time.time()
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t
 print("initialize time",tinit,"s")
-phase1step=5#7
-dict1step=7#8
-dict2step=8#9
+phase1step=7#7
+dict1step=8#8
+dict2step=9#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
 print(phase1step,"+",dict1step,"+",dict2step)
 tdict0=time.time()
@@ -264,7 +353,7 @@ print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 htms,qtms,stms,p1,p2,times,miss=[],[],[],[],[],[],0
 totalnums=sum([round((-(6-3*6**0.5)**n*(-3+6**0.5)+(3*(2+6**0.5))**n*(3+6**0.5))/4) for n in range(phase1step+1)])-1#correct for n<=12, from sum of series OEIS A333298, real should be sum of A080583 from A080601
 n=6
-cubenumber=10
+cubenumber=25
 
 starttime=time.time()
 for i in range(cubenumber):
@@ -298,7 +387,7 @@ for i in range(cubenumber):
         htms.append(htm)
         qtms.append(qtm)
         stms.append(stm)
-        print("\nmin htm",htm,", qtm",qtm,"stm",stm,"solution",minmove,decodevalue(minmove),rotatenumbertostring(decodevalue(minmove)))
+        print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution",minmove,decodevalue(minmove),rotatenumbertostring(decodevalue(minmove)))
         if i<100:
             print("current htm results:",htms)
         print("average htm",sum(htms)/len(htms),"\naverage qtm",sum(qtms)/len(qtms),"\naverage stm",sum(stms)/len(stms))
