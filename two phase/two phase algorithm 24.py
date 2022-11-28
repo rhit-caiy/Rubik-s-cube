@@ -281,9 +281,9 @@ t=time.time()
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t
 print("initialize time",tinit,"s")
-phase1step=7#7
-dict1step=8#8
-dict2step=9#9
+phase1step=8#7
+dict1step=7#8
+dict2step=8#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
 print(phase1step,"+",dict1step,"+",dict2step)
 tdict0=time.time()
@@ -294,9 +294,10 @@ tdict2=time.time()
 print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 
 htms,qtms,stms,times,miss=[],[],[],[],0
-totalnums=sum([round((-(6-3*6**0.5)**n*(-3+6**0.5)+(3*(2+6**0.5))**n*(3+6**0.5))/4) for n in range(phase1step+1)])-1#correct for n<=12, from sum of series OEIS A333298, real should be sum of A080583 from A080601
+#totalnums=sum([round((-(6-3*6**0.5)**n*(-3+6**0.5)+(3*(2+6**0.5))**n*(3+6**0.5))/4) for n in range(phase1step+1)])-1#correct for n<=12, from sum of series OEIS A333298, real should be sum of A080583 from A080601
 n=6
-cubenumber=30
+cubenumber=1
+print(cubenumber,"cubes",n,"threads")
 
 starttime=time.time()
 for i in range(cubenumber):
