@@ -1,6 +1,8 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
-#include <ctime>
+#include <iomanip>
+#include <ctime> 
+#include <cstdlib>
 #include <unordered_map>
 #include <list>
 
@@ -26,6 +28,7 @@ struct dict2cube {
 unordered_map<unsigned int, unsigned long long int> getdict1(int dict1step, unordered_map<unsigned short, unsigned short>* cor0, unordered_map<unsigned short, unsigned short>* eor0, unordered_map<unsigned short, unsigned short>* ep4r0) {
 	unordered_map<unsigned int, unsigned long long int> dict1;
 	cout << "dict1" << endl;
+	cout << setw(8) << "step" << setw(16) << "cubes left" << setw(16) << "dict length" << setw(16) << "time/s" << endl;
 	unsigned short ccon = 0, cen2 = 10200, ceon = 0;
 	dict1cube cd1c = { ccon,ceon,cen2,1,-1 };
 	list<dict1cube> predictstate = { cd1c };
@@ -64,17 +67,18 @@ unordered_map<unsigned int, unsigned long long int> getdict1(int dict1step, unor
 				}
 			}
 		}
-		cout << step << "   " << newpredictstate.size() << "    " << dict1.size() << "    " << (double)(clock() - t1) / CLOCKS_PER_SEC << "s" << endl;
+		cout << setw(8) << step << setw(16) << newpredictstate.size() << setw(16) << dict1.size() << setw(16) << (double)(clock() - t1) / CLOCKS_PER_SEC << "s" << endl;
 		predictstate = newpredictstate;
 		newpredictstate = {};
 	}
-	cout << "dict 1 " << dict1.size() << "  " << (double)(clock() - t0) / CLOCKS_PER_SEC << "s" << endl;
+	cout << setw(8) << "dict 1" << setw(16) <<"" << setw(16) << dict1.size() << setw(16) << (double)(clock() - t0) / CLOCKS_PER_SEC << "s" << endl;
 	return dict1;
 }
 
 unordered_map<unsigned long long int, unsigned long long int> getdict2(int dict2step,unsigned long long* eighteen, unordered_map<unsigned short, unsigned short>* cr0, unordered_map<unsigned short, unsigned short>* ep4r0, unordered_map<unsigned short, unsigned short>* cr1, unordered_map<unsigned short, unsigned short>* ep4r1) {
 	unordered_map<unsigned long long int, unsigned long long int> dict2;
 	cout << "dict2" << endl;
+	cout << setw(8) << "step" << setw(16) << "cubes left" << setw(16) << "dict length" << setw(16) << "time/s" << endl;
 	unsigned short ccn = 0, cen1 = 0, cen2 = 10200, cen3 = 11856;
 	dict2cube cd2c = { ccn,cen1,cen2,cen3,0,-1 };
 	list<dict2cube> predictstate = { cd2c };
@@ -132,12 +136,37 @@ unordered_map<unsigned long long int, unsigned long long int> getdict2(int dict2
 				}
 			}
 		}
-		cout << step << "   " << newpredictstate.size() << "    " << dict2.size() << "    " << (double)(clock() - t1) / CLOCKS_PER_SEC << "s" << endl;
+		cout << setw(8) << step << setw(16) << newpredictstate.size() << setw(16) << dict2.size() << setw(16) << (double)(clock() - t1) / CLOCKS_PER_SEC << "s" << endl;
 		predictstate = newpredictstate;
 		newpredictstate = {};
 	}
-	cout << "dict 2 " << dict2.size() << "  " << (double)(clock() - t0) / CLOCKS_PER_SEC << "s" << endl;
+	cout << setw(8) << "dict 2" << setw(16) << "" << setw(16) << dict2.size() << setw(16) << (double)(clock() - t0) / CLOCKS_PER_SEC << "s" << endl;
 	return dict2;
+}
+
+
+void randomcube(short randomstrings[2][5000]) {
+	srand(time(NULL));
+	short f, t;
+	int a = 1024 + rand() % 1024;
+	for (int i = 0; i < a; i++) {
+		f = rand() % 6;
+		t = rand() % 3;
+		randomstrings[0][2 * i] = f;
+		randomstrings[0][2 * i + 1] = t;
+		randomstrings[1][2 * a - 2 * i - 2] = f;
+		randomstrings[1][2 * a - 2 * i - 1] = 2 - t;
+	}
+	/*
+	for (int i = 0; i < a; i++) {
+		cout << randomstrings[0][2 * i] << randomstrings[0][2 * i + 1];
+	}
+	cout << endl;
+	for (int i = 0; i < a; i++) {
+		cout << randomstrings[1][2 * i] << randomstrings[1][2 * i + 1];
+	}
+	cout << endl;
+	*/
 }
 
 int main() {
@@ -165,11 +194,7 @@ int main() {
 	int edgedirection[12][2] = { {0,5},{0,1},{0,2},{0,4},{1,5},{1,2},{4,2},{4,5},{3,5},{3,1},{3,2},{3,4} };
 
 	unordered_map<int, unsigned short> cdict, codict, ep4dict, eodict;
-
-	cout << sizeof(short) << " " << sizeof(int) << " " << sizeof(long int) << " " << sizeof(long long int) << " " << sizeof(unsigned long long int) << endl;
-
-	unsigned short n = 0;
-	unsigned short n1 = 0;
+	unsigned short n = 0, n1 = 0;
 
 	//cdict
 	for (int i = 0; i < 8; i++) {
@@ -329,7 +354,6 @@ int main() {
 		int* fe = faceedge[f];
 
 		for (short t = 0; t < 3; t++) {
-			cout << f << " " << t << endl;
 			int nc1 = facetimecorner[f][t][0];
 			int nc2 = facetimecorner[f][t][1];
 			int nc3 = facetimecorner[f][t][2];
@@ -442,12 +466,29 @@ int main() {
 		eighteen[i] = 18 * eighteen[i - 1];
 	}
 
-	int dict1step = 7;
-	int dict2step = 8;
+	int dict1step = 8;
+	int dict2step = 9;
 
 	unordered_map<unsigned int, unsigned long long int> dict1 = getdict1(dict1step, cor0, eor0, ep4r0);
 	unordered_map<unsigned long long int, unsigned long long int> dict2 = getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1);
 	
+	int phase1step = 4;
+	int stepshouldbelow = phase1step + dict1step + dict2step + 1;
+	int cubenumber = 1;
+	int threadn = 6;
+
+	for (int i = 0; i < cubenumber; i++) {
+		cout << endl << endl << "cube " << i + 1 << endl;
+		time(&rawtime);
+		info = localtime(&rawtime);
+		strftime(buffer, 64, "%Y-%m-%d %H:%M:%S", info);
+		cout << buffer << endl;
+		cout << "search depth " << phase1step << " + " << dict1step << " + " << dict2step << " = " << stepshouldbelow - 1 << endl;
+
+		short randomstrings[2][5000];
+		randomcube(randomstrings);
+
+	}
 	/*
 	for (const auto& key_value : dict2) {
 		unsigned long long int key = key_value.first;
@@ -456,6 +497,7 @@ int main() {
 	}
 	cout << cr[0][0].at(0) << endl;
 	*/
+	cin.get();
 }
 
 
