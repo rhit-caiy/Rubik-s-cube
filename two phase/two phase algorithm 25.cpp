@@ -1,12 +1,144 @@
 #define _CRT_SECURE_NO_WARNINGS
-#include <stdio.h>
 #include <iostream>
 #include <ctime>
-#include <time.h>
 #include <unordered_map>
 #include <list>
 
 using namespace std;
+
+struct dict1cube {
+	unsigned short co;
+	unsigned short eo;
+	unsigned short e2;
+	unsigned long long oldstep;
+	short f1;
+};
+
+struct dict2cube {
+	unsigned short c;
+	unsigned short e1;
+	unsigned short e2;
+	unsigned short e3;
+	unsigned long long oldstep;
+	short f1;
+};
+
+unordered_map<unsigned int, unsigned long long int> getdict1(int dict1step, unordered_map<unsigned short, unsigned short>* cor0, unordered_map<unsigned short, unsigned short>* eor0, unordered_map<unsigned short, unsigned short>* ep4r0) {
+	unordered_map<unsigned int, unsigned long long int> dict1;
+	cout << "dict1" << endl;
+	unsigned short ccon = 0, cen2 = 10200, ceon = 0;
+	dict1cube cd1c = { ccon,ceon,cen2,1,-1 };
+	list<dict1cube> predictstate = { cd1c };
+	list<dict1cube> newpredictstate;
+	dict1[cen2 / 24 + 495 * (ceon + (unsigned int)2048 * ccon)] = 1;
+	clock_t t0 = clock();
+	
+	unsigned short oco, oeo, oe2, nco, neo, ne2;
+	unsigned long long oldstep, newstep;
+	short f, t, f1;
+	unsigned int key;
+	list<dict1cube>::iterator it;
+	clock_t t1;
+	for (int step = 1; step < dict1step + 1; step++) {
+		t1 = clock();
+		for (it = predictstate.begin(); it != predictstate.end(); it++) {
+			oco = it->co, oeo = it->eo, oe2 = it->e2, oldstep = it->oldstep, f1 = it->f1;
+			oldstep *= 18;
+			for (f = 0; f < 6; f++) {
+				if (f != f1 && f1 - f != 3) {
+					newstep = oldstep + 3 * f + 2;
+					nco = oco, neo = oeo, ne2 = oe2;
+					for (t = 0; t < 3; t++) {
+						nco = cor0[f].at(nco);
+						neo = eor0[f].at(neo);
+						ne2 = ep4r0[f].at(ne2);
+						key = ne2 / 24 + 495 * (neo + (unsigned int)2048 * nco);
+						if (!dict1[key]) {
+							dict1[key] = newstep;
+							if (step != dict1step) {
+								newpredictstate.push_back({ nco,neo,ne2,newstep,f });
+							}
+						}
+						newstep--;
+					}
+				}
+			}
+		}
+		cout << step << "   " << newpredictstate.size() << "    " << dict1.size() << "    " << (double)(clock() - t1) / CLOCKS_PER_SEC << "s" << endl;
+		predictstate = newpredictstate;
+		newpredictstate = {};
+	}
+	cout << "dict 1 " << dict1.size() << "  " << (double)(clock() - t0) / CLOCKS_PER_SEC << "s" << endl;
+	return dict1;
+}
+
+unordered_map<unsigned long long int, unsigned long long int> getdict2(int dict2step,unsigned long long* eighteen, unordered_map<unsigned short, unsigned short>* cr0, unordered_map<unsigned short, unsigned short>* ep4r0, unordered_map<unsigned short, unsigned short>* cr1, unordered_map<unsigned short, unsigned short>* ep4r1) {
+	unordered_map<unsigned long long int, unsigned long long int> dict2;
+	cout << "dict2" << endl;
+	unsigned short ccn = 0, cen1 = 0, cen2 = 10200, cen3 = 11856;
+	dict2cube cd2c = { ccn,cen1,cen2,cen3,0,-1 };
+	list<dict2cube> predictstate = { cd2c };
+	list<dict2cube> newpredictstate;
+	dict2[cen3 + 11880 * (cen2 + 11880 * (cen1 + (unsigned long long)11880 * ccn))] = 1;
+	clock_t t0 = clock();
+
+	unsigned short oc, oe1, oe2, oe3, nc, ne1, ne2, ne3;
+	unsigned long long oldstep, newstep;
+	short t, f1;
+	unsigned long long key;
+	list<dict2cube>::iterator it;
+	clock_t t1;
+	for (int step = 1; step < dict2step + 1; step++) {
+		t1 = clock();
+		unsigned long long eighteen0 = eighteen[step - 1], eighteen1 = eighteen[step];
+		for (it = predictstate.begin(); it != predictstate.end(); it++) {
+			oc = it->c, oe1 = it->e1, oe2 = it->e2, oe3 = it->e3, oldstep = it->oldstep, f1 = it->f1;
+			for (short f : {0, 3}) {
+				if (f != f1 && (f1 != 3 || f != 3)) {
+					nc = oc;
+					ne1 = oe1;
+					ne2 = oe2;
+					ne3 = oe3;
+					for (t = 2; t > -1; t--) {
+						nc = cr0[f].at(nc);
+						ne1 = ep4r0[f].at(ne1);
+						ne2 = ep4r0[f].at(ne2);
+						ne3 = ep4r0[f].at(ne3);
+						key = ne3 + 11880 * (ne2 + 11880 * (ne1 + (unsigned long long)11880 * nc));
+						if (!dict2[key]) {
+							newstep = oldstep + (3 * f + t) * eighteen0;
+							dict2[key] = newstep + eighteen1;
+							if (step != dict2step) {
+								newpredictstate.push_back({ nc,ne1,ne2,ne3,newstep,f });
+							}
+						}
+					}
+				}
+			}
+			for (short f : {1, 2, 4, 5}) {
+				if (f != f1 && f1 - f != 3) {
+					nc = cr1[f].at(oc);
+					ne1 = ep4r1[f].at(oe1);
+					ne2 = ep4r1[f].at(oe2);
+					ne3 = ep4r1[f].at(oe3);
+					key = ne3 + 11880 * (ne2 + 11880 * (ne1 + (unsigned long long)11880 * nc));
+					if (!dict2[key]) {
+						newstep = oldstep + (3 * f + 1) * eighteen0;
+						dict2[key] = newstep + eighteen1;
+						if (step != dict2step) {
+							newpredictstate.push_back({ nc,ne1,ne2,ne3,newstep,f });
+						}
+					}
+				}
+			}
+		}
+		cout << step << "   " << newpredictstate.size() << "    " << dict2.size() << "    " << (double)(clock() - t1) / CLOCKS_PER_SEC << "s" << endl;
+		predictstate = newpredictstate;
+		newpredictstate = {};
+	}
+	cout << "dict 2 " << dict2.size() << "  " << (double)(clock() - t0) / CLOCKS_PER_SEC << "s" << endl;
+	return dict2;
+}
 
 int main() {
 	time_t rawtime;
@@ -17,38 +149,29 @@ int main() {
 	strftime(buffer, 64, "%Y-%m-%d %H:%M:%S", info);
 	cout << buffer << endl;
 
-
-	clock_t t1, t2;
-	t1 = clock();
-	for (int i = 0; i < 300000000; i++) {
-		continue;
-	}
-	t2 = clock();
-	cout << (double)(t2 - t1) / CLOCKS_PER_SEC << endl;
-
 	clock_t tinit = clock();
 
-    int cc[8] = { 0,1,2,3,4,5,6,7 };
-    int cco[8] = { 0,0,0,0,3,3,3,3 };
-    int ce[12] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
-    int ceo[12] = { 0,0,0,0,1,1,4,4,3,3,3,3 };
+	int cc[8] = { 0,1,2,3,4,5,6,7 };
+	int cco[8] = { 0,0,0,0,3,3,3,3 };
+	int ce[12] = { 0,1,2,3,4,5,6,7,8,9,10,11 };
+	int ceo[12] = { 0,0,0,0,1,1,4,4,3,3,3,3 };
 
-    int facetimecorner[6][3][4] = { {{2,3,1,0},{3,1,0,2},{1,0,2,3}},{{6,4,2,0},{4,2,0,6},{2,0,6,4}},{{4,5,3,2},{5,3,2,4},{3,2,4,5}},{{6,7,5,4},{7,5,4,6},{5,4,6,7}},{{5,7,1,3},{7,1,3,5},{1,3,5,7}},{{7,6,0,1},{6,0,1,7},{0,1,7,6}} };  
-    int facetimeedge[6][3][4] = { {{1,2,3,0},{2,3,0,1},{3,0,1,2}},{{4,9,5,1},{9,5,1,4},{5,1,4,9}},{{5,10,6,2},{10,6,2,5},{6,2,5,10}},{{9,8,11,10},{8,11,10,9},{11,10,9,8}},{{6,11,7,3},{11,7,3,6},{7,3,6,11}},{{7,8,4,0},{8,4,0,7},{4,0,7,8}} };
-    int facecorner[6][4] = { {0,2,3,1},{0,6,4,2},{2,4,5,3},{4,6,7,5},{3,5,7,1},{1,7,6,0} };
-    int faceedge[6][4] = { {0,1,2,3},{1,4,9,5},{2,5,10,6},{10,9,8,11},{3,6,11,7},{0,7,8,4} };
-    int facetimedirection[6][3][6] = { {{0,5,1,3,2,4},{0,4,5,3,1,2},{0,2,4,3,5,1}},{{2,1,3,5,4,0},{3,1,5,0,4,2},{5,1,0,2,4,3}},{{4,0,2,1,3,5},{3,4,2,0,1,5},{1,3,2,4,0,5}},{{0,2,4,3,5,1},{0,4,5,3,1,2},{0,5,1,3,2,4}},{{5,1,0,2,4,3},{3,1,5,0,4,2},{2,1,3,5,4,0}},{{1,3,2,4,0,5},{3,4,2,0,1,5},{4,0,2,1,3,5}} };
-    int cornerdirection[8][3] = { {0,5,1},{0,4,5},{0,1,2},{0,2,4},{3,2,1},{3,4,2},{3,1,5},{3,5,4} };
-    int edgedirection[12][2] = { {0,5},{0,1},{0,2},{0,4},{1,5},{1,2},{4,2},{4,5},{3,5},{3,1},{3,2},{3,4} };
+	int facetimecorner[6][3][4] = { {{2,3,1,0},{3,1,0,2},{1,0,2,3}},{{6,4,2,0},{4,2,0,6},{2,0,6,4}},{{4,5,3,2},{5,3,2,4},{3,2,4,5}},{{6,7,5,4},{7,5,4,6},{5,4,6,7}},{{5,7,1,3},{7,1,3,5},{1,3,5,7}},{{7,6,0,1},{6,0,1,7},{0,1,7,6}} };
+	int facetimeedge[6][3][4] = { {{1,2,3,0},{2,3,0,1},{3,0,1,2}},{{4,9,5,1},{9,5,1,4},{5,1,4,9}},{{5,10,6,2},{10,6,2,5},{6,2,5,10}},{{9,8,11,10},{8,11,10,9},{11,10,9,8}},{{6,11,7,3},{11,7,3,6},{7,3,6,11}},{{7,8,4,0},{8,4,0,7},{4,0,7,8}} };
+	int facecorner[6][4] = { {0,2,3,1},{0,6,4,2},{2,4,5,3},{4,6,7,5},{3,5,7,1},{1,7,6,0} };
+	int faceedge[6][4] = { {0,1,2,3},{1,4,9,5},{2,5,10,6},{10,9,8,11},{3,6,11,7},{0,7,8,4} };
+	int facetimedirection[6][3][6] = { {{0,5,1,3,2,4},{0,4,5,3,1,2},{0,2,4,3,5,1}},{{2,1,3,5,4,0},{3,1,5,0,4,2},{5,1,0,2,4,3}},{{4,0,2,1,3,5},{3,4,2,0,1,5},{1,3,2,4,0,5}},{{0,2,4,3,5,1},{0,4,5,3,1,2},{0,5,1,3,2,4}},{{5,1,0,2,4,3},{3,1,5,0,4,2},{2,1,3,5,4,0}},{{1,3,2,4,0,5},{3,4,2,0,1,5},{4,0,2,1,3,5}} };
+	int cornerdirection[8][3] = { {0,5,1},{0,4,5},{0,1,2},{0,2,4},{3,2,1},{3,4,2},{3,1,5},{3,5,4} };
+	int edgedirection[12][2] = { {0,5},{0,1},{0,2},{0,4},{1,5},{1,2},{4,2},{4,5},{3,5},{3,1},{3,2},{3,4} };
 
-    unordered_map<int, unsigned short> cdict, codict, ep4dict, eodict;
+	unordered_map<int, unsigned short> cdict, codict, ep4dict, eodict;
 
-    cout << sizeof(short) << " " << sizeof(int) << " " << sizeof(long int) << " " << sizeof(long long int) << " " << sizeof(unsigned long long int)<<endl;
+	cout << sizeof(short) << " " << sizeof(int) << " " << sizeof(long int) << " " << sizeof(long long int) << " " << sizeof(unsigned long long int) << endl;
 
-    unsigned short n = 0;
+	unsigned short n = 0;
 	unsigned short n1 = 0;
 
-    //cdict
+	//cdict
 	for (int i = 0; i < 8; i++) {
 		for (int j = 0; j < 8; j++) {
 			if (i == j) {
@@ -78,7 +201,7 @@ int main() {
 									if (i == p || j == p || k == p || l == p || m == p || n == p || o == p) {
 										continue;
 									}
-									cdict[((((((i * 8 + j) * 8 + k) * 8 + l) * 8 + m) * 8 + n) * 8 + o) * 8 + p]=n1;
+									cdict[((((((i * 8 + j) * 8 + k) * 8 + l) * 8 + m) * 8 + n) * 8 + o) * 8 + p] = n1;
 									n1++;
 								}
 							}
@@ -88,7 +211,7 @@ int main() {
 			}
 		}
 	}
-	cout<<"cdict " << cdict.size() << endl;
+	cout << "cdict " << cdict.size() << endl;
 	/*
 	cout << cdict.at(key) << endl;
 	for (const auto& key_value : cdict) {
@@ -120,7 +243,7 @@ int main() {
 		}
 	}
 	cout << "codict " << codict.size() << endl;
-	
+
 
 	//ep4dict
 	n1 = 0;
@@ -158,14 +281,6 @@ int main() {
 		}
 	}
 	cout << "ep4dict " << ep4dict.size() << endl;
-
-	/*
-	for (const auto& key_value : ep4dict) {
-		int key = key_value.first;
-		int value = key_value.second;
-		cout << key << " - " << value << endl;
-	}
-	*/
 
 	//eodict
 	n1 = 0;
@@ -229,7 +344,7 @@ int main() {
 			unordered_map<unsigned short, unsigned short> cmap;
 			for (const auto& key_value : cdict) {
 				int key = key_value.first;
-				short c[8],dc[8];
+				short c[8], dc[8];
 				for (int i = 7; i >= 0; i--) {
 					int re = key % 8;
 					c[i] = re;
@@ -241,7 +356,7 @@ int main() {
 				c[c3] = dc[nc3];
 				c[c4] = dc[nc4];
 
-				cmap[cdict.at(((((((c[0] * 8 + c[1]) * 8 + c[2]) * 8 + c[3]) * 8 + c[4]) * 8 + c[5]) * 8 + c[6]) * 8 + c[7])] = key_value.second;
+				cmap[key_value.second] = cdict.at(((((((c[0] * 8 + c[1]) * 8 + c[2]) * 8 + c[3]) * 8 + c[4]) * 8 + c[5]) * 8 + c[6]) * 8 + c[7]);
 			}
 			cr[f][t] = cmap;
 
@@ -260,7 +375,7 @@ int main() {
 				co[c3] = ftd[dco[nc3]];
 				co[c4] = ftd[dco[nc4]];
 
-				comap[codict.at(((((((co[0] * 6 + co[1]) * 6 + co[2]) * 6 + co[3]) * 6 + co[4]) * 6 + co[5]) * 6 + co[6]) * 6 + co[7])] = key_value.second;
+				comap[key_value.second] = codict.at(((((((co[0] * 6 + co[1]) * 6 + co[2]) * 6 + co[3]) * 6 + co[4]) * 6 + co[5]) * 6 + co[6]) * 6 + co[7]);
 			}
 			cor[f][t] = comap;
 
@@ -279,7 +394,7 @@ int main() {
 				eo[e3] = ftd[deo[ne3]];
 				eo[e4] = ftd[deo[ne4]];
 
-				eomap[eodict.at(((((((((((eo[0] * 6 + eo[1]) * 6 + eo[2]) * 6 + eo[3]) * 6 + eo[4]) * 6 + eo[5]) * 6 + eo[6]) * 6 + eo[7]) * 6 + eo[8]) * 6 + eo[9]) * 6 + eo[10]) * 6 + eo[11])] = key_value.second;
+				eomap[key_value.second] = eodict.at(((((((((((eo[0] * 6 + eo[1]) * 6 + eo[2]) * 6 + eo[3]) * 6 + eo[4]) * 6 + eo[5]) * 6 + eo[6]) * 6 + eo[7]) * 6 + eo[8]) * 6 + eo[9]) * 6 + eo[10]) * 6 + eo[11]);
 			}
 			eor[f][t] = eomap;
 
@@ -299,14 +414,14 @@ int main() {
 					key /= 12;
 				}
 				//cout << key_value.second << endl;
-				ep4map[ep4dict.at(((ep4[0]*12+ep4[1])*12+ep4[2])*12+ep4[3])] = key_value.second;
+				ep4map[key_value.second] = ep4dict.at(((ep4[0] * 12 + ep4[1]) * 12 + ep4[2]) * 12 + ep4[3]);
 			}
 			ep4r[f][t] = ep4map;
 		}
 
 	}
 	tinit = clock() - tinit;
-	cout <<"initial time " << (double)tinit / CLOCKS_PER_SEC << "s" << endl;
+	cout << "initial time " << (double)tinit / CLOCKS_PER_SEC << "s" << endl;
 
 	time(&rawtime);
 	info = localtime(&rawtime);
@@ -314,23 +429,33 @@ int main() {
 	cout << buffer << endl;
 
 
-	unordered_map<unsigned short, unsigned short> cr0[3] = { cr[0][0],cr[1][0],cr[2][0] };
-	unordered_map<unsigned short, unsigned short> cor0[3] = { cor[0][0],cor[1][0],cor[2][0] };
-	unordered_map<unsigned short, unsigned short> eor0[3] = { eor[0][0],eor[1][0],eor[2][0] };
-	unordered_map<unsigned short, unsigned short> ep4r0[3] = { ep4r[0][0],ep4r[1][0],ep4r[2][0] };
-	unordered_map<unsigned short, unsigned short> cr1[3] = { cr[0][1],cr[1][1],cr[2][1] };
-	unordered_map<unsigned short, unsigned short> ep4r1[3] = { ep4r[0][1],ep4r[1][1],ep4r[2][1] };
-	int ccn=0, ccon=0, cen1=0, cen2=10200, cen3=11856, ceon=0;
+	unordered_map<unsigned short, unsigned short> cr0[6] = { cr[0][0],cr[1][0],cr[2][0],cr[3][0],cr[4][0],cr[5][0] };
+	unordered_map<unsigned short, unsigned short> cor0[6] = { cor[0][0],cor[1][0],cor[2][0],cor[3][0],cor[4][0],cor[5][0] };
+	unordered_map<unsigned short, unsigned short> eor0[6] = { eor[0][0],eor[1][0],eor[2][0],eor[3][0],eor[4][0],eor[5][0] };
+	unordered_map<unsigned short, unsigned short> ep4r0[6] = { ep4r[0][0],ep4r[1][0],ep4r[2][0],ep4r[3][0],ep4r[4][0],ep4r[5][0] };
+	unordered_map<unsigned short, unsigned short> cr1[6] = { cr[0][1],cr[1][1],cr[2][1],cr[3][1],cr[4][1],cr[5][1] };
+	unordered_map<unsigned short, unsigned short> ep4r1[6] = { ep4r[0][1],ep4r[1][1],ep4r[2][1],ep4r[3][1],ep4r[4][1],ep4r[5][1] };
+	unsigned short ccn = 0, ccon = 0, cen1 = 0, cen2 = 10200, cen3 = 11856, ceon = 0;
 
-	int dict1step = 1;
-	int dict2step = 1;
+	unsigned long long eighteen[16] = { 1 };
+	for (int i = 1; i <= 15; i++) {
+		eighteen[i] = 18 * eighteen[i - 1];
+	}
 
-	//dict1 unsigned int->unsigned long long int
-	//dict2 unsigned long long int->unsigned long long int
-	unordered_map<unsigned int, unsigned long long int> dict1;
-	cout << "dict1" << endl;
-	list<int> predictstate;
+	int dict1step = 7;
+	int dict2step = 8;
 
-
+	unordered_map<unsigned int, unsigned long long int> dict1 = getdict1(dict1step, cor0, eor0, ep4r0);
+	unordered_map<unsigned long long int, unsigned long long int> dict2 = getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1);
+	
+	/*
+	for (const auto& key_value : dict2) {
+		unsigned long long int key = key_value.first;
+		unsigned long long int value = key_value.second;
+		cout << key << " - " << value << endl;
+	}
+	cout << cr[0][0].at(0) << endl;
+	*/
 }
+
 
