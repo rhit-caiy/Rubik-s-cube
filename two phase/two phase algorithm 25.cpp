@@ -25,6 +25,15 @@ struct dict2cube {
 	short f1;
 };
 
+struct cubepack {
+	unsigned short c;
+	unsigned short co;
+	unsigned short eo;
+	unsigned short e1;
+	unsigned short e2;
+	unsigned short e3;
+};
+
 unordered_map<unsigned int, unsigned long long int> getdict1(int dict1step, unordered_map<unsigned short, unsigned short>* cor0, unordered_map<unsigned short, unsigned short>* eor0, unordered_map<unsigned short, unsigned short>* ep4r0) {
 	unordered_map<unsigned int, unsigned long long int> dict1;
 	cout << "dict1" << endl;
@@ -145,10 +154,9 @@ unordered_map<unsigned long long int, unsigned long long int> getdict2(int dict2
 }
 
 
-void randomcube(short randomstrings[2][5000]) {
+void randomcube(short randomstrings[2][5000],int a) {
 	srand(time(NULL));
 	short f, t;
-	int a = 1024 + rand() % 1024;
 	for (int i = 0; i < a; i++) {
 		f = rand() % 6;
 		t = rand() % 3;
@@ -157,16 +165,25 @@ void randomcube(short randomstrings[2][5000]) {
 		randomstrings[1][2 * a - 2 * i - 2] = f;
 		randomstrings[1][2 * a - 2 * i - 1] = 2 - t;
 	}
-	/*
-	for (int i = 0; i < a; i++) {
-		cout << randomstrings[0][2 * i] << randomstrings[0][2 * i + 1];
+}
+
+void getcubewithbase(cubepack unsolvedcubes[6], short randomstrings[2][5000], int a, unordered_map<unsigned short, unsigned short> cr[6][3], unordered_map<unsigned short, unsigned short> cor[6][3], unordered_map<unsigned short, unsigned short> ep4r[6][3], unordered_map<unsigned short, unsigned short> eor[6][3]) {
+	int directions[3][6] = { {0, 1, 2, 3, 4, 5},{1, 2, 0, 4, 5, 3},{2, 0, 1, 5, 3, 4 } };
+	for (int i = 0; i < 6; i++) {
+		int* direction = directions[i % 3];
+		unsigned short c = 0, co = 0, eo = 0, e1 = 0, e2 = 10200, e3 = 11856;
+		for (int j = 0; j < a; j++) {
+			short f = direction[randomstrings[i / 3][2 * j]];
+			short t = randomstrings[i / 3][2 * j + 1];
+			c = cr[f][t].at(c);
+			co = cor[f][t].at(co);
+			eo = eor[f][t].at(eo);
+			e1 = ep4r[f][t].at(e1);
+			e2 = ep4r[f][t].at(e2);
+			e3 = ep4r[f][t].at(e3);
+		}
+		unsolvedcubes[i] = { c,co,eo,e1,e2,e3 };
 	}
-	cout << endl;
-	for (int i = 0; i < a; i++) {
-		cout << randomstrings[1][2 * i] << randomstrings[1][2 * i + 1];
-	}
-	cout << endl;
-	*/
 }
 
 int main() {
@@ -268,7 +285,6 @@ int main() {
 		}
 	}
 	cout << "codict " << codict.size() << endl;
-
 
 	//ep4dict
 	n1 = 0;
@@ -447,12 +463,6 @@ int main() {
 	tinit = clock() - tinit;
 	cout << "initial time " << (double)tinit / CLOCKS_PER_SEC << "s" << endl;
 
-	time(&rawtime);
-	info = localtime(&rawtime);
-	strftime(buffer, 64, "%Y-%m-%d %H:%M:%S", info);
-	cout << buffer << endl;
-
-
 	unordered_map<unsigned short, unsigned short> cr0[6] = { cr[0][0],cr[1][0],cr[2][0],cr[3][0],cr[4][0],cr[5][0] };
 	unordered_map<unsigned short, unsigned short> cor0[6] = { cor[0][0],cor[1][0],cor[2][0],cor[3][0],cor[4][0],cor[5][0] };
 	unordered_map<unsigned short, unsigned short> eor0[6] = { eor[0][0],eor[1][0],eor[2][0],eor[3][0],eor[4][0],eor[5][0] };
@@ -466,13 +476,13 @@ int main() {
 		eighteen[i] = 18 * eighteen[i - 1];
 	}
 
-	int dict1step = 8;
-	int dict2step = 9;
+	int dict1step = 7;
+	int dict2step = 8;
 
 	unordered_map<unsigned int, unsigned long long int> dict1 = getdict1(dict1step, cor0, eor0, ep4r0);
 	unordered_map<unsigned long long int, unsigned long long int> dict2 = getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1);
 	
-	int phase1step = 4;
+	int phase1step = 5;
 	int stepshouldbelow = phase1step + dict1step + dict2step + 1;
 	int cubenumber = 1;
 	int threadn = 6;
@@ -486,17 +496,26 @@ int main() {
 		cout << "search depth " << phase1step << " + " << dict1step << " + " << dict2step << " = " << stepshouldbelow - 1 << endl;
 
 		short randomstrings[2][5000];
-		randomcube(randomstrings);
-
+		srand(time(NULL));
+		int a = 1024 + rand() % 1024;
+		cout << "random with " << a << " moves" << endl;
+		randomcube(randomstrings,a);
+		cubepack unsolvedcubes[6];
+		getcubewithbase(unsolvedcubes,randomstrings, a, cr, cor, ep4r, eor);
+		cout << "finish solve cube " << i+1 << endl;
 	}
 	/*
+	long long size = 0;
 	for (const auto& key_value : dict2) {
-		unsigned long long int key = key_value.first;
-		unsigned long long int value = key_value.second;
-		cout << key << " - " << value << endl;
+		//unsigned int key = key_value.first;
+		//unsigned long long int value = key_value.second;
+		size += sizeof(key_value);
+		//cout << key << " - " << value << endl;
 	}
-	cout << cr[0][0].at(0) << endl;
+	cout << "dict2 size: " << size << endl;
+	cout << sizeof(int*) <<"  " <<sizeof(int)<<"  "<<sizeof(long long int) << endl;
 	*/
+
 	cin.get();
 }
 
