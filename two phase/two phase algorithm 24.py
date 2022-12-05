@@ -184,7 +184,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
 
 def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr,ep4r,dict1,dict2):
     tstart=time.time()
-    print("{}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(threadid),"htm","qtm","stm","time/s","type","solution"))
+    print("{}\nc={} co={} eo={} e1={} e2={} e3={}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(threadid),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
     cubes=[(c,co,eo,e1,e2,e3,1,0,-1)]
     while cubes:
         oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
@@ -281,7 +281,7 @@ t=time.time()
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=getdicts()
 tinit=time.time()-t
 print("initialize time",tinit,"s")
-phase1step=8#7
+phase1step=5#7
 dict1step=7#8
 dict2step=8#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
@@ -296,7 +296,7 @@ print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
 htms,qtms,stms,times,miss=[],[],[],[],0
 #totalnums=sum([round((-(6-3*6**0.5)**n*(-3+6**0.5)+(3*(2+6**0.5))**n*(3+6**0.5))/4) for n in range(phase1step+1)])-1#correct for n<=12, from sum of series OEIS A333298, real should be sum of A080583 from A080601
 n=6
-cubenumber=1
+cubenumber=100
 print(cubenumber,"cubes",n,"threads")
 
 starttime=time.time()
