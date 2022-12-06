@@ -7,7 +7,6 @@
 #include <unordered_map>
 #include <list>
 #include <stack>
-
 using namespace std;
 
 const double log18 = log(18);
@@ -90,7 +89,7 @@ unordered_map<unsigned int, unsigned long long int> getdict1(int dict1step, unor
 						neo = eor0[f].at(neo);
 						ne2 = ep4r0[f].at(ne2);
 						key = ne2 / 24 + 495 * (neo + (unsigned int)2048 * nco);
-						if (!dict1.count(key)) {//!dict1[key]
+						if (!dict1.count(key)) {
 							dict1[key] = newstep;
 							if (step != dict1step) {
 								newpredictstate.push_back({ nco,neo,ne2,newstep,f });
@@ -105,6 +104,7 @@ unordered_map<unsigned int, unsigned long long int> getdict1(int dict1step, unor
 		predictstate = newpredictstate;
 		newpredictstate = {};
 	}
+	dict1.erase(cen2 / 24 + 495 * (ceon + (unsigned int)2048 * ccon));
 	cout << setw(8) << "dict 1" << setw(16) <<"" << setw(16) << dict1.size() << setw(16) << (double)(clock() - t0) / CLOCKS_PER_SEC << "s" << endl;
 	return dict1;
 }
@@ -212,7 +212,7 @@ void getcubewithbase(cubepack unsolvedcubes[6], short randomstrings[2][5000], in
 	}
 }
 
-solvereturn solve(cubepack cubepack,int threadid,int htm,int qtm,int stm,int phase1step, unordered_map<unsigned short, unsigned short> cr0[6], unordered_map<unsigned short, unsigned short> cor0[6], unordered_map<unsigned short, unsigned short> eor0[6], unordered_map<unsigned short, unsigned short> ep4r0[6], unordered_map<unsigned short, unsigned short> cr1[6], unordered_map<unsigned short, unsigned short> ep4r1[6], unordered_map<unsigned short, unsigned short> cr[6][3], unordered_map<unsigned short, unsigned short> ep4r[6][3], unordered_map<unsigned short, unsigned short> eor[6][3], unordered_map<unsigned int, unsigned long long int>* dict1, unordered_map<unsigned long long int, unsigned long long int>* dict2) {
+solvereturn solve(cubepack cubepack, short threadid, short htm, short qtm, short stm, short phase1step, unordered_map<unsigned short, unsigned short> cr0[6], unordered_map<unsigned short, unsigned short> cor0[6], unordered_map<unsigned short, unsigned short> eor0[6], unordered_map<unsigned short, unsigned short> ep4r0[6], unordered_map<unsigned short, unsigned short> cr1[6], unordered_map<unsigned short, unsigned short> ep4r1[6], unordered_map<unsigned short, unsigned short> cr[6][3], unordered_map<unsigned short, unsigned short> ep4r[6][3], unordered_map<unsigned short, unsigned short> eor[6][3], unordered_map<unsigned int, unsigned long long int>* dict1, unordered_map<unsigned long long int, unsigned long long int>* dict2) {
 	clock_t tstart = clock();
 	unsigned short c = cubepack.c, co = cubepack.co, eo = cubepack.eo, e1 = cubepack.e1, e2 = cubepack.e2, e3 = cubepack.e3;
 	cout << "thread " << threadid << endl << "c=" << c << " co=" << co << " eo=" << eo << " e1=" << e1 << " e2=" << e2 << " e3=" << e3 << endl;
@@ -226,6 +226,7 @@ solvereturn solve(cubepack cubepack,int threadid,int htm,int qtm,int stm,int pha
 	unsigned long long int key2;
 	short step, f1, f0, t0, l;
 	int totalnum=1;
+	unsigned long long minmovep1=1, minmovep2=1;
 	unordered_map<unsigned short, unsigned short> *crf0, *corf0, *eorf0, *ep4rf0, *ep4rf0t0, *ep4rf01;
 	while (!cubes.empty()) {
 		tempcube=cubes.top();
@@ -242,8 +243,6 @@ solvereturn solve(cubepack cubepack,int threadid,int htm,int qtm,int stm,int pha
 				nc = oc, nco = oco, neo = oeo, ne1 = oe1, ne2 = oe2, ne3 = oe3;
 				for (short t = 0; t < 3; t++) {
 					m1 = m1_1 + t;
-					//ep4rf0t0 = &(ep4r0[f]);
-					//nc,nco,neo,ne1,ne2,ne3
 					nc = crf0->at(nc);
 					nco = corf0->at(nco);
 					neo = eorf0->at(neo);
@@ -264,7 +263,6 @@ solvereturn solve(cubepack cubepack,int threadid,int htm,int qtm,int stm,int pha
 							t0 = m1_2 % 3;
 							m1 = 18 * m1 + 3 * f0 + t0;
 							m1_2 /= 18;
-							//nc1,ne11,ne21,ne31
 							nc1 = cr[f0][t0].at(nc1);
 							ep4rf0t0 = &ep4r[f0][t0];
 							ne11 = ep4rf0t0->at(ne11);
@@ -277,34 +275,58 @@ solvereturn solve(cubepack cubepack,int threadid,int htm,int qtm,int stm,int pha
 							l = (short)(log(m1) / log18) + (short)(log(m2) / log18);
 							if (l <= htm) {
 								htm = l;
-								cout << threadid << "   " << htm <<" = "<<step << " + " << (short)(log(m1) / log18) - (short)(log(m1_1) / log18) << " + " << (short)(log(m2) / log18) << " type 1  phase1 " << m1 << "  phase2 " << m2 << endl;
+								minmovep1 = m1;
+								minmovep2 = m2;
+								cout << threadid << "   " << htm <<" = "<<step << " + " << (short)(log(m1) / log18) - (short)(log(m1_1) / log18) << " + " << (short)(log(m2) / log18) << "    type 1  phase1 " << m1 << "  phase2 " << m2 << "    ";
+								unsigned long long printm1 = m1;
+								unsigned long long printm2 = m2;
+								while (printm1 >= 18) {
+									cout << printm1 / 3 % 6 << printm1 % 3;
+									printm1 /= 18;
+								}
+								while (printm2 >= 18) {
+									cout << printm2 / 3 % 6 << printm2 % 3;
+									printm2 /= 18;
+								}
+								cout << endl;
+
+								ep4rf01 = &ep4r1[f0];
+								nc1 = cr1[f0].at(nc1);
+								ne1 = ep4rf01->at(ne1);
+								ne2 = ep4rf01->at(ne2);
+								ne3 = ep4rf01->at(ne3);
+								key2 = ne31 + 11880 * (ne21 + 11880 * (ne11 + (unsigned long long)11880 * nc1));
+								if (dict2->count(key2)) {
+									m1 += 2;
+									m2 = dict2->at(key2);
+									l = (short)(log(m1) / log18) + (short)(log(m2) / log18);
+									if (l <= htm) {
+										htm = l;
+										minmovep1 = m1;
+										minmovep2 = m2;
+										cout << threadid << "   " << htm << " = " << step << " + " << (short)(log(m1) / log18) - (short)(log(m1_1) / log18) << " + " << (short)(log(m2) / log18) << "    type 2  phase1 " << m1 << "  phase2 " << m2 << "    ";
+										unsigned long long printm1 = m1;
+										unsigned long long printm2 = m2;
+										while (printm1 >= 18) {
+											cout << printm1 / 3 % 6 << printm1 % 3;
+											printm1 /= 18;
+										}
+										while (printm2 >= 18) {
+											cout << printm2 / 3 % 6 << printm2 % 3;
+											printm2 /= 18;
+										}
+										cout << endl;
+									}
+								}
 							}
 						}
-						ep4rf01 = &ep4r1[f0];
-						nc1 = cr1[f0].at(nc1);
-						ne1 = ep4rf01->at(ne1);
-						ne2 = ep4rf01->at(ne2);
-						ne3 = ep4rf01->at(ne3);
-
-						key2 = ne31 + 11880 * (ne21 + 11880 * (ne11 + (unsigned long long)11880 * nc1));
-						if (dict2->count(key2)) {
-							m1 += 2;
-							m2 = dict2->at(key2);
-							l = (short)(log(m1) / log18) + (short)(log(m2) / log18);
-							if (l <= htm) {
-								htm = l;
-								cout << threadid << "   " << htm << " = " << step << " + " << (short)(log(m1) / log18) - (short)(log(m1_1) / log18) << " + " << (short)(log(m2) / log18) << " type 2  phase1 " << m1 << "  phase2 " << m2 << endl;
-							}
-						}
-
 					}
-					
 				}
 			}
 		}
 	}
 
-	solvereturn sr = { htm,qtm,stm,(short)1,(short)1 };
+	solvereturn sr = { htm,qtm,stm,minmovep1,minmovep2 };
 	cout << "total number of cube verified " << totalnum << endl;
 	cout << "finish thread " << threadid <<"    htm "<<htm << "  qtm " << qtm << "  stm " << stm <<"    time " << (double)(clock()-tstart) / CLOCKS_PER_SEC << "s" << endl << endl;
 	return sr;
@@ -593,12 +615,12 @@ int main(int argc,char** argv) {
 		eighteen[i] = 18 * eighteen[i - 1];
 	}
 
-	int phase1step = 6;
-	int dict1step = 7;
-	int dict2step = 8;
-	int stepshouldbelow = phase1step + dict1step + dict2step + 1;
+	short phase1step = 5;
+	short dict1step = 7;
+	short dict2step = 8;
+	short stepshouldbelow = phase1step + dict1step + dict2step + 1;
 	int cubenumber = 10;
-	int threadn = 6;
+	short threadn = 6;
 
 	if (argc >= 4) {
 		phase1step = atoi(argv[1]);
@@ -608,10 +630,21 @@ int main(int argc,char** argv) {
 	if (argc >= 5) {
 		cubenumber = atoi(argv[4]);
 	}
+	if (argc >= 6) {
+		threadn = atoi(argv[5]);
+	}
 	cout << phase1step << " + " << dict1step << " + " << dict2step << endl;
+	clock_t tdict0, tdict1, tdict2, starttime;
+	tdict0 = clock();
 	unordered_map<unsigned int, unsigned long long int> dict1 = getdict1(dict1step, cor0, eor0, ep4r0);
+	tdict1 = clock();
 	unordered_map<unsigned long long int, unsigned long long int> dict2 = getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1);
-
+	tdict2 = clock();
+	cout << "dicts time " << (double)(tdict2 - tdict0) / CLOCKS_PER_SEC << "s = " << (double)(tdict1 - tdict0) / CLOCKS_PER_SEC << "s + " << (double)(tdict2 - tdict1) / CLOCKS_PER_SEC << "s" << endl;
+	cout << cubenumber << " cubes " << threadn << " threads" << endl;
+	list<short> htms,qtms,stms;
+	
+	starttime = clock();
 	for (int i = 0; i < cubenumber; i++) {
 		cout << endl << endl << "cube " << i + 1 << endl;
 		time(&rawtime);
@@ -628,21 +661,66 @@ int main(int argc,char** argv) {
 		cubepack unsolvedcubes[6];
 		getcubewithbase(unsolvedcubes,randomstrings, a, cr, cor, eor, ep4r);
 
-		int htm = stepshouldbelow;
+		short htm = stepshouldbelow;
+		short qtm = 2 * stepshouldbelow;
+		short stm = stepshouldbelow;
+		unsigned long long minmovep1=0, minmovep2=0;
 		solvereturn sr[6]{};
 		for (int j = 0; j < threadn; j++) {
-			sr[j]=solve(unsolvedcubes[j], j, htm, stepshouldbelow * 2, stepshouldbelow, phase1step, cr0, cor0, eor0, ep4r0, cr1, ep4r1, cr, ep4r, eor, &dict1, &dict2);
+			sr[j]=solve(unsolvedcubes[j], j, htm, qtm, stm, phase1step, cr0, cor0, eor0, ep4r0, cr1, ep4r1, cr, ep4r, eor, &dict1, &dict2);
+			if (htm > sr[j].htm) {
+				minmovep1 = sr[j].minmovep1;
+				minmovep2 = sr[j].minmovep2;
+			}
 			htm = sr[j].htm;
+			qtm = sr[j].qtm;
+			stm = sr[j].stm;
 		}
 		cout << "finish solve cube " << i+1 << endl;
-		cout << "min htm " << htm << endl;
+		if (htm >= stepshouldbelow) {
+			cout << "no solution" << endl;
+		}
+		else {
+			htms.push_back(htm);
+			qtms.push_back(qtm);
+			stms.push_back(stm);
+			cout << "min htm " << htm <<" qtm "<<qtm<<" stm "<<stm << endl<<"solution "<<minmovep1<<"  "<<minmovep2<<"    "<<endl;//decode value
+			while (minmovep1 >= 18) {
+				cout << minmovep1 / 3 % 6 << minmovep1 % 3;
+				minmovep1 /= 18;
+			}
+			while (minmovep2 >= 18) {
+				cout << minmovep2 / 3 % 6 << minmovep2 % 3;
+				minmovep2 /= 18;
+			}
+			cout << endl;
+			double ahtm = 0;
+			for (short s : htms) {
+				ahtm += s;
+			}
+			ahtm = ahtm / htms.size();
+			cout << "average htm " << ahtm<<endl;
+		}
 	}
+
+	cout << "two phase algorithm version 25" << endl << endl;
 
 	time(&rawtime);
 	info = localtime(&rawtime);
 	strftime(buffer, 64, "%Y-%m-%d %H:%M:%S", info);
 	cout << buffer << endl;
 	
+	cout << "average time " << (double)(clock() - starttime) / cubenumber / CLOCKS_PER_SEC << "s" << endl;
+
+	cout << "htm" << endl;
+	double ahtm = 0;
+	for (short s : htms) {
+		ahtm += s;
+		cout << s << " ";
+	}
+	cout << endl;
+	ahtm = ahtm / htms.size();
+	cout << "average htm " << ahtm << endl;
 
 	//cout << "Press enter";
 	//cin.get();
