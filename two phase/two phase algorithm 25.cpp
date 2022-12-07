@@ -59,7 +59,7 @@ struct solvereturn {
 
 unordered_map<unsigned int, unsigned long long int> getdict1(int dict1step, unordered_map<unsigned short, unsigned short>* cor0, unordered_map<unsigned short, unsigned short>* eor0, unordered_map<unsigned short, unsigned short>* ep4r0) {
 	unordered_map<unsigned int, unsigned long long int> dict1;
-	dict1.reserve(20000000);
+	dict1.reserve(14000000);
 	cout << "dict1" << endl;
 	cout << setw(8) << "step" << setw(16) << "cubes left" << setw(16) << "dict length" << setw(16) << "time/s" << endl;
 	unsigned short ccon = 0, cen2 = 10200, ceon = 0;
@@ -111,7 +111,7 @@ unordered_map<unsigned int, unsigned long long int> getdict1(int dict1step, unor
 
 unordered_map<unsigned long long int, unsigned long long int> getdict2(int dict2step,unsigned long long* eighteen, unordered_map<unsigned short, unsigned short>* cr0, unordered_map<unsigned short, unsigned short>* ep4r0, unordered_map<unsigned short, unsigned short>* cr1, unordered_map<unsigned short, unsigned short>* ep4r1) {
 	unordered_map<unsigned long long int, unsigned long long int> dict2;
-	dict2.reserve(10000000);
+	dict2.reserve(6000000);
 	cout << "dict2" << endl;
 	cout << setw(8) << "step" << setw(16) << "cubes left" << setw(16) << "dict length" << setw(16) << "time/s" << endl;
 	unsigned short ccn = 0, cen1 = 0, cen2 = 10200, cen3 = 11856;
@@ -215,7 +215,7 @@ void getcubewithbase(cubepack unsolvedcubes[6], short randomstrings[2][5000], in
 solvereturn solve(cubepack cubepack, short threadid, short htm, short qtm, short stm, short phase1step, unordered_map<unsigned short, unsigned short> cr0[6], unordered_map<unsigned short, unsigned short> cor0[6], unordered_map<unsigned short, unsigned short> eor0[6], unordered_map<unsigned short, unsigned short> ep4r0[6], unordered_map<unsigned short, unsigned short> cr1[6], unordered_map<unsigned short, unsigned short> ep4r1[6], unordered_map<unsigned short, unsigned short> cr[6][3], unordered_map<unsigned short, unsigned short> ep4r[6][3], unordered_map<unsigned short, unsigned short> eor[6][3], unordered_map<unsigned int, unsigned long long int>* dict1, unordered_map<unsigned long long int, unsigned long long int>* dict2) {
 	clock_t tstart = clock();
 	unsigned short c = cubepack.c, co = cubepack.co, eo = cubepack.eo, e1 = cubepack.e1, e2 = cubepack.e2, e3 = cubepack.e3;
-	cout << "thread " << threadid << endl << "c=" << c << " co=" << co << " eo=" << eo << " e1=" << e1 << " e2=" << e2 << " e3=" << e3 << endl;
+	cout << "thread " << threadid << endl << "c = " << c << "  co = " << co << "  eo = " << eo << "  e1 = " << e1 << "  e2 = " << e2 << "  e3 = " << e3 << endl;
 	solvecube initialcube = { c,co,eo,e1,e2,e3,1,0,-1 };
 	stack<solvecube> cubes;
 	cubes.push(initialcube);
@@ -224,8 +224,7 @@ solvereturn solve(cubepack cubepack, short threadid, short htm, short qtm, short
 	unsigned long long oldstep, m1_1, m1_2, m1, m2;
 	unsigned int key1;
 	unsigned long long int key2;
-	short step, f1, f0, t0, l;
-	int totalnum=1;
+	short step, f1, f0, t0, l, qtmvalue, stmvalue;
 	unsigned long long minmovep1=1, minmovep2=1;
 	unordered_map<unsigned short, unsigned short> *crf0, *corf0, *eorf0, *ep4rf0, *ep4rf0t0, *ep4rf01;
 	while (!cubes.empty()) {
@@ -234,7 +233,6 @@ solvereturn solve(cubepack cubepack, short threadid, short htm, short qtm, short
 		oc = tempcube.c, oco = tempcube.co, oeo = tempcube.eo, oe1 = tempcube.e1, oe2 = tempcube.e2, oe3 = tempcube.e3, oldstep = tempcube.oldstep * 18, step = tempcube.step + 1, f1 = tempcube.f1;
 		for (short f = 0; f < 6; f++) {
 			if (f != f1 && f1 - f != 3) {
-				totalnum += 3;
 				m1_1 = oldstep + 3 * f;
 				crf0 = &cr0[f];
 				corf0 = &cor0[f];
@@ -277,18 +275,32 @@ solvereturn solve(cubepack cubepack, short threadid, short htm, short qtm, short
 								htm = l;
 								minmovep1 = m1;
 								minmovep2 = m2;
+								qtmvalue = htm;
+								stmvalue = htm;
 								cout << threadid << "   " << htm <<" = "<<step << " + " << (short)(log(m1) / log18) - (short)(log(m1_1) / log18) << " + " << (short)(log(m2) / log18) << "    type 1  phase1 " << m1 << "  phase2 " << m2 << "    ";
 								unsigned long long printm1 = m1;
 								unsigned long long printm2 = m2;
 								while (printm1 >= 18) {
 									cout << printm1 / 3 % 6 << printm1 % 3;
+									if (printm1 % 3 == 1) {
+										qtmvalue++;
+									}
 									printm1 /= 18;
 								}
 								while (printm2 >= 18) {
 									cout << printm2 / 3 % 6 << printm2 % 3;
+									if (printm2 % 3 == 1) {
+										qtmvalue++;
+									}
 									printm2 /= 18;
 								}
 								cout << endl;
+								if (qtmvalue < qtm) {
+									qtm = qtmvalue;
+								}
+								if (stmvalue < stm) {
+									stm = stmvalue;
+								}
 
 								ep4rf01 = &ep4r1[f0];
 								nc1 = cr1[f0].at(nc1);
@@ -304,18 +316,32 @@ solvereturn solve(cubepack cubepack, short threadid, short htm, short qtm, short
 										htm = l;
 										minmovep1 = m1;
 										minmovep2 = m2;
+										qtmvalue = htm;
+										stmvalue = htm;
 										cout << threadid << "   " << htm << " = " << step << " + " << (short)(log(m1) / log18) - (short)(log(m1_1) / log18) << " + " << (short)(log(m2) / log18) << "    type 2  phase1 " << m1 << "  phase2 " << m2 << "    ";
 										unsigned long long printm1 = m1;
 										unsigned long long printm2 = m2;
 										while (printm1 >= 18) {
 											cout << printm1 / 3 % 6 << printm1 % 3;
+											if (printm1 % 3 == 1) {
+												qtmvalue++;
+											}
 											printm1 /= 18;
 										}
 										while (printm2 >= 18) {
 											cout << printm2 / 3 % 6 << printm2 % 3;
+											if (printm2 % 3 == 1) {
+												qtmvalue++;
+											}
 											printm2 /= 18;
 										}
 										cout << endl;
+										if (qtmvalue < qtm) {
+											qtm = qtmvalue;
+										}
+										if (stmvalue < stm) {
+											stm = stmvalue;
+										}
 									}
 								}
 							}
@@ -327,7 +353,6 @@ solvereturn solve(cubepack cubepack, short threadid, short htm, short qtm, short
 	}
 
 	solvereturn sr = { htm,qtm,stm,minmovep1,minmovep2 };
-	cout << "total number of cube verified " << totalnum << endl;
 	cout << "finish thread " << threadid <<"    htm "<<htm << "  qtm " << qtm << "  stm " << stm <<"    time " << (double)(clock()-tstart) / CLOCKS_PER_SEC << "s" << endl << endl;
 	return sr;
 }
@@ -521,7 +546,7 @@ int main(int argc,char** argv) {
 			int* ftd = facetimedirection[f][t];
 
 			unordered_map<unsigned short, unsigned short> cmap;
-			for (const auto& key_value : cdict) {
+			for (auto& key_value : cdict) {
 				int key = key_value.first;
 				short c[8]{}, dc[8]{};
 				for (int i = 7; i >= 0; i--) {
@@ -534,13 +559,12 @@ int main(int argc,char** argv) {
 				c[c2] = dc[nc2];
 				c[c3] = dc[nc3];
 				c[c4] = dc[nc4];
-
 				cmap[key_value.second] = cdict.at(((((((c[0] * 8 + c[1]) * 8 + c[2]) * 8 + c[3]) * 8 + c[4]) * 8 + c[5]) * 8 + c[6]) * 8 + c[7]);
 			}
 			cr[f][t] = cmap;
 
 			unordered_map<unsigned short, unsigned short> comap;
-			for (const auto& key_value : codict) {
+			for (auto& key_value : codict) {
 				int key = key_value.first;
 				short co[8]{}, dco[8]{};
 				for (int i = 7; i >= 0; i--) {
@@ -553,13 +577,12 @@ int main(int argc,char** argv) {
 				co[c2] = ftd[dco[nc2]];
 				co[c3] = ftd[dco[nc3]];
 				co[c4] = ftd[dco[nc4]];
-
 				comap[key_value.second] = codict.at(((((((co[0] * 6 + co[1]) * 6 + co[2]) * 6 + co[3]) * 6 + co[4]) * 6 + co[5]) * 6 + co[6]) * 6 + co[7]);
 			}
 			cor[f][t] = comap;
 
 			unordered_map<unsigned short, unsigned short> eomap;
-			for (const auto& key_value : eodict) {
+			for (auto& key_value : eodict) {
 				int key = key_value.first;
 				short eo[12]{}, deo[12]{};
 				for (int i = 11; i >= 0; i--) {
@@ -572,13 +595,12 @@ int main(int argc,char** argv) {
 				eo[e2] = ftd[deo[ne2]];
 				eo[e3] = ftd[deo[ne3]];
 				eo[e4] = ftd[deo[ne4]];
-
 				eomap[key_value.second] = eodict.at(((((((((((eo[0] * 6 + eo[1]) * 6 + eo[2]) * 6 + eo[3]) * 6 + eo[4]) * 6 + eo[5]) * 6 + eo[6]) * 6 + eo[7]) * 6 + eo[8]) * 6 + eo[9]) * 6 + eo[10]) * 6 + eo[11]);
 			}
 			eor[f][t] = eomap;
 
 			unordered_map<unsigned short, unsigned short> ep4map;
-			for (const auto& key_value : ep4dict) {
+			for (auto& key_value : ep4dict) {
 				int key = key_value.first;
 				short ep4[4]{};
 				for (int i = 3; i >= 0; i--) {
@@ -592,7 +614,6 @@ int main(int argc,char** argv) {
 					ep4[i] = re;
 					key /= 12;
 				}
-				//cout << key_value.second << endl;
 				ep4map[key_value.second] = ep4dict.at(((ep4[0] * 12 + ep4[1]) * 12 + ep4[2]) * 12 + ep4[3]);
 			}
 			ep4r[f][t] = ep4map;
@@ -725,5 +746,3 @@ int main(int argc,char** argv) {
 	//cout << "Press enter";
 	//cin.get();
 }
-
-
