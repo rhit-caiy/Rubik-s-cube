@@ -328,7 +328,7 @@ for i in range(cubenumber):
     print("estimated time for rest",cubenumber-i-1,"cubes:",(time.time()-starttime)*(cubenumber-i-1)/(i+1),"s")
 endtime=time.time()
 
-print("\n\ntwo phase algorithm version 24")
+print("\n\ntwo phase algorithm version 27")
 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
 print("initialize time",tinit,"s")
 print(f"dicts time {tdict2-tdict0}s = {tdict1-tdict0}s + {tdict2-tdict1}s")
