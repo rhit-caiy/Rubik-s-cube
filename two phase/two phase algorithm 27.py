@@ -49,6 +49,7 @@ def getdicts():
                 c[c1],c[c2],c[c3],c[c4]=c[c2],c[c3],c[c4],c[c1]
                 b=cdict[tuple(c)]
                 d1[a],d1[b]=b,a
+        cr[f]=(tuple(d0),tuple(d1),tuple(d2))
         d0,d1,d2=cor[f]
         for dco in codict:
             co=list(dco)
@@ -59,6 +60,7 @@ def getdicts():
                 co[c1],co[c2],co[c3],co[c4]=ftd0[co[c2]],ftd0[co[c3]],ftd0[co[c4]],ftd0[co[c1]]
                 b=codict[tuple(co)]
                 d1[a],d1[b]=b,a
+        cor[f]=(tuple(d0),tuple(d1),tuple(d2))
         d0,d1,d2=ep4r[f]
         for dep in ep4dict:
             ep=list(dep)
@@ -73,6 +75,7 @@ def getdicts():
                         ep[i]=fe[fte.index(ep[i])]
                 b=ep4dict[tuple(ep)]
                 d1[a],d1[b]=b,a
+        ep4r[f]=(tuple(d0),tuple(d1),tuple(d2))
         d0,d1,d2=eor[f]
         for deo in eodict:
             eo=list(deo)
@@ -83,7 +86,9 @@ def getdicts():
                 eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
                 b=eodict[tuple(eo)]
                 d1[a],d1[b]=b,a
-    return cr,cor,ep4r,eor,cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo],[i[0] for i in cr],[i[0] for i in cor],[i[0] for i in eor],[i[0] for i in ep4r],[i[1] for i in cr],[i[1] for i in ep4r],round(time()-t0,6)
+        eor[f]=(tuple(d0),tuple(d1),tuple(d2))
+    cr,cor,ep4r,eor=tuple(cr),tuple(cor),tuple(ep4r),tuple(eor)
+    return cr,cor,ep4r,eor,cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo],tuple([i[0] for i in cr]),tuple([i[0] for i in cor]),tuple([i[0] for i in eor]),tuple([i[0] for i in ep4r]),tuple([i[1] for i in cr]),tuple([i[1] for i in ep4r]),round(time()-t0,6)
 
 def getdict1(dict1step,cor0,eor0,ep4r0):
     print("\ndict1\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
@@ -253,9 +258,9 @@ def decodevalue(n):
     return s
 
 print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
-eighteen=(18**i for i in range(28))
+eighteen=tuple([18**i for i in range(28)])
 changedirections=((0,1,2,3,4,5),(1,2,0,4,5,3),(2,0,1,5,3,4))
-allrotation=["U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'"]
+allrotation=("U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'")
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1,tinit=getdicts()
 print("initialize time",tinit,"s")
 phase1step=5#7
@@ -304,7 +309,7 @@ for i in range(cubenumber):
     print("finish solve cube",i+1)
     if htm>=stepshouldbelow:
         miss+=1
-        print("no solution below",htm,"steps for this cube\nmiss rate",miss,"/",i+1)
+        print("no solution below",htm,"steps for this cube")
     else:
         print("{:<8}{:<8}{}".format("thread","htm","solution"))
         for j in range(n):
@@ -318,7 +323,9 @@ for i in range(cubenumber):
             print(allrotation[3*int(decodedvalue[2*j])+int(decodedvalue[2*j+1])],end="")
         if i<100:
             print("\ncurrent htm results:",htms)
-        print("\naverage htm",sum(htms)/len(htms),"\naverage qtm",sum(qtms)/len(qtms),"\naverage stm",sum(stms)/len(stms))
+        print("\naverage htm",round(sum(htms)/len(htms),6),"\naverage qtm",round(sum(qtms)/len(qtms),6),"\naverage stm",round(sum(stms)/len(stms),6))
+    if miss:
+        print("miss rate",miss,"/",i+1)
     print("time:",round(cubetime,6),"s ","average time",round(sum(times)/(i+1),6),strftime("%Y-%m-%d %H:%M:%S",localtime()))
     print("estimated time for rest",cubenumber-i-1,"cubes:",round((time()-starttime)*(cubenumber-i-1)/(i+1),6),"s")
 endtime=time()
@@ -332,13 +339,13 @@ if cubenumber<=100:
     print("htm",htms,"\nqtm",qtms,"\nstm",stms)
 print(cubenumber,"cubes")
 if len(htms)>0:
-    print("\nhtm average",sum(htms)/len(htms),"range",min(htms),"-",max(htms),"\nhtm     number")
+    print("\nhtm average",round(sum(htms)/len(htms),6),"range",min(htms),"-",max(htms),"\nhtm     number")
     for i in range(min(htms),max(htms)+1):
         print("{:<8}{:<8}{}".format(i,htms.count(i),"-"*int(100*htms.count(i)/cubenumber)))
-    print("\nqtm average",sum(qtms)/len(qtms),"range",min(qtms),"-",max(qtms),"\nqtm     number")
+    print("\nqtm average",round(sum(qtms)/len(qtms),6),"range",min(qtms),"-",max(qtms),"\nqtm     number")
     for i in range(min(qtms),max(qtms)+1):
         print("{:<8}{:<8}{}".format(i,qtms.count(i),"-"*int(100*qtms.count(i)/cubenumber)))
-    print("\nstm average",sum(stms)/len(stms),"range",min(stms),"-",max(stms),"\nstm     number")
+    print("\nstm average",round(sum(stms)/len(stms),6),"range",min(stms),"-",max(stms),"\nstm     number")
     for i in range(min(stms),max(stms)+1):
         print("{:<8}{:<8}{}".format(i,stms.count(i),"-"*int(100*stms.count(i)/cubenumber)))
 if miss!=0:
