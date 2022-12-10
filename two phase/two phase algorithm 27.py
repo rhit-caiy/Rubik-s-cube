@@ -11,63 +11,58 @@ def getdicts():
     facetimedirection=(((0,5,1,3,2,4),(0,4,5,3,1,2)),((2,1,3,5,4,0),(3,1,5,0,4,2)),((4,0,2,1,3,5),(3,4,2,0,1,5)),((0,2,4,3,5,1),(0,4,5,3,1,2)),((5,1,0,2,4,3),(3,1,5,0,4,2)),((1,3,2,4,0,5),(3,4,2,0,1,5)))
     cornerdirection=((0,5,1),(0,4,5),(0,1,2),(0,2,4),(3,2,1),(3,4,2),(3,1,5),(3,5,4))
     edgedirection=((0,5),(0,1),(0,2),(0,4),(1,5),(1,2),(4,2),(4,5),(3,5),(3,1),(3,2),(3,4))
-    cdict,codict,ep4dict,eodict={},{},{},{}
-    for n,i in enumerate(permutations(cc)):
-        cdict[i]=n
-    cr=[[[0]*(n+1) for i in range(3)] for i in range(6)]
-    n=0
-    for i in product(range(3),repeat=8):
-        if not sum(i)%3:
-            codict[tuple([cornerdirection[j][i[j]] for j in range(8)])]=n
-            n=1+n
-    cor=[[[0]*(n+1) for i in range(3)] for i in range(6)]
-    n=0
-    for i in combinations(ce,r=4):
-        for j in permutations(i):
-            ep4dict[j]=n
-            n=1+n
-    ep4r=[[[0]*(n+1) for i in range(3)] for i in range(6)]
-    n=0
-    for i in product(range(2),repeat=12):
-        if not i.count(1)%2:
-            eodict[tuple([edgedirection[j][i[j]] for j in range(12)])]=n
-            n=1+n
-    eor=[[[0]*(n+1) for i in range(3)] for i in range(6)]
+    cdict={i:n for n,i in enumerate(permutations(cc))}
+    codict={tuple([cornerdirection[j][i[j]] for j in range(8)]):n for n,i in enumerate((i for i in product(range(3),repeat=8) if not sum(i)%3))}
+    eodict={tuple([edgedirection[j][i[j]] for j in range(12)]):n for n,i in enumerate([i for i in product(range(2),repeat=12) if not i.count(1)%2])}
+    ep4dict={j:n for n,j in enumerate(j for i in combinations(ce,r=4) for j in permutations(i))}
+    cl,col,eol,ep4l=[0]*len(cdict),[0]*len(codict),[0]*len(eodict),[0]*len(ep4dict)
+    cr,cor,eor,ep4r=[],[],[],[]
     for f in 0,1,2,3,4,5:
         c1,c2,c3,c4=facecorner[f]
         e1,e2,e3,e4=fe=faceedge[f]
         sfe=set(fe)
         fte=e2,e3,e4,e1
         ftd0,ftd1=facetimedirection[f]
-        d0,d1,d2=cr[f]
-        for dc in cdict:
+        d0,d1,d2=cl.copy(),cl.copy(),cl.copy()
+        for a,dc in enumerate(cdict):
             c=list(dc)
             c[c1],c[c2],c[c3],c[c4]=c[c2],c[c3],c[c4],c[c1]
-            a,b=cdict[dc],cdict[tuple(c)]
+            b=cdict[tuple(c)]
             d0[a],d2[b]=b,a
             if not d1[a]:
                 c[c1],c[c2],c[c3],c[c4]=c[c2],c[c3],c[c4],c[c1]
                 b=cdict[tuple(c)]
                 d1[a],d1[b]=b,a
-        cr[f]=(tuple(d0),tuple(d1),tuple(d2))
-        d0,d1,d2=cor[f]
-        for dco in codict:
+        cr.append((tuple(d0),tuple(d1),tuple(d2)))
+        d0,d1,d2=col.copy(),col.copy(),col.copy()
+        for a,dco in enumerate(codict):
             co=list(dco)
             co[c1],co[c2],co[c3],co[c4]=ftd0[co[c2]],ftd0[co[c3]],ftd0[co[c4]],ftd0[co[c1]]
-            a,b=codict[dco],codict[tuple(co)]
+            b=codict[tuple(co)]
             d0[a],d2[b]=b,a
             if not d1[a]:
                 co[c1],co[c2],co[c3],co[c4]=ftd0[co[c2]],ftd0[co[c3]],ftd0[co[c4]],ftd0[co[c1]]
                 b=codict[tuple(co)]
                 d1[a],d1[b]=b,a
-        cor[f]=(tuple(d0),tuple(d1),tuple(d2))
-        d0,d1,d2=ep4r[f]
-        for dep in ep4dict:
+        cor.append((tuple(d0),tuple(d1),tuple(d2)))
+        d0,d1,d2=eol.copy(),eol.copy(),eol.copy()
+        for a,deo in enumerate(eodict):
+            eo=list(deo)
+            eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
+            b=eodict[tuple(eo)]
+            d0[a],d2[b]=b,a
+            if not d1[a]:
+                eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
+                b=eodict[tuple(eo)]
+                d1[a],d1[b]=b,a
+        eor.append((tuple(d0),tuple(d1),tuple(d2)))
+        d0,d1,d2=ep4l.copy(),ep4l.copy(),ep4l.copy()
+        for a,dep in enumerate(ep4dict):
             ep=list(dep)
             for i in 0,1,2,3:
                 if ep[i] in sfe:
                     ep[i]=fe[fte.index(ep[i])]
-            a,b=ep4dict[dep],ep4dict[tuple(ep)]
+            b=ep4dict[tuple(ep)]
             d0[a],d2[b]=b,a
             if not d1[a]:
                 for i in 0,1,2,3:
@@ -75,20 +70,8 @@ def getdicts():
                         ep[i]=fe[fte.index(ep[i])]
                 b=ep4dict[tuple(ep)]
                 d1[a],d1[b]=b,a
-        ep4r[f]=(tuple(d0),tuple(d1),tuple(d2))
-        d0,d1,d2=eor[f]
-        for deo in eodict:
-            eo=list(deo)
-            eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
-            a,b=eodict[deo],eodict[tuple(eo)]
-            d0[a],d2[b]=b,a
-            if not d1[a]:
-                eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
-                b=eodict[tuple(eo)]
-                d1[a],d1[b]=b,a
-        eor[f]=(tuple(d0),tuple(d1),tuple(d2))
-    cr,cor,ep4r,eor=tuple(cr),tuple(cor),tuple(ep4r),tuple(eor)
-    return cr,cor,ep4r,eor,cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo],tuple([i[0] for i in cr]),tuple([i[0] for i in cor]),tuple([i[0] for i in eor]),tuple([i[0] for i in ep4r]),tuple([i[1] for i in cr]),tuple([i[1] for i in ep4r]),round(time()-t0,6)
+        ep4r.append((tuple(d0),tuple(d1),tuple(d2)))
+    return tuple(cr),tuple(cor),tuple(ep4r),tuple(eor),cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo],tuple([i[0] for i in cr]),tuple([i[0] for i in cor]),tuple([i[0] for i in eor]),tuple([i[0] for i in ep4r]),tuple([i[1] for i in cr]),tuple([i[1] for i in ep4r]),round(time()-t0,6)
 
 def getdict1(dict1step,cor0,eor0,ep4r0):
     print("\ndict1\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
@@ -253,8 +236,8 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
 def decodevalue(n):
     s=""
     while n>=18:
-        ft,n=n%18,n//18
-        s=str(ft//3)+str(ft%3)+s
+        s=str(n//3%6)+str(n%3)+s
+        n=n//18
     return s
 
 print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
