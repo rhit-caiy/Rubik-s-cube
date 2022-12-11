@@ -15,8 +15,7 @@ def getdicts():
     codict={tuple([cornerdirection[j][i[j]] for j in range(8)]):n for n,i in enumerate((i for i in product(range(3),repeat=8) if not sum(i)%3))}
     eodict={tuple([edgedirection[j][i[j]] for j in range(12)]):n for n,i in enumerate([i for i in product(range(2),repeat=12) if not i.count(1)%2])}
     ep4dict={j:n for n,j in enumerate(j for i in combinations(ce,r=4) for j in permutations(i))}
-    cl,col,eol,ep4l=[0]*len(cdict),[0]*len(codict),[0]*len(eodict),[0]*len(ep4dict)
-    cr,cor,eor,ep4r=[],[],[],[]
+    cl,col,eol,ep4l,cr,cor,eor,ep4r=[0]*len(cdict),[0]*len(codict),[0]*len(eodict),[0]*len(ep4dict),[],[],[],[]
     for f in 0,1,2,3,4,5:
         c1,c2,c3,c4=facecorner[f]
         e1,e2,e3,e4=fe=faceedge[f]
@@ -204,13 +203,14 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
     return htm,qtm,stm,minmove,time()-tstart
 
 def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
-    solution=(m1-1)*eighteen[int(log(m2,18))]+m2
+    n=solution=(m1-1)*eighteen[int(log(m2,18))]+m2
     if solution<minmove:
         minmove=solution
     qtmvalue=stmvalue=htm=l
-    numstr=decodevalue(solution)
-    for i in range(1,len(numstr),2):
-        if numstr[i]=="1":
+    numstr=""
+    while n>=18:
+        numstr,n=str(n//3%6)+str(n%3)+numstr,n//18
+        if n%3==1:
             qtmvalue+=1
     for i in range(0,len(numstr)-2,2):
         if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
@@ -221,13 +221,6 @@ def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
         stm=stmvalue
     print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
     return htm,qtm,stm,minmove
-
-def decodevalue(n):
-    s=""
-    while n>=18:
-        s=str(n//3%6)+str(n%3)+s
-        n=n//18
-    return s
 
 print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
 eighteen=tuple([18**i for i in range(28)])
@@ -273,7 +266,6 @@ for i in range(cubenumber):
         print("{}\nc = {}  co = {}  eo = {}  e1 = {}  e2 = {}  e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(j),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
         htm,qtm,stm,minmove,threadtime=solve(c,co,eo,e1,e2,e3,j,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
         print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}".format(j,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
-        print("current best",minmove,decodevalue(minmove),"\n")
         cubetime+=threadtime
     times.append(cubetime)
     print("finish solve cube",i+1)
@@ -284,10 +276,12 @@ for i in range(cubenumber):
         htms.append(htm)
         qtms.append(qtm)
         stms.append(stm)
-        decodedvalue=decodevalue(minmove)
-        print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+decodedvalue)
+        numstr,num="",minmove
+        while num>=18:
+            numstr,num=str(num//3%6)+str(num%3)+numstr,num//18
+        print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+numstr)
         for j in range(htm):
-            print(allrotation[3*int(decodedvalue[2*j])+int(decodedvalue[2*j+1])],end="")
+            print(allrotation[3*int(numstr[2*j])+int(numstr[2*j+1])],end="")
         if i<100:
             print("\ncurrent htm results:",htms)
         print("\naverage htm",round(sum(htms)/len(htms),6),"\naverage qtm",round(sum(qtms)/len(qtms),6),"\naverage stm",round(sum(stms)/len(stms),6))
