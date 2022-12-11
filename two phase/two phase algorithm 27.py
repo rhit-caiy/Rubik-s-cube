@@ -193,45 +193,34 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                             m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
                             l=int(log(m1,18))+int(log(m2,18))
                             if l<=htm:
-                                solution=(m1-1)*eighteen[int(log(m2,18))]+m2
-                                if solution<minmove:
-                                    minmove=solution
-                                qtmvalue=stmvalue=htm=l
-                                numstr=decodevalue(solution)
-                                for i in range(1,len(numstr),2):
-                                    if numstr[i]=="1":
-                                        qtmvalue+=1
-                                for i in range(0,len(numstr)-2,2):
-                                    if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
-                                        stmvalue-=1
-                                if qtmvalue<qtm:
-                                    qtm=qtmvalue
-                                if stmvalue<stm:
-                                    stm=stmvalue
-                                print("{:<18}{:<6}{:<6}{:<14f}1     {:<36}{}".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,solution,numstr))
+                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
                                 ep4rf01=ep4r1[f0]
                                 nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
                                 if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
                                     m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
                                     l=int(log(m1,18))+int(log(m2,18))
                                     if l<=htm:
-                                        solution=(m1-3)*eighteen[int(log(m2,18))]+m2
-                                        if solution<minmove:
-                                            minmove=solution
-                                        qtmvalue=stmvalue=htm=l
-                                        numstr=decodevalue(solution)
-                                        for i in range(1,len(numstr),2):
-                                            if numstr[i]=="1":
-                                                qtmvalue+=1
-                                        for i in range(0,len(numstr)-2,2):
-                                            if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
-                                                stmvalue-=1
-                                        if qtmvalue<qtm:
-                                            qtm=qtmvalue
-                                        if stmvalue<stm:
-                                            stm=stmvalue
-                                        print("{:<18}{:<6}{:<6}{:<14f}2     {:<36}{}".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,solution,numstr))
+                                        htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,2)
     return htm,qtm,stm,minmove,time()-tstart
+
+def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
+    solution=(m1-1)*eighteen[int(log(m2,18))]+m2
+    if solution<minmove:
+        minmove=solution
+    qtmvalue=stmvalue=htm=l
+    numstr=decodevalue(solution)
+    for i in range(1,len(numstr),2):
+        if numstr[i]=="1":
+            qtmvalue+=1
+    for i in range(0,len(numstr)-2,2):
+        if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
+            stmvalue-=1
+    if qtmvalue<qtm:
+        qtm=qtmvalue
+    if stmvalue<stm:
+        stm=stmvalue
+    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
+    return htm,qtm,stm,minmove
 
 def decodevalue(n):
     s=""
@@ -272,9 +261,7 @@ for i in range(cubenumber):
     randomlists=[[randint(0,17) for j in range(l)]]
     randomlists.append([(j//3)*6+2-j for j in randomlists[0][::-1]])
     print("random with",l,"moves\n")
-    solutions=[eighteen[stepshouldbelow]]*n
     cubetime=0
-    
     for j in range(n):
         randomlist=randomlists[j//3]
         direction=changedirections[j%3]
@@ -285,8 +272,8 @@ for i in range(cubenumber):
             c,co,eo,e1,e2,e3=cr[f][t][c],cor[f][t][co],eor[f][t][eo],ep4rft[e1],ep4rft[e2],ep4rft[e3]
         print("{}\nc = {}  co = {}  eo = {}  e1 = {}  e2 = {}  e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(j),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
         htm,qtm,stm,minmove,threadtime=solve(c,co,eo,e1,e2,e3,j,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
-        print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}\n".format(j,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
-        solutions[j]=minmove
+        print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}".format(j,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
+        print("current best",minmove,decodevalue(minmove),"\n")
         cubetime+=threadtime
     times.append(cubetime)
     print("finish solve cube",i+1)
@@ -294,9 +281,6 @@ for i in range(cubenumber):
         miss+=1
         print("no solution below",htm,"steps for this cube")
     else:
-        print("{:<8}{:<8}{}".format("thread","htm","solution"))
-        for j in range(n):
-            print("{:<8}{:<8}{:<36}{}".format(j,int(log(solutions[j],18)),solutions[j],decodevalue(solutions[j])))
         htms.append(htm)
         qtms.append(qtm)
         stms.append(stm)
