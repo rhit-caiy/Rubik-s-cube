@@ -13,15 +13,18 @@ edgedirection=((0,5),(0,1),(0,2),(0,4),(1,5),(1,2),(4,2),(4,5),(3,5),(3,1),(3,2)
 adj=((5,4,2,1),(0,2,3,5),(0,4,3,1),(1,2,4,5),(0,5,3,2),(0,1,3,4))
 
 #the position of each face of each block
-cornerposition=(((0,0),(1,0),(5,2)),((0,2),(5,0),(4,2)),((0,6),(2,0),(1,2)),((0,8),(4,0),(2,2)),
-                ((3,0),(1,8),(2,6)),((3,2),(2,8),(4,6)),((3,6),(5,8),(1,6)),((3,8),(4,8),(5,6)))
+cornerposition=(((0,0),(5,2),(1,0)),((0,2),(4,2),(5,0)),((0,6),(1,2),(2,0)),((0,8),(2,2),(4,0)),
+                ((3,0),(2,6),(1,8)),((3,2),(4,6),(2,8)),((3,6),(1,6),(5,8)),((3,8),(5,6),(4,8)))
 edgeposition=(((0,1),(5,1)),((0,3),(1,1)),((0,7),(2,1)),((0,5),(4,1)),
               ((1,3),(5,5)),((1,5),(2,3)),((4,3),(2,5)),((4,5),(5,3)),
               ((3,7),(5,7)),((3,3),(1,7)),((3,1),(2,7)),((3,5),(4,7)))
-#centeredge=((0,2,10,8),(4,5,6,7),(1,3,11,9))
+centeredge=((0,2,10,8),(4,5,6,7),(1,3,11,9))
 color=("#FFFF00","#0000FF","#FF0000","#FFFFFF","#00FF00","#FF8000")
-allrotation=("U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'")
-rotates=["U","L","F","R","B","D","M","E","S","x","y","z"]
+allrotation=("U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'","M","M2","M'","E","E2","E'","S","S2","S'","x","x2","x'","y","y2","y'","z","z2","z'")
+eighteen=tuple([18**i for i in range(28)])
+changedirections=((0,1,2,3,4,5),(1,2,0,4,5,3),(2,0,1,5,3,4))
+
+
 
 #init
 t0=time()
@@ -97,6 +100,41 @@ for f in 0,1,2,3,4,5:
     ep4r.append((tuple(d0),tuple(d1),tuple(d2)))
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=tuple(cr),tuple(cor),tuple(ep4r),tuple(eor),cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo],tuple([i[0] for i in cr]),tuple([i[0] for i in cor]),tuple([i[0] for i in eor]),tuple([i[0] for i in ep4r]),tuple([i[1] for i in cr]),tuple([i[1] for i in ep4r])
 
+#dict for directly complete cube
+#1 19
+#2 262
+#3 3502
+#4 46741
+#5 621649
+#6 
+#7 
+def getdict0(dict0step):
+    print("\ndict0\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
+    dict0={(ccn,ccon,ceon,cen1,cen2,cen3):1}
+    predictstate,newpredictstate=[(ccn,ccon,ceon,cen1,cen2,cen3,0,-1)],[]
+    t0=time()
+    for step in range(1,dict0step+1):
+        t1=time()
+        eighteen0,eighteen1=eighteen[step-1],eighteen[step]
+        for cube in predictstate:
+            oc,oco,oeo,oe1,oe2,oe3,oldstep,f1=cube
+            for f in 0,1,2,3,4,5:
+                if f1 is not f:
+                    crf0,ep4rf0=cr0[f],ep4r0[f]
+                    corf0,eorf0=cor0[f],eor0[f]
+                    nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
+                    for t in 2,1,0:
+                        nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                        key0=(nc,nco,neo,ne1,ne2,ne3)
+                        if key0 not in dict2:
+                            newstep=oldstep+(3*f+t)*eighteen0
+                            dict0[key0]=newstep+eighteen1
+                            if step is not dict0step:
+                                newpredictstate.append(key0+(newstep,f))
+        print("{:<8}{:<16}{:<16}{:<16f}".format(step,len(newpredictstate),len(dict0),time()-t1))
+        predictstate,newpredictstate=newpredictstate,[]
+    return dict0,round(time()-t0,6)
+
 #dict for complete phase 1, remove correct one
 #1 4
 #2 54
@@ -104,7 +142,8 @@ cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=tuple
 #4 7802
 #5 95038
 #6 1138855
-#7 
+#7 13209133
+#8 
 def getdict1(dict1step,cor0,eor0,ep4r0):
     print("\ndict1\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
     dict1={425:1}#cen2//24+495*(ceon+2048*ccon)
@@ -152,7 +191,7 @@ def getdict1(dict1step,cor0,eor0,ep4r0):
 #5 23561
 #6 146635
 #7 883485
-#8 
+#8 5068603
 #9 
 def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
     print("\ndict2\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
@@ -243,7 +282,7 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                                     m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
                                     l=int(log(m1,18))+int(log(m2,18))
                                     if l<=htm:
-                                        htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
     return htm,qtm,stm,minmove,time()-tstart
 
 #print the solved form solve, solution must be <= current htm
@@ -268,13 +307,10 @@ def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
     return htm,qtm,stm,minmove
 
 print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
-eighteen=tuple([18**i for i in range(28)])
-changedirections=((0,1,2,3,4,5),(1,2,0,4,5,3),(2,0,1,5,3,4))
-allrotation=("U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'")
 
-phase1step=5#7
-dict1step=5#8
-dict2step=6#9
+phase1step=6#7
+dict1step=7#8
+dict2step=8#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
 print(phase1step,"+",dict1step,"+",dict2step)
 dict1,tdict1=getdict1(dict1step,cor0,eor0,ep4r0)
@@ -282,10 +318,13 @@ print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict1),tdict1))
 dict2,tdict2=getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1)
 print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict2),tdict2))
 print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
-n=1
-print(n,"threads")
+threadn=1
+print(threadn,"threads")
 
-
+phase0step=6
+dict0step=6
+dict0,tdict0=getdict0(dict0step)
+print("phase 0 dict time",tdict0)
 
 window=Tk()
 canvas=Canvas(window,bg="#808080",width=1440,height=810)
@@ -300,44 +339,18 @@ eo=ceon
 
 center=[0,1,2,3,4,5]
 cubecolor=[[i]*9 for i in range(6)]
-'''
-def rotate(a):
-    rotateedge(a)
-    rotatecorner(a)
-    
-def rotateedge(a):
-    global edge,edged
-    r=faceedge[a]
-    ne=edge.copy()
-    ned=edged.copy()
-    for i in range(4):
-        ne[r[i]]=edge[r[(i+1)%4]]
-    for i in r:
-        i=edge[i]
-        if edged[i]!=a:
-            ned[i]=adj[a][(adj[a].index(edged[i])+1)%4]
-    edge=ne
-    edged=ned
-    
-def rotatecorner(a):
-    global corner,cornerd
-    r=facecorner[a]
-    nc=corner.copy()
-    ncd=cornerd.copy()
-    for i in range(4):
-        nc[r[i]]=corner[r[(i+1)%4]]
-    for i in r:
-        i=corner[i]
-        if cornerd[i]!=a:
-            ncd[i]=adj[a][(adj[a].index(cornerd[i])+1)%4]
-    corner=nc
-    cornerd=ncd
+#history=[]
 
 def rotatemiddle(a):
-    global center,edge,edged
+    global e1,e2,e3,eo,center
     #LDF for MES
-    ne=edge.copy()
-    ned=edged.copy()
+    edge=[0]*12
+    for n,i in enumerate(rep4dict[e1]+rep4dict[e2]+rep4dict[e3]):
+        edge[i]=n
+    edged=reodict[eo]
+    
+    ne=list(edge)
+    ned=list(edged)
     nc=center.copy()
     facenum=0
     if a==0:
@@ -347,39 +360,42 @@ def rotatemiddle(a):
     else:
         facenum=2
     for i in range(4):
-        nc[adj[facenum][i]]=center[adj[facenum][(i-1)%4]]
+        nc[adj[facenum][i]]=center[adj[facenum][i-1]]
     for i in range(4):
-        ne[centeredge[a][i]]=edge[centeredge[a][(i-1)%4]]
+        ne[centeredge[a][i]]=edge[centeredge[a][i-1]]
+    me1,me2,me3,me4=centeredge[a]
     for i in range(4):
-        ned[edge[centeredge[a][i]]]=adj[facenum][(adj[facenum].index(edged[edge[centeredge[a][i]]])+1)%4]
+        if edged[centeredge[a][i]]==edgedirection[centeredge[a][i]][0]:
+            ned[centeredge[a][i-1]]=edgedirection[centeredge[a][i-1]][1]
+        else:
+            ned[centeredge[a][i-1]]=edgedirection[centeredge[a][i-1]][0]
+    
     center=nc
-    edge=ne
-    edged=ned
+    eo=eodict[tuple(ned)]
+    
+    e1=ep4dict[tuple([ne.index(i) for i in range(0,4)])]
+    e2=ep4dict[tuple([ne.index(i) for i in range(4,8)])]
+    e3=ep4dict[tuple([ne.index(i) for i in range(8,12)])]
+    #e1,e2,e3,center
 
-def rotatec(a):
+def rotatecube(a):
     if a==0:
         rotatemiddle(0)
         rotatemiddle(0)
         rotatemiddle(0)
-        rotate(3)
-        rotate(1)
-        rotate(1)
-        rotate(1)
+        rotate(4,0)
+        rotate(1,2)
     elif a==1:
         rotatemiddle(1)
         rotatemiddle(1)
         rotatemiddle(1)
-        rotate(0)
-        rotate(5)
-        rotate(5)
-        rotate(5)
+        rotate(0,0)
+        rotate(3,2)
     elif a==2:
         rotatemiddle(2)
-        rotate(2)
-        rotate(4)
-        rotate(4)
-        rotate(4)
-'''
+        rotate(2,0)
+        rotate(5,2)
+
 def rotate(f,t):
     global c,co,e1,e2,e3,eo
     c=cr[f][t][c]
@@ -387,6 +403,7 @@ def rotate(f,t):
     eo=eor[f][t][eo]
     ep4rft=ep4r[f][t]
     e1,e2,e3=ep4rft[e1],ep4rft[e2],ep4rft[e3]
+    
 
 def start():
     draw()
@@ -406,40 +423,42 @@ def draw():
     canvas.create_rectangle(900,560,1000,610,fill="#C0C0C0")
     canvas.create_text(950,585,text="replay")
     for i in range(12):
-        canvas.create_rectangle(100*i+110,650,100*i+190,690,fill="#C0C0C0")
-        canvas.create_text(100*i+140,670,text=rotates[i])
-    for i in range(12):
-        canvas.create_rectangle(100*i+110,700,100*i+190,740,fill="#C0C0C0")
-        canvas.create_text(100*i+140,720,text=rotates[i]+"'")
+        for j in range(3):
+            canvas.create_rectangle(100*i+110,650+50*j,100*i+190,690+50*j,fill="#C0C0C0")
+            canvas.create_text(100*i+140,670+50*j,text=allrotation[3*i+j])
         
 def click(coordinate):
-    global cubecolor,corner,cornerd,edge,edged,center
+    global cubecolor,c,co,eo,e1,e2,e3,center
     x=coordinate.x
     y=coordinate.y
+    a=(x-100)//100
     if 650<y<690:
-        a=(x-100)//100
         if 0<=a<=5:
             rotate(a,0)
-        '''
         elif 6<=a<=8:
             rotatemiddle(a-6)
         elif 9<=a<=11:
-            rotatec(a-9)
-            '''
+            rotatecube(a-9)
     elif 700<y<740:
-        a=(x-100)//100
+        if 0<=a<=5:
+            rotate(a,1)
+        elif 6<=a<=8:
+            rotatemiddle(a-6)
+            rotatemiddle(a-6)
+        elif 9<=a<=11:
+            rotatecube(a-9)
+            rotatecube(a-9)
+    elif 750<y<790:
         if 0<=a<=5:
             rotate(a,2)
-            '''
         elif 6<=a<=8:
             rotatemiddle(a-6)
             rotatemiddle(a-6)
             rotatemiddle(a-6)
         elif 9<=a<=11:
-            rotatec(a-9)
-            rotatec(a-9)
-            rotatec(a-9)
-            '''
+            rotatecube(a-9)
+            rotatecube(a-9)
+            rotatecube(a-9)
     elif 50<x<150 and 500<y<550:
         c=ccn
         co=ccon
@@ -458,13 +477,13 @@ def click(coordinate):
         print("solve")
         print("cube =",cubecolor)
         print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
-        solve()
+        solvecube()
     elif 200<x<300 and 560<y<610:
         randomcube()
         print("random and solve")
         print("cube =",cubecolor)
         print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
-        solve()
+        solvecube()
         '''
     elif 900<x<1000 and 500<y<550:
         i=input("input:")
@@ -475,22 +494,23 @@ def click(coordinate):
         replay()
         '''
     display()
-'''
+
 def keypress(key):
     k=key.keysym
     print(k)
-    if k=='U':
-        rotate(0)
-    elif k=='L':
-        rotate(1)
-    elif k=='F':
-        rotate(2)
-    elif k=='R':
-        rotate(3)
-    elif k=='B':
-        rotate(4)
-    elif k=='D':
-        rotate(5)
+    if k=='U' or k=='u' or k=='0':
+        rotate(0,0)
+    elif k=='L' or k=='l' or k=='1':
+        rotate(1,0)
+    elif k=='F' or k=='f' or k=='2':
+        rotate(2,0)
+    elif k=='D' or k=='d' or k=='3':
+        rotate(3,0)
+    elif k=='R' or k=='r' or k=='4':
+        rotate(4,0)
+    elif k=='B' or k=='b' or k=='5':
+        rotate(5,0)
+    '''
     elif k=="M":
         rotatemiddle(0)
     elif k=="E":
@@ -503,10 +523,11 @@ def keypress(key):
         rotatec(1)
     elif k=='z':
         rotatec(2)
+    '''
     display()
-'''
+
 def display():
-    updatecube()
+    updatecubecolor()
     canvas.delete("all")
     draw()
     xy=((500,0),(300,200),(500,200),(500,400),(700,200),(900,200))
@@ -516,9 +537,8 @@ def display():
             for k in range(3):
                 canvas.create_rectangle(x+60*k,y+60*j+20,x+60*k+60,y+60*j+80,fill=color[cubecolor[i][3*j+k]])
     canvas.update()
-    sleep(0.5)
     
-def updatecube():
+def updatecubecolor():
     global cubecolor
     #center
     for i in range(6):
@@ -529,50 +549,106 @@ def updatecube():
         edge[i]=n
     edged=reodict[eo]
     for i in range(12):
-        if edged[i]==ceo[i]:
-            cubecolor[edgeposition[i][0][0]][edgeposition[i][0][1]]=edgeposition[edge[i]][0][0]
-            cubecolor[edgeposition[i][1][0]][edgeposition[i][1][1]]=edgeposition[edge[i]][1][0]
-        else:
-            cubecolor[edgeposition[i][0][0]][edgeposition[i][0][1]]=edgeposition[edge[i]][1][0]
-            cubecolor[edgeposition[i][1][0]][edgeposition[i][1][1]]=edgeposition[edge[i]][0][0]
+        n=edgedirection[i].index(edged[i])
+        for j in 0,1:
+            a,b=edgeposition[i][j]
+            cubecolor[a][b]=edgedirection[edge[i]][n-j]
     #corner
     corner=rcdict[c]
     cornerd=rcodict[co]
     for i in range(8):
-        if cornerd[i]==cornerposition[i][0][0]:
-            cubecolor[cornerposition[i][0][0]][cornerposition[i][0][1]]=cornerposition[corner[i]][0][0]
-            cubecolor[cornerposition[i][1][0]][cornerposition[i][1][1]]=cornerposition[corner[i]][1][0]
-            cubecolor[cornerposition[i][2][0]][cornerposition[i][2][1]]=cornerposition[corner[i]][2][0]
-        elif cornerd[i]==cornerposition[i][1][0]:
-            cubecolor[cornerposition[i][0][0]][cornerposition[i][0][1]]=cornerposition[corner[i]][2][0]
-            cubecolor[cornerposition[i][1][0]][cornerposition[i][1][1]]=cornerposition[corner[i]][0][0]
-            cubecolor[cornerposition[i][2][0]][cornerposition[i][2][1]]=cornerposition[corner[i]][1][0]
-        else:
-            cubecolor[cornerposition[i][0][0]][cornerposition[i][0][1]]=cornerposition[corner[i]][1][0]
-            cubecolor[cornerposition[i][1][0]][cornerposition[i][1][1]]=cornerposition[corner[i]][2][0]
-            cubecolor[cornerposition[i][2][0]][cornerposition[i][2][1]]=cornerposition[corner[i]][0][0]
+        n=cornerdirection[i].index(cornerd[i])
+        for j in 0,1,2:
+            a,b=cornerposition[i][j]
+            cubecolor[a][b]=cornerdirection[corner[i]][j-n]
 
 def randomcube():
     for i in range(randint(1024,2048)):
         rotate(randint(0,5),randint(0,2))
-    '''
-    a=randint(16,32)
-    randomstring=""
-    for i in range(a):
-        r=randint(0,9)
-        if r<6:
-            rotate(r)
-        else:
-            rotatemiddle(r-6)
-        randomstring+=rotates[r]
-    print("mix up steps:",randomstring)
-    '''
+
+def simplesolve(c,co,eo,e1,e2,e3,phase0step):
+    if (c,co,eo,e1,e2,e3) in dict0:
+        return dict0[(c,co,eo,e1,e2,e3)]
+    t0=time()
+    cubes,newcubes=[(c,co,eo,e1,e2,e3,1,-1)],[]
+    for step in range(1,phase0step+1):
+        t1=time()
+        for cube in cubes:
+            oc,oco,oeo,oe1,oe2,oe3,oldstep,f1=cube
+            oldstep=18*oldstep
+            for f in 0,1,2,3,4,5:
+                if f is not f1 and f1-f!=3:
+                    newstep=oldstep+3*f
+                    crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
+                    nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
+                    for newstep in newstep,newstep,newstep+2:
+                        nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                        if (nc,nco,neo,ne1,ne2,ne3) in dict0:
+                            m=dict0[(nc,nco,neo,ne1,ne2,ne3)]
+                            return (newstep-1)*eighteen[int(log(m,18))]+m
+                        elif step is not phase0step:
+                            newcubes.append((nc,nco,neo,ne1,ne2,ne3,newstep,f))
+        print(step,len(newcubes),time()-t1)
+        cubes,newcubes=newcubes,[]
+    print(time()-t0,"no solution under",phase0step+dict0step,"steps")
+    return 0
+
+def solvecube():
+    print()
+    print(center)
+    #adjust direction
+    adjust1=[[0,0],[2,2,2],[0],[],[2],[0,0,0]]
+    for a in adjust1[center.index(3)]:
+        rotatecube(a)
+    adjust2=[[],[],[1,1,1],[],[1,1],[1]]
+    for a in adjust2[center.index(1)]:
+        rotatecube(a)
+    print(center)
+    #if can be finished within 12 steps
     
-
-
+    print("start one phase")
+    r=simplesolve(c,co,eo,e1,e2,e3,phase0step)
+    if r:
+        htm=int(log(r,18))
+        print("directly solved",htm,r)
+        minmove=r
+        numstr,num="",minmove
+        while num>=18:
+            numstr,num=str(num//3%6)+str(num%3)+numstr,num//18
+        for j in range(htm):
+            print(allrotation[3*int(numstr[2*j])+int(numstr[2*j+1])],end="")
+            rotate(int(numstr[2*j]),int(numstr[2*j+1]))
+            display()
+            sleep(1)
+        return
+    
+    print("start two phase")
+    htm=qtm=stm=50
+    minmove=eighteen[-1]
+    for i in range(threadn):
+        print("{}\nc = {}  co = {}  eo = {}  e1 = {}  e2 = {}  e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(i),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
+        htm,qtm,stm,minmove,threadt=solve(c,co,eo,e1,e2,e3,0,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
+        print(threadt,"s")
+        print(htm,qtm,stm,minmove)
+        
+        
+    if htm>=50:
+        print("fail to solve")
+    else:
+        numstr,num="",minmove
+        while num>=18:
+            numstr,num=str(num//3%6)+str(num%3)+numstr,num//18
+        print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+numstr)
+        for j in range(htm):
+            print(allrotation[3*int(numstr[2*j])+int(numstr[2*j+1])],end="")
+            rotate(int(numstr[2*j]),int(numstr[2*j+1]))
+            display()
+            sleep(0.5)
+        print()
+        print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
 
 canvas.bind("<Button-1>",click)
-#canvas.bind_all("<KeyPress>",keypress)
+canvas.bind_all("<KeyPress>",keypress)
 start()
 canvas.pack()
 window.mainloop()
