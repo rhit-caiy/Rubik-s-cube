@@ -255,112 +255,10 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
         predictstate,newpredictstate=newpredictstate,[]
     return dict2,round(time()-t0,6)
 
-#solve the cube with c,co,eo,e1,e2,e3 numbers
-def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen):
-    tstart=time()
-    cubes=[(c,co,eo,e1,e2,e3,1,0,-1)]
-    n=0
-    total=totalnums[phase1step-1]
-    x=800
-    y=80
-    w=500
-    y1=100
-    # canvas.create_rectangle(x,y,x+w,y1)
-    # canvas.create_text(x-50,(y+y1)/2,text="two phase")
-    while cubes:
-        n=1+n
-        if not n%1000:
-            p=n/total
-            canvas.delete("phase1")
-            canvas.create_rectangle(x,y,x+w*p,y1,fill="#00FF00",tag="phase1")
-            canvas.update()
-            
-        oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
-        step,oldstep=1+step,18*oldstep
-        for f in 0,1,2,3,4,5:
-            if f is not f1 and f1-f!=3:
-                m1_1=oldstep+3*f
-                crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
-                nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
-                for m1 in m1_1,m1_1+1,m1_1+2:
-                    nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                    if step is not phase1step:
-                        cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
-                    if ne2//24+495*(neo+2048*nco) in dict1:
-                        m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
-                        while m1_2>=18:
-                            f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
-                            ep4rf0t0=ep4r[f0][t0]
-                            nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
-                        if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                            m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                            l=int(log(m1,18))+int(log(m2,18))
-                            if l<=htm:
-                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
-                                ep4rf01=ep4r1[f0]
-                                nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
-                                if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                                    m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                                    l=int(log(m1,18))+int(log(m2,18))
-                                    if l<=htm:
-                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
-    return htm,qtm,stm,minmove,time()-tstart
-
-#print the solved form solve, solution must be <= current htm
-def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
-    n=solution=(m1-1)*eighteen[int(log(m2,18))]+m2
-    if solution<minmove:
-        minmove=solution
-    qtmvalue=stmvalue=htm=l
-    numstr=""
-    while n>=18:
-        numstr,n=str(n//3%6)+str(n%3)+numstr,n//18
-        if n%3==1:
-            qtmvalue+=1
-    for i in range(0,len(numstr)-2,2):
-        if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
-            stmvalue-=1
-    if qtmvalue<qtm:
-        qtm=qtmvalue
-    if stmvalue<stm:
-        stm=stmvalue
-    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
-    return htm,qtm,stm,minmove
-
-
-phase1step=6#7
-dict1step=7#8
-dict2step=8#9
-stepshouldbelow=phase1step+dict1step+dict2step+1
-print(phase1step,"+",dict1step,"+",dict2step)
-dict1,tdict1=getdict1(dict1step,cor0,eor0,ep4r0)
-print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict1),tdict1))
-dict2,tdict2=getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1)
-print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict2),tdict2))
-print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
-threadn=1
-print(threadn,"threads")
-
-phase0step=6
-dict0step=6
-dict0,tdict0=getdict0(dict0step)
-print("phase 0 dict time",tdict0)
 
 window=Tk()
 canvas=Canvas(window,bg="#808080",width=1440,height=810)
 window.title("cube")
-
-c=ccn
-co=ccon
-e1=cen1
-e2=cen2
-e3=cen3
-eo=ceon
-
-center=[0,1,2,3,4,5]
-cubecolor=[[i]*9 for i in range(6)]
-history=[(c,co,eo,e1,e2,e3,center)]
-solving=0
 
 def rotatemiddle(a):
     global e1,e2,e3,eo,center
@@ -536,33 +434,36 @@ def click(coordinate):
     display()
     addhistory()
 
+keydict={'W':(1,2),'A':(0,0),'S':(1,0),'D':(0,2),'R':(2,0),'F':(2,2),'I':(4,0),'J':(0,0),'K':(4,2),'L':(0,2),'Y':(2,2),'H':(2,0),'Z':(3,2),'M':(3,0),'X':(3,0),'N':(3,2)}
 def keypress(key):
     k=key.keysym
     print(k)
-    if k=='U' or k=='u' or k=='0':
-        rotate(0,0)
-    elif k=='L' or k=='l' or k=='1':
-        rotate(1,0)
-    elif k=='F' or k=='f' or k=='2':
-        rotate(2,0)
-    elif k=='D' or k=='d' or k=='3':
-        rotate(3,0)
-    elif k=='R' or k=='r' or k=='4':
-        rotate(4,0)
-    elif k=='B' or k=='b' or k=='5':
-        rotate(5,0)
-    elif k=="M":
-        rotatemiddle(0)
-    elif k=="E":
-        rotatemiddle(1)
-    elif k=="S":
-        rotatemiddle(2)
-    elif k=='x':
-        rotatecube(0)
-    elif k=='y':
-        rotatecube(1)
-    elif k=='z':
-        rotatecube(2)
+    if len(k)==1:
+        if k in "012345":
+            rotate(int(k),0)
+        elif k in "ulfdrb":
+            rotate("ulfdrb".index(k),0)
+        elif k in "mes":
+            rotatemiddle("mes".index(k))
+        elif k in "xyz":
+            rotatecube("xyz".index(k))
+        elif k in keydict:
+            f,t=keydict[k]
+            rotate(f,t)
+        elif k=="G":
+            rotatemiddle(0)
+        elif k=="T":
+            for i in range(3):
+                rotatemiddle(0)
+        elif k=="[":
+            rotatecube(1)
+        elif k=="]":
+            for i in range(3):
+                rotatecube(1)
+    elif k in ("Up","Down","Left","Right","Next","Prior"):
+        v=("Up","Down","Left","Right","Next","Prior").index(k)
+        for i in range(v%2*2+1):
+            rotatecube(v//2)
     elif k=="Return":
         solvecube()
     elif k=="space":
@@ -627,6 +528,79 @@ def randomcube():
         rotate(randint(0,5),randint(0,2))
     addhistory()
 
+#solve the cube with c,co,eo,e1,e2,e3 numbers
+def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen):
+    tstart=time()
+    cubes=[(c,co,eo,e1,e2,e3,1,0,-1)]
+    n=0
+    total=totalnums[phase1step-1]
+    x=800
+    y=80
+    w=500
+    y1=100
+    # canvas.create_rectangle(x,y,x+w,y1)
+    # canvas.create_text(x-50,(y+y1)/2,text="two phase")
+    while cubes:
+        n=1+n
+        if not n%1000:
+            p=n/total
+            canvas.delete("phase1")
+            canvas.create_rectangle(x,y,x+w*p,y1,fill="#00FF00",tag="phase1")
+            canvas.update()
+            
+        oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
+        step,oldstep=1+step,18*oldstep
+        for f in 0,1,2,3,4,5:
+            if f is not f1 and f1-f!=3:
+                m1_1=oldstep+3*f
+                crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
+                nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
+                for m1 in m1_1,m1_1+1,m1_1+2:
+                    nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                    if step is not phase1step:
+                        cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
+                    if ne2//24+495*(neo+2048*nco) in dict1:
+                        m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
+                        while m1_2>=18:
+                            f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
+                            ep4rf0t0=ep4r[f0][t0]
+                            nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
+                        if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
+                            m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                            l=int(log(m1,18))+int(log(m2,18))
+                            if l<=htm:
+                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
+                                ep4rf01=ep4r1[f0]
+                                nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
+                                if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
+                                    m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                                    l=int(log(m1,18))+int(log(m2,18))
+                                    if l<=htm:
+                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+    return htm,qtm,stm,minmove,time()-tstart
+
+#print the solved form solve, solution must be <= current htm
+def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
+    n=solution=(m1-1)*eighteen[int(log(m2,18))]+m2
+    if solution<minmove:
+        minmove=solution
+    qtmvalue=stmvalue=htm=l
+    numstr=""
+    while n>=18:
+        numstr,n=str(n//3%6)+str(n%3)+numstr,n//18
+        if n%3==1:
+            qtmvalue+=1
+    for i in range(0,len(numstr)-2,2):
+        if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
+            stmvalue-=1
+    if qtmvalue<qtm:
+        qtm=qtmvalue
+    if stmvalue<stm:
+        stm=stmvalue
+    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
+    return htm,qtm,stm,minmove
+
+#solve directly
 def simplesolve(c,co,eo,e1,e2,e3,phase0step):
     if (c,co,eo,e1,e2,e3) in dict0:
         return dict0[(c,co,eo,e1,e2,e3)]
@@ -672,7 +646,62 @@ def simplesolve(c,co,eo,e1,e2,e3,phase0step):
     canvas.create_rectangle(x,y,x+w*p,y1,fill="#FF0000",tag="phase0")
     canvas.update()
     return 0
-
+'''
+def solvetogether(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen):
+    tstart=time()
+    cubes=[(c,co,eo,e1,e2,e3,1,0,-1)]
+    n=0
+    total=totalnums[phase1step-1]
+    x=800
+    y=80
+    w=500
+    y1=100
+    # canvas.create_rectangle(x,y,x+w,y1)
+    # canvas.create_text(x-50,(y+y1)/2,text="two phase")
+    while cubes:
+        n=1+n
+        if not n%1000:
+            p=n/total
+            canvas.delete("phase1")
+            canvas.create_rectangle(x,y,x+w*p,y1,fill="#00FF00",tag="phase1")
+            canvas.update()
+            
+        oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
+        step,oldstep=1+step,18*oldstep
+        for f in 0,1,2,3,4,5:
+            if f is not f1 and f1-f!=3:
+                m1_1=oldstep+3*f
+                crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
+                nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
+                for m1 in m1_1,m1_1+1,m1_1+2:
+                    nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                    if (nc,nco,neo,ne1,ne2,ne3) in dict0:
+                        m2=dict0[(nc,nco,neo,ne1,ne2,ne3)]
+                        l=int(log(m1,18))+int(log(m2,18))
+                        htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,0)
+                        
+                    if step is not phase1step:
+                        cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
+                    if ne2//24+495*(neo+2048*nco) in dict1:
+                        m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
+                        while m1_2>=18:
+                            f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
+                            ep4rf0t0=ep4r[f0][t0]
+                            nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
+                        if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
+                            m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                            l=int(log(m1,18))+int(log(m2,18))
+                            if l<=htm:
+                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
+                                ep4rf01=ep4r1[f0]
+                                nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
+                                if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
+                                    m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                                    l=int(log(m1,18))+int(log(m2,18))
+                                    if l<=htm:
+                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+    return htm,qtm,stm,minmove,time()-tstart
+'''
 def decodevalue(num):
     s=""
     while num>=18:
@@ -750,6 +779,37 @@ def solvecube():
             sleep(0.5)
         print()
         print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
+
+
+phase0step=phase1step=6#7
+dict0step=6#6
+dict1step=7#8
+dict2step=8#9
+stepshouldbelow=phase1step+dict1step+dict2step+1
+print(phase1step,"+",dict1step,"+",dict2step)
+dict0,tdict0=getdict0(dict0step)
+print("phase 0 dict time",tdict0)
+dict1,tdict1=getdict1(dict1step,cor0,eor0,ep4r0)
+print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict1),tdict1))
+dict2,tdict2=getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1)
+print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict2),tdict2))
+print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
+threadn=1
+print(threadn,"threads")
+
+
+
+c=ccn
+co=ccon
+e1=cen1
+e2=cen2
+e3=cen3
+eo=ceon
+
+center=[0,1,2,3,4,5]
+cubecolor=[[i]*9 for i in range(6)]
+history=[(c,co,eo,e1,e2,e3,center)]
+solving=0
 
 canvas.bind("<Button-1>",click)
 canvas.bind_all("<KeyPress>",keypress)
