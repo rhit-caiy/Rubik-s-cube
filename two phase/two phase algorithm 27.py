@@ -199,7 +199,7 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                                     m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
                                     l=int(log(m1,18))+int(log(m2,18))
                                     if l<=htm:
-                                        htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
     return htm,qtm,stm,minmove,time()-tstart
 
 def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
@@ -265,7 +265,7 @@ for i in range(cubenumber):
             c,co,eo,e1,e2,e3=cr[f][t][c],cor[f][t][co],eor[f][t][eo],ep4rft[e1],ep4rft[e2],ep4rft[e3]
         print("{}\nc = {}  co = {}  eo = {}  e1 = {}  e2 = {}  e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(j),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
         htm,qtm,stm,minmove,threadtime=solve(c,co,eo,e1,e2,e3,j,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
-        print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}".format(j,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
+        print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}\n".format(j,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
         cubetime+=threadtime
     times.append(cubetime)
     print("finish solve cube",i+1)

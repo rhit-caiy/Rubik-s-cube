@@ -3,6 +3,7 @@ from random import randint
 from math import log
 from itertools import permutations,product,combinations
 from tkinter import Tk,Canvas
+# from sys import getsizeof
 
 print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
 
@@ -27,8 +28,10 @@ eighteen=tuple([18**i for i in range(28)])
 changedirections=((0,1,2,3,4,5),(1,2,0,4,5,3),(2,0,1,5,3,4))
 #change corner 2 7 034 156
 #change edge 125 069 3a4 7b8
+#directions
 
 #reverse
+
 
 
 #initialize
@@ -112,11 +115,11 @@ cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=tuple
 #3 3502
 #4 46741
 #5 621649
-#6 
-#7 
+#6 8240087
+#7 109043123
 def getdict0(dict0step):
     print("\ndict0\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
-    dict0={(ccn,ccon,ceon,cen1,cen2,cen3):1}
+    dict0={ccn+40320*(ccon+2187*(ceon+2048*(cen3+11880*(cen2+11880*cen1)))):1}
     predictstate,newpredictstate=[(ccn,ccon,ceon,cen1,cen2,cen3,0,-1)],[]
     t0=time()
     for step in range(1,dict0step+1):
@@ -131,12 +134,12 @@ def getdict0(dict0step):
                     nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
                     for t in 2,1,0:
                         nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                        key0=(nc,nco,neo,ne1,ne2,ne3)
+                        key0=nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1+11880))))#(nc,nco,neo,ne1,ne2,ne3)
                         if key0 not in dict0:
                             newstep=oldstep+(3*f+t)*eighteen0
                             dict0[key0]=newstep+eighteen1
                             if step is not dict0step:
-                                newpredictstate.append(key0+(newstep,f))
+                                newpredictstate.append((nc,nco,neo,ne1,ne2,ne3,newstep,f))
         print("{:<8}{:<16}{:<16}{:<16f}".format(step,len(newpredictstate),len(dict0),time()-t1))
         predictstate,newpredictstate=newpredictstate,[]
     return dict0,round(time()-t0,6)
@@ -149,7 +152,7 @@ def getdict0(dict0step):
 #5 95038
 #6 1138855
 #7 13209133
-#8 
+#8 138155501
 def getdict1(dict1step,cor0,eor0,ep4r0):
     print("\ndict1\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
     dict1={425:1}#cen2//24+495*(ceon+2048*ccon)
@@ -198,7 +201,7 @@ def getdict1(dict1step,cor0,eor0,ep4r0):
 #6 146635
 #7 883485
 #8 5068603
-#9 
+#9 27699336
 def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
     print("\ndict2\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
     dict2={121187856:1}#cen3+11880*(cen2+11880*(cen1+11880*ccn))
@@ -255,6 +258,19 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
         predictstate,newpredictstate=newpredictstate,[]
     return dict2,round(time()-t0,6)
 
+# =============================================================================
+# def size(d):
+#     a=getsizeof(d)
+#     if type(d)==list or type(d)==tuple:
+#         for i in d:
+#             a+=size(i)
+#     elif type(d)==dict:
+#         for i in d:
+#             a+=size(i)
+#         for i in d.values():
+#             a+=size(i)
+#     return a
+# =============================================================================
 
 window=Tk()
 canvas=Canvas(window,bg="#808080",width=1440,height=810)
@@ -291,11 +307,9 @@ def rotatemiddle(a):
     
     center=nc
     eo=eodict[tuple(ned)]
-    
     e1=ep4dict[tuple([ne.index(i) for i in range(0,4)])]
     e2=ep4dict[tuple([ne.index(i) for i in range(4,8)])]
     e3=ep4dict[tuple([ne.index(i) for i in range(8,12)])]
-    #e1,e2,e3,center
 
 def rotatecube(a):
     if a==0:
@@ -325,7 +339,6 @@ def rotate(f,t):
     
 
 def start():
-    draw()
     display()
     
 def draw():
@@ -347,24 +360,19 @@ def draw():
         for j in range(3):
             canvas.create_rectangle(100*i+110,650+50*j,100*i+190,690+50*j,fill="#C0C0C0")
             canvas.create_text(100*i+140,670+50*j,text=allrotation[3*i+j])
-    if solving:
-        x=800
-        y=20
-        w=500
-        y1=70
-        canvas.create_rectangle(x,y,x+w,y1)
-        canvas.create_text(x-25,(y+y1)/2,text="BFS")
-        
-        x=800
-        y=80
-        w=500
-        y1=100
-        canvas.create_rectangle(x,y,x+w,y1)
-        canvas.create_text(x-50,(y+y1)/2,text="two phase")
-        
+    if solving==1:
+        for i in range(threadn):
+            x=200
+            y=20+100*i
+            w=1000
+            y1=80+100*i
+            canvas.create_rectangle(x,y,x+w,y1)
+            canvas.create_text(x-20,(y+y1)/2,text=str(i))
         
 def click(coordinate):
     global cubecolor,c,co,eo,e1,e2,e3,center
+    if solving:
+        return
     x=coordinate.x
     y=coordinate.y
     a=(x-100)//100
@@ -436,6 +444,8 @@ def click(coordinate):
 
 keydict={'W':(1,2),'A':(0,0),'S':(1,0),'D':(0,2),'R':(2,0),'F':(2,2),'I':(4,0),'J':(0,0),'K':(4,2),'L':(0,2),'Y':(2,2),'H':(2,0),'Z':(3,2),'M':(3,0),'X':(3,0),'N':(3,2)}
 def keypress(key):
+    if solving:
+        return
     k=key.keysym
     print(k)
     if len(k)==1:
@@ -467,7 +477,7 @@ def keypress(key):
     elif k=="Return":
         solvecube()
     elif k=="space":
-        pass
+        pass   
     elif k=='BackSpace':
         loadhistory()
     display()
@@ -527,6 +537,12 @@ def randomcube():
     for i in range(randint(1024,2048)):
         rotate(randint(0,5),randint(0,2))
     addhistory()
+    
+def randomcolor():
+    c="#"
+    for i in range(6):
+        c+=hex(randint(0,15))[2:]
+    return c
 
 #solve the cube with c,co,eo,e1,e2,e3 numbers
 def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen):
@@ -534,49 +550,93 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
     cubes=[(c,co,eo,e1,e2,e3,1,0,-1)]
     n=0
     total=totalnums[phase1step-1]
-    x=800
-    y=80
-    w=500
-    y1=100
-    # canvas.create_rectangle(x,y,x+w,y1)
-    # canvas.create_text(x-50,(y+y1)/2,text="two phase")
-    while cubes:
-        n=1+n
-        if not n%1000:
-            p=n/total
-            canvas.delete("phase1")
-            canvas.create_rectangle(x,y,x+w*p,y1,fill="#00FF00",tag="phase1")
-            canvas.update()
-            
-        oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
-        step,oldstep=1+step,18*oldstep
-        for f in 0,1,2,3,4,5:
-            if f is not f1 and f1-f!=3:
-                m1_1=oldstep+3*f
-                crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
-                nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
-                for m1 in m1_1,m1_1+1,m1_1+2:
-                    nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                    if step is not phase1step:
-                        cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
-                    if ne2//24+495*(neo+2048*nco) in dict1:
-                        m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
-                        while m1_2>=18:
-                            f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
-                            ep4rf0t0=ep4r[f0][t0]
-                            nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
-                        if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                            m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+    x=200
+    y=20+100*threadid
+    w=1000
+    y1=80+100*threadid
+    cl=randomcolor()#"#0080FF"
+    drawnum=total//1000
+    if threadid:
+        while cubes:
+            n=1+n
+            if not n%drawnum:
+                p=n/total
+                canvas.create_line(x+w*p,y,x+w*p,y1,fill=cl)
+                canvas.update()
+                
+            oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
+            step,oldstep=1+step,18*oldstep
+            for f in 0,1,2,3,4,5:
+                if f is not f1 and f1-f!=3:
+                    m1_1=oldstep+3*f
+                    crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
+                    nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
+                    for m1 in m1_1,m1_1+1,m1_1+2:
+                        nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                        if step is not phase1step:
+                            cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
+                        if ne2//24+495*(neo+2048*nco) in dict1:
+                            m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
+                            while m1_2>=18:
+                                f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
+                                ep4rf0t0=ep4r[f0][t0]
+                                nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
+                            if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
+                                m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                                l=int(log(m1,18))+int(log(m2,18))
+                                if l<=htm:
+                                    cl=randomcolor()#"#00FF00"
+                                    htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
+                                    ep4rf01=ep4r1[f0]
+                                    nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
+                                    if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
+                                        m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                                        l=int(log(m1,18))+int(log(m2,18))
+                                        if l<=htm:
+                                            htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+    else:
+        while cubes:
+            n=1+n
+            if not n%drawnum:
+                p=n/total
+                canvas.create_line(x+w*p,y,x+w*p,y1,fill=cl)
+                canvas.update()
+            oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
+            step,oldstep=1+step,18*oldstep
+            for f in 0,1,2,3,4,5:
+                if f is not f1 and f1-f!=3:
+                    m1_1=oldstep+3*f
+                    crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
+                    nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
+                    for m1 in m1_1,m1_1+1,m1_1+2:
+                        nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                        if nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1)))) in dict0:
+                            m2=dict0[nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1))))]
                             l=int(log(m1,18))+int(log(m2,18))
-                            if l<=htm:
-                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
-                                ep4rf01=ep4r1[f0]
-                                nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
-                                if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                                    m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                                    l=int(log(m1,18))+int(log(m2,18))
-                                    if l<=htm:
-                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+                            htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,0)
+                            cl="#FFFFFF"
+                        if step is not phase1step:
+                            cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
+                        if ne2//24+495*(neo+2048*nco) in dict1:
+                            m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
+                            while m1_2>=18:
+                                f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
+                                ep4rf0t0=ep4r[f0][t0]
+                                nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
+                            if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
+                                m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                                l=int(log(m1,18))+int(log(m2,18))
+                                if l<=htm:
+                                    cl=randomcolor()#"#00FF00"
+                                    htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
+                                    ep4rf01=ep4r1[f0]
+                                    nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
+                                    if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
+                                        m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                                        l=int(log(m1,18))+int(log(m2,18))
+                                        if l<=htm:
+                                            htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+    
     return htm,qtm,stm,minmove,time()-tstart
 
 #print the solved form solve, solution must be <= current htm
@@ -597,111 +657,12 @@ def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
         qtm=qtmvalue
     if stmvalue<stm:
         stm=stmvalue
-    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
+    if rtype==0:
+        s=f"{htm} = {step} + {int(log(m2,18))}"
+    s=f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}"
+    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(s,qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
     return htm,qtm,stm,minmove
 
-#solve directly
-def simplesolve(c,co,eo,e1,e2,e3,phase0step):
-    if (c,co,eo,e1,e2,e3) in dict0:
-        return dict0[(c,co,eo,e1,e2,e3)]
-    t0=time()
-    cubes,newcubes=[(c,co,eo,e1,e2,e3,1,-1)],[]
-    n=0
-    total=totalnums[phase0step-1]
-    x=800
-    y=20
-    w=500
-    y1=70
-    # canvas.create_rectangle(x,y,x+w,y1)
-    # canvas.create_text(x-25,(y+y1)/2,text="BFS")
-    
-    for step in range(1,phase0step+1):
-        t1=time()
-        for cube in cubes:
-            n=1+n
-            if not n%1000:
-                p=n/total
-                canvas.delete("phase0")
-                canvas.create_rectangle(x,y,x+w*p,y1,fill="#00FF00",tag="phase0")
-                canvas.update()
-                
-            oc,oco,oeo,oe1,oe2,oe3,oldstep,f1=cube
-            oldstep=18*oldstep
-            for f in 0,1,2,3,4,5:
-                if f is not f1 and f1-f!=3:
-                    newstep=oldstep+3*f
-                    crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
-                    nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
-                    for newstep in newstep,newstep+1,newstep+2:
-                        nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                        if (nc,nco,neo,ne1,ne2,ne3) in dict0:
-                            m=dict0[(nc,nco,neo,ne1,ne2,ne3)]
-                            return (newstep-1)*eighteen[int(log(m,18))]+m
-                        elif step is not phase0step:
-                            newcubes.append((nc,nco,neo,ne1,ne2,ne3,newstep,f))
-        print(step,len(newcubes),round(time()-t1,6),"s")
-        cubes,newcubes=newcubes,[]
-    print(round(time()-t0,6),"s, no solution under",phase0step+dict0step,"steps")
-    canvas.delete("phase0")
-    canvas.create_rectangle(x,y,x+w*p,y1,fill="#FF0000",tag="phase0")
-    canvas.update()
-    return 0
-'''
-def solvetogether(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen):
-    tstart=time()
-    cubes=[(c,co,eo,e1,e2,e3,1,0,-1)]
-    n=0
-    total=totalnums[phase1step-1]
-    x=800
-    y=80
-    w=500
-    y1=100
-    # canvas.create_rectangle(x,y,x+w,y1)
-    # canvas.create_text(x-50,(y+y1)/2,text="two phase")
-    while cubes:
-        n=1+n
-        if not n%1000:
-            p=n/total
-            canvas.delete("phase1")
-            canvas.create_rectangle(x,y,x+w*p,y1,fill="#00FF00",tag="phase1")
-            canvas.update()
-            
-        oc,oco,oeo,oe1,oe2,oe3,oldstep,step,f1=cubes.pop()
-        step,oldstep=1+step,18*oldstep
-        for f in 0,1,2,3,4,5:
-            if f is not f1 and f1-f!=3:
-                m1_1=oldstep+3*f
-                crf0,corf0,eorf0,ep4rf0=cr0[f],cor0[f],eor0[f],ep4r0[f]
-                nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
-                for m1 in m1_1,m1_1+1,m1_1+2:
-                    nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                    if (nc,nco,neo,ne1,ne2,ne3) in dict0:
-                        m2=dict0[(nc,nco,neo,ne1,ne2,ne3)]
-                        l=int(log(m1,18))+int(log(m2,18))
-                        htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,0)
-                        
-                    if step is not phase1step:
-                        cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
-                    if ne2//24+495*(neo+2048*nco) in dict1:
-                        m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
-                        while m1_2>=18:
-                            f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
-                            ep4rf0t0=ep4r[f0][t0]
-                            nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
-                        if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                            m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                            l=int(log(m1,18))+int(log(m2,18))
-                            if l<=htm:
-                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
-                                ep4rf01=ep4r1[f0]
-                                nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
-                                if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                                    m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                                    l=int(log(m1,18))+int(log(m2,18))
-                                    if l<=htm:
-                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
-    return htm,qtm,stm,minmove,time()-tstart
-'''
 def decodevalue(num):
     s=""
     while num>=18:
@@ -735,26 +696,14 @@ def solvecube():
     adjust2=[[],[],[1,1,1],[],[1,1],[1]]
     for a in adjust2[center.index(1)]:
         rotatecube(a)
+    if (c,co,eo,e1,e2,e3)==(ccn,ccon,ceon,cen1,cen2,cen3):
+        print("unmixed")
+        solving=0
+        return
     display()
     #try to solve within 12 moves
     print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
     replaycube=(c,co,eo,e1,e2,e3)
-    
-    print("start one phase, search depth",phase0step,"+",dict0step,"=",phase0step,dict0step)
-    r=simplesolve(c,co,eo,e1,e2,e3,phase0step)
-    if r:
-        solving=0
-        htm=int(log(r,18))
-        print("directly solved in",htm,"steps")
-        replaystring=numstr=decodevalue(r)
-        print(r)
-        print(numstr)
-        for j in range(htm):
-            print(allrotation[3*int(numstr[2*j])+int(numstr[2*j+1])],end="")
-            rotate(int(numstr[2*j]),int(numstr[2*j+1]))
-            display()
-            sleep(0.5)
-        return
     
     print("start two phase")
     print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
@@ -762,11 +711,11 @@ def solvecube():
     minmove=eighteen[-1]
     for i in range(threadn):
         print("{}\nc = {}  co = {}  eo = {}  e1 = {}  e2 = {}  e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(i),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
-        htm,qtm,stm,minmove,threadt=solve(c,co,eo,e1,e2,e3,0,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
-        print(threadt,"s")
-        print(htm,qtm,stm,minmove)
-        
-    solving=0
+        htm,qtm,stm,minmove,threadtime=solve(c,co,eo,e1,e2,e3,i,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
+        print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}\n".format(i,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
+        if htm<=phase1step+dict0step:
+            break
+    solving=2
     if htm>=stepshouldbelow:
         print("fail to solve")
     else:
@@ -778,10 +727,9 @@ def solvecube():
             display()
             sleep(0.5)
         print()
-        print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
+    solving=0
 
-
-phase0step=phase1step=6#7
+phase1step=6#7
 dict0step=6#6
 dict1step=7#8
 dict2step=8#9
@@ -794,10 +742,15 @@ print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict1),tdict1))
 dict2,tdict2=getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1)
 print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict2),tdict2))
 print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
-threadn=1
+
+# dict0size=size(dict0)
+# dict1size=size(dict1)
+# dict2size=size(dict2)
+# gb=2**30
+# print(dict0size/gb,dict1size/gb,dict2size/gb)
+
+threadn=2
 print(threadn,"threads")
-
-
 
 c=ccn
 co=ccon
