@@ -5,13 +5,12 @@ from itertools import permutations,product,combinations
 
 def getdicts():
     t0=time()
-    cc,cco,ce,ceo=(0,1,2,3,4,5,6,7),(0,0,0,0,0,0,0,0),(0,1,2,3,4,5,6,7,8,9,10,11),(0,0,0,0,0,0,0,0,0,0,0,0)
     facecorner=((0,2,3,1),(0,6,4,2),(2,4,5,3),(4,6,7,5),(3,5,7,1),(1,7,6,0))
     faceedge=((0,1,2,3),(1,4,9,5),(2,5,10,6),(10,9,8,11),(3,6,11,7),(0,7,8,4))
-    cdict={i:n for n,i in enumerate(permutations(cc))}
+    cdict={i:n for n,i in enumerate(permutations((0,1,2,3,4,5,6,7)))}
     codict={i:n for n,i in enumerate((i for i in product(range(3),repeat=8) if not sum(i)%3))}
     eodict={i:n for n,i in enumerate([i for i in product(range(2),repeat=12) if not i.count(1)%2])}
-    ep4dict={j:n for n,j in enumerate(j for i in combinations(ce,r=4) for j in permutations(i))}
+    ep4dict={j:n for n,j in enumerate(j for i in combinations((0,1,2,3,4,5,6,7,8,9,10,11),r=4) for j in permutations(i))}
     cl,col,eol,ep4l,cr,cor,eor,ep4r=[0]*len(cdict),[0]*len(codict),[0]*len(eodict),[0]*len(ep4dict),[],[],[],[]
     add1,add2=[1,2,0],[2,0,1]
     for f in 0,1,2,3,4,5:
@@ -78,18 +77,18 @@ def getdicts():
         for a,dep in enumerate(ep4dict):
             ep=list(dep)
             for i in 0,1,2,3:
-                if ep[i] in sfe:
-                    ep[i]=fe[fte.index(ep[i])]
+                if (x:=ep[i]) in sfe:
+                    ep[i]=fe[fte.index(x)]
             b=ep4dict[tuple(ep)]
             d0[a],d2[b]=b,a
             if not d1[a]:
                 for i in 0,1,2,3:
-                    if ep[i] is not dep[i]:
-                        ep[i]=fe[fte.index(ep[i])]
+                    if (x:=ep[i]) is not dep[i]:
+                        ep[i]=fe[fte.index(x)]
                 b=ep4dict[tuple(ep)]
                 d1[a],d1[b]=b,a
         ep4r.append((tuple(d0),tuple(d1),tuple(d2)))
-    return tuple(cr),tuple(cor),tuple(ep4r),tuple(eor),cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo],tuple([i[0] for i in cr]),tuple([i[0] for i in cor]),tuple([i[0] for i in eor]),tuple([i[0] for i in ep4r]),tuple([i[1] for i in cr]),tuple([i[1] for i in ep4r]),round(time()-t0,6)
+    return tuple(cr),tuple(cor),tuple(ep4r),tuple(eor),cdict[(0,1,2,3,4,5,6,7)],codict[(0,0,0,0,0,0,0,0)],ep4dict[(0,1,2,3)],ep4dict[(4,5,6,7)],ep4dict[(8,9,10,11)],eodict[(0,0,0,0,0,0,0,0,0,0,0,0)],tuple([i[0] for i in cr]),tuple([i[0] for i in cor]),tuple([i[0] for i in eor]),tuple([i[0] for i in ep4r]),tuple([i[1] for i in cr]),tuple([i[1] for i in ep4r]),round(time()-t0,6)
 
 def getdict1(dict1step,cor0,eor0,ep4r0):
     print("\ndict1\n{:<8}{:<16}{:<16}{:<16}".format("step","cubes left","dict length","time/s"))
@@ -108,8 +107,7 @@ def getdict1(dict1step,cor0,eor0,ep4r0):
                     corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
                     for newstep in [newstep+2,newstep+1,newstep]:
                         nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
-                        key1=ne2//24+495*(neo+2048*nco)
-                        if key1 not in dict1:
+                        if (key1:=ne2//24+495*(neo+2048*nco)) not in dict1:
                             dict1[key1]=newstep
                             if step is not dict1step:
                                 newpredictstate.append((nco,neo,ne2,newstep,f))
@@ -120,8 +118,7 @@ def getdict1(dict1step,cor0,eor0,ep4r0):
                     corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
                     for newstep in [newstep+2,newstep+1,newstep]:
                         nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
-                        key1=ne2//24+495*(neo+2048*nco)
-                        if key1 not in dict1:
+                        if (key1:=ne2//24+495*(neo+2048*nco)) not in dict1:
                             dict1[key1]=newstep
                             if step is not dict1step:
                                 newpredictstate.append((nco,neo,ne2,newstep,f))
@@ -144,8 +141,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                 if f1 is not f:
                     ep4rf1=ep4r1[f]
                     nc,ne1,ne2,ne3=cr1[f][oc],ep4rf1[oe1],ep4rf1[oe2],ep4rf1[oe3]
-                    key2=ne3+11880*(ne2+11880*(ne1+11880*nc))
-                    if key2 not in dict2:
+                    if (key2:=ne3+11880*(ne2+11880*(ne1+11880*nc))) not in dict2:
                         newstep=oldstep+(3*f+1)*eighteen0
                         dict2[key2]=newstep+eighteen1
                         if step is not dict2step:
@@ -154,8 +150,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                 if f1 is not f and f1-f!=3:
                     ep4rf1=ep4r1[f]
                     nc,ne1,ne2,ne3=cr1[f][oc],ep4rf1[oe1],ep4rf1[oe2],ep4rf1[oe3]
-                    key2=ne3+11880*(ne2+11880*(ne1+11880*nc))
-                    if key2 not in dict2:
+                    if (key2:=ne3+11880*(ne2+11880*(ne1+11880*nc))) not in dict2:
                         newstep=oldstep+(3*f+1)*eighteen0
                         dict2[key2]=newstep+eighteen1
                         if step is not dict2step:
@@ -165,8 +160,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                 nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
                 for t in 2,1,0:
                     nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                    key2=ne3+11880*(ne2+11880*(ne1+11880*nc))
-                    if key2 not in dict2:
+                    if (key2:=ne3+11880*(ne2+11880*(ne1+11880*nc))) not in dict2:
                         newstep=oldstep+(9+t)*eighteen0
                         dict2[key2]=newstep+eighteen1
                         if step is not dict2step:
@@ -176,8 +170,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                     nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
                     for t in 2,1,0:
                         nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                        key2=ne3+11880*(ne2+11880*(ne1+11880*nc))
-                        if key2 not in dict2:
+                        if (key2:=ne3+11880*(ne2+11880*(ne1+11880*nc))) not in dict2:
                             newstep=oldstep+t*eighteen0
                             dict2[key2]=newstep+eighteen1
                             if step is not dict2step:
@@ -202,22 +195,20 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                     if step is not phase1step:
                         cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
                     if ne2//24+495*(neo+2048*nco) in dict1:
-                        m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
-                        while m1_2>=18:
-                            f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
+                        m1_2,f0,nc1,ne11,ne21,ne31=18*dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
+                        while (m1_2:=m1_2//18)>=18:
+                            f0,t0,m1=m1_2//3%6,m1_2%3,18*m1+m1_2%18
                             ep4rf0t0=ep4r[f0][t0]
                             nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
                         if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
                             m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                            l=int(log(m1,18))+int(log(m2,18))
-                            if l<=htm:
+                            if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
                                 htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
                                 ep4rf01=ep4r1[f0]
                                 nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
                                 if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
                                     m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                                    l=int(log(m1,18))+int(log(m2,18))
-                                    if l<=htm:
+                                    if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
                                         htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
     return htm,qtm,stm,minmove,time()-tstart
 
@@ -226,9 +217,9 @@ def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
     if solution<minmove:
         minmove=solution
     qtmvalue=stmvalue=htm=l
-    numstr=""
-    while n>=18:
-        numstr,n=str(n//3%6)+str(n%3)+numstr,n//18
+    n,numstr=18*n,""
+    while (n:=n//18)>=18:
+        numstr=str(n//3%6)+str(n%3)+numstr
         if n%3==1:
             qtmvalue+=1
     for i in range(0,len(numstr)-2,2):
@@ -282,7 +273,7 @@ for i in range(cubenumber):
             f,t=direction[randomlist[k]//3],randomlist[k]%3
             ep4rft=ep4r[f][t]
             c,co,eo,e1,e2,e3=cr[f][t][c],cor[f][t][co],eor[f][t][eo],ep4rft[e1],ep4rft[e2],ep4rft[e3]
-        print("{}\nc = {}  co = {}  eo = {}  e1 = {}  e2 = {}  e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(j),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
+        print("{}\nc = {} ; co = {} ; eo = {} ; e1 = {} ; e2 = {} ; e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(j),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
         htm,qtm,stm,minmove,threadtime=solve(c,co,eo,e1,e2,e3,j,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
         print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}\n".format(j,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
         cubetime+=threadtime
@@ -295,9 +286,9 @@ for i in range(cubenumber):
         htms.append(htm)
         qtms.append(qtm)
         stms.append(stm)
-        numstr,num="",minmove
-        while num>=18:
-            numstr,num=str(num//3%6)+str(num%3)+numstr,num//18
+        numstr,num="",18*minmove
+        while (num:=num//18)>=18:
+            numstr=str(num//3%6)+str(num%3)+numstr
         print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+numstr)
         for j in range(htm):
             print(allrotation[3*int(numstr[2*j])+int(numstr[2*j+1])],end="")
