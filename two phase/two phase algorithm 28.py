@@ -203,24 +203,24 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                         if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
                             m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
                             if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
-                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
+                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,qtm,stm,step,tstart,1,eighteen)
                                 ep4rf01=ep4r1[f0]
                                 nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
-                                if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                                    m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
+                                if (key2:=ne31+11880*(ne21+11880*(ne11+11880*nc1))) in dict2:
+                                    m2=dict2[key2]
                                     if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
-                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+                                        htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,qtm,stm,step,tstart,2,eighteen)
     return htm,qtm,stm,minmove,time()-tstart
 
-def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
+def solved(m1,m2,minmove,l,qtm,stm,step,tstart,rtype,eighteen):
     n=solution=(m1-1)*eighteen[int(log(m2,18))]+m2
     if solution<minmove:
         minmove=solution
-    qtmvalue=stmvalue=htm=l
+    qtmvalue=stmvalue=l
     n,numstr=18*n,""
     while (n:=n//18)>=18:
         numstr=str(n//3%6)+str(n%3)+numstr
-        if n%3==1:
+        if numstr[1]=="1":
             qtmvalue+=1
     for i in range(0,len(numstr)-2,2):
         if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
@@ -229,8 +229,8 @@ def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
         qtm=qtmvalue
     if stmvalue<stm:
         stm=stmvalue
-    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
-    return htm,qtm,stm,minmove
+    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{l} = {step} + {l-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
+    return l,qtm,stm,minmove
 
 print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
 eighteen=tuple([18**i for i in range(28)])
@@ -248,7 +248,7 @@ print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict1),tdict1))
 dict2,tdict2=getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1)
 print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict2),tdict2))
 print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
-#totalnums=sum([round((-(6-3*6**0.5)**n*(-3+6**0.5)+(3*(2+6**0.5))**n*(3+6**0.5))/4) for n in range(phase1step+1)])-1#correct for n<=12, from sum of series OEIS A333298, real should be sum of A080583 from A080601
+
 htms,qtms,stms,times,miss=[],[],[],[],0
 n=6
 cubenumber=10
