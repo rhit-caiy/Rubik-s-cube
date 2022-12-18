@@ -802,13 +802,12 @@ def reversecube(c,co,eo,e1,e2,e3):
     ne=list(e)
     
     for i in range(8):
-        nc[c.index(i)]=c[i]
-        nco[c.index(i)]=co[i]
+        nc[c[i]]=i
+        nco[c[i]]=(3-co[i])%3
     
     for i in range(12):
-        ne[e.index(i)]=e[i]
-        neo[e.index(i)]=eo[i]
-    
+        ne[e[i]]=i
+        neo[e[i]]=eo[i]
     
     c=cdict[tuple(nc)]
     co=codict[tuple(nco)]
@@ -849,13 +848,7 @@ def solvecube():
     for i in range(3):
         cubepacks.append(reversecube(*cubepacks[i]))
     print("cube packs:",cubepacks)
-    '''
-    for i in range(10):
-        for j in 3,0:
-            c,co,eo,e1,e2,e3=cubepacks[j]
-            display()
-            sleep(1)
-    '''
+    
     for i in range(threadn):
         print("{}\nc = {} ; co = {} ; eo = {} ; e1 = {} ; e2 = {} ; e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(i),*cubepacks[i],"htm","qtm","stm","time/s","type","solution"))
         htm,qtm,stm,minmove,threadtime=solve(*cubepacks[i],i,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
@@ -907,7 +900,7 @@ print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
 # gb=2**30
 # print(dict0size/gb,dict1size/gb,dict2size/gb)
 
-threadn=3
+threadn=6
 print(threadn,"threads")
 
 c=ccn
@@ -925,5 +918,6 @@ solving=0
 canvas.bind("<Button-1>",click)
 canvas.bind_all("<KeyPress>",keypress)
 start()
+canvas.focus()
 canvas.pack()
 window.mainloop()
