@@ -148,8 +148,7 @@ def getdict0(dict0step):
                     nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
                     for t in 2,1,0:
                         nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                        key0=nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1+11880))))#(nc,nco,neo,ne1,ne2,ne3)
-                        if key0 not in dict0:
+                        if (key0:=nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1))))) not in dict0:
                             newstep=oldstep+(3*f+t)*eighteen0
                             dict0[key0]=newstep+eighteen1
                             if step is not dict0step:
@@ -184,8 +183,7 @@ def getdict1(dict1step,cor0,eor0,ep4r0):
                     corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
                     for newstep in [newstep+2,newstep+1,newstep]:
                         nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
-                        key1=ne2//24+495*(neo+2048*nco)
-                        if key1 not in dict1:
+                        if (key1:=ne2//24+495*(neo+2048*nco)) not in dict1:
                             dict1[key1]=newstep
                             if step is not dict1step:
                                 newpredictstate.append((nco,neo,ne2,newstep,f))
@@ -196,8 +194,7 @@ def getdict1(dict1step,cor0,eor0,ep4r0):
                     corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
                     for newstep in [newstep+2,newstep+1,newstep]:
                         nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
-                        key1=ne2//24+495*(neo+2048*nco)
-                        if key1 not in dict1:
+                        if (key1:=ne2//24+495*(neo+2048*nco)) not in dict1:
                             dict1[key1]=newstep
                             if step is not dict1step:
                                 newpredictstate.append((nco,neo,ne2,newstep,f))
@@ -230,8 +227,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                 if f1 is not f:
                     ep4rf1=ep4r1[f]
                     nc,ne1,ne2,ne3=cr1[f][oc],ep4rf1[oe1],ep4rf1[oe2],ep4rf1[oe3]
-                    key2=ne3+11880*(ne2+11880*(ne1+11880*nc))
-                    if key2 not in dict2:
+                    if (key2:=ne3+11880*(ne2+11880*(ne1+11880*nc))) not in dict2:
                         newstep=oldstep+(3*f+1)*eighteen0
                         dict2[key2]=newstep+eighteen1
                         if step is not dict2step:
@@ -240,8 +236,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                 if f1 is not f and f1-f!=3:
                     ep4rf1=ep4r1[f]
                     nc,ne1,ne2,ne3=cr1[f][oc],ep4rf1[oe1],ep4rf1[oe2],ep4rf1[oe3]
-                    key2=ne3+11880*(ne2+11880*(ne1+11880*nc))
-                    if key2 not in dict2:
+                    if (key2:=ne3+11880*(ne2+11880*(ne1+11880*nc))) not in dict2:
                         newstep=oldstep+(3*f+1)*eighteen0
                         dict2[key2]=newstep+eighteen1
                         if step is not dict2step:
@@ -251,8 +246,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                 nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
                 for t in 2,1,0:
                     nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                    key2=ne3+11880*(ne2+11880*(ne1+11880*nc))
-                    if key2 not in dict2:
+                    if (key2:=ne3+11880*(ne2+11880*(ne1+11880*nc))) not in dict2:
                         newstep=oldstep+(9+t)*eighteen0
                         dict2[key2]=newstep+eighteen1
                         if step is not dict2step:
@@ -262,8 +256,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                     nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
                     for t in 2,1,0:
                         nc,ne1,ne2,ne3=crf0[nc],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
-                        key2=ne3+11880*(ne2+11880*(ne1+11880*nc))
-                        if key2 not in dict2:
+                        if (key2:=ne3+11880*(ne2+11880*(ne1+11880*nc))) not in dict2:
                             newstep=oldstep+t*eighteen0
                             dict2[key2]=newstep+eighteen1
                             if step is not dict2step:
@@ -444,20 +437,21 @@ def click(coordinate):
         print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
         solvecube()
     elif 900<x<1000 and 500<y<550:
-        #i=input("input:")
-        #exec(i)
-        c=input("c:")
-        co=input("co:")
-        eo=input("eo:")
-        e1=input("e1:")
-        e2=input("e2:")
-        e3=input("e3:")
-        print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
-        
-        #if i.isdigit():
-        #    pass
-        #     i=rotatenumbertostring(i)
-        # do(i)
+        print("\ninput input mode:\n1 rotation notation, ULFDRB\n2 rotation in number from 0 to 17\n3 in 18decimal\n4 number of c,co,eo,e1,e2,e3, split by comma")
+        i=input("input type:")
+        v=input("input value:")
+        if i=="1":
+            v=rotatestringtonumber(v)
+        elif i=="2":
+            pass
+        elif i=="3":
+            v=decodevalue(int(v))
+        if i in "123" and len(i)==1:
+            for j in range(len(v)//2):
+                rotate(int(v[2*j]),int(v[2*j+1]))
+        elif i=="4":
+            c,co,eo,e1,e2,e3=[int(value) for value in v.split(",")]
+
     elif 900<x<1000 and 560<y<610:
         replay()
     elif 1050<x<1150 and 560<y<610:
@@ -600,23 +594,21 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                         if step is not phase1step:
                             cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
                         if ne2//24+495*(neo+2048*nco) in dict1:
-                            m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
-                            while m1_2>=18:
-                                f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
+                            m1_2,f0,nc1,ne11,ne21,ne31=18*dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
+                            while (m1_2:=m1_2//18)>=18:
+                                f0,t0,m1=m1_2//3%6,m1_2%3,18*m1+m1_2%18
                                 ep4rf0t0=ep4r[f0][t0]
                                 nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
                             if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
                                 m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                                l=int(log(m1,18))+int(log(m2,18))
-                                if l<=htm:
-                                    cl=randomcolor()#"#00FF00"
+                                if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
+                                    cl=randomcolor()
                                     htm,qtm,stm,minmove=solved(m1,m2,minmove,l,qtm,stm,step,tstart,1)
                                     ep4rf01=ep4r1[f0]
                                     nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
-                                    if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                                        m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                                        l=int(log(m1,18))+int(log(m2,18))
-                                        if l<=htm:
+                                    if (key2:=ne31+11880*(ne21+11880*(ne11+11880*nc1))) in dict2:
+                                        m2=dict2[key2]
+                                        if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
                                             htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,qtm,stm,step,tstart,2)
     else:
         while cubes:
@@ -634,32 +626,30 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                     nc,nco,neo,ne1,ne2,ne3=oc,oco,oeo,oe1,oe2,oe3
                     for m1 in m1_1,m1_1+1,m1_1+2:
                         nc,nco,neo,ne1,ne2,ne3=crf0[nc],corf0[nco],eorf0[neo],ep4rf0[ne1],ep4rf0[ne2],ep4rf0[ne3]
+                        if step is not phase1step:
+                            cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
                         if nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1)))) in dict0:
                             m2=dict0[nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1))))]
                             l=int(log(m1,18))+int(log(m2,18))
                             if l<=htm:
                                 htm,qtm,stm,minmove=solved(m1,m2,minmove,l,qtm,stm,step,tstart,0)
                                 cl=randomcolor()
-                        if step is not phase1step:
-                            cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
-                        if ne2//24+495*(neo+2048*nco) in dict1:
-                            m1_2,f0,nc1,ne11,ne21,ne31=dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
-                            while m1_2>=18:
-                                f0,t0,m1,m1_2=m1_2//3%6,m1_2%3,18*m1+m1_2%18,m1_2//18
+                        elif ne2//24+495*(neo+2048*nco) in dict1:
+                            m1_2,f0,nc1,ne11,ne21,ne31=18*dict1[ne2//24+495*(neo+2048*nco)],f,nc,ne1,ne2,ne3
+                            while (m1_2:=m1_2//18)>=18:
+                                f0,t0,m1=m1_2//3%6,m1_2%3,18*m1+m1_2%18
                                 ep4rf0t0=ep4r[f0][t0]
                                 nc1,ne11,ne21,ne31=cr[f0][t0][nc1],ep4rf0t0[ne11],ep4rf0t0[ne21],ep4rf0t0[ne31]
                             if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
                                 m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                                l=int(log(m1,18))+int(log(m2,18))
-                                if l<=htm:
-                                    cl=randomcolor()#"#00FF00"
+                                if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
+                                    cl=randomcolor()
                                     htm,qtm,stm,minmove=solved(m1,m2,minmove,l,qtm,stm,step,tstart,1)
                                     ep4rf01=ep4r1[f0]
                                     nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
-                                    if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
-                                        m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
-                                        l=int(log(m1,18))+int(log(m2,18))
-                                        if l<=htm:
+                                    if (key2:=ne31+11880*(ne21+11880*(ne11+11880*nc1))) in dict2:
+                                        m2=dict2[key2]
+                                        if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
                                             htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,qtm,stm,step,tstart,2)
     
     return htm,qtm,stm,minmove,time()-tstart
@@ -685,19 +675,42 @@ def solved(m1,m2,minmove,l,qtm,stm,step,tstart,rtype):
     print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{l} = {step} + {l-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
     return l,qtm,stm,minmove
 
+def rotatenumbertostring(s):
+    r=""
+    for i in range(len(s)//2):
+        r+=allrotation[3*int(s[2*i])+int(s[2*i+1])]
+    return r
+
+def rotatestringtonumber(s):
+    r=""
+    for c in s:
+        if c=="2":
+            r=r[:-1]+"1"
+        elif c=="'" or c=="3":
+            r=r[:-1]+"2"
+        elif c in allrotation:
+            i=allrotation.index(c)
+            r+=str(i//3)+"0"
+    return r
+
 def decodevalue(num):
     s=""
-    while num>=18:
+    num=18*num
+    while (num:=num//18)>=18:
         s=str(num//3%6)+str(num%3)+s
-        num=num//18
     return s
+
+def reverserotation(s):
+    r=""
+    for i in range(len(s)//2):
+        r=s[2*i]+str(2-int(s[2*i+1]))+r
+    return r
 
 total=[round((-(6-3*6**0.5)**n*(-3+6**0.5)+(3*(2+6**0.5))**n*(3+6**0.5))/4) for n in range(1,12)]#correct for n<=12, from sum of series OEIS A333298, real should be sum of A080583 from A080601
 totalnums=[sum(total[:n])+1 for n in range(len(total))]
 
 replaycube=(c,co,eo,e1,e2,e3)
 replaystring=""
-replaythread=0
 def replay():
     global c,co,eo,e1,e2,e3
     c,co,eo,e1,e2,e3=replaycube
@@ -705,7 +718,7 @@ def replay():
     sleep(1)
     for i in range(len(replaystring)//2):
         f,t=int(replaystring[2*i]),int(replaystring[2*i+1])
-        rotate(changedirections[-replaythread][f],t)
+        rotate(f,t)
         display()
         sleep(0.5)
 
@@ -737,8 +750,6 @@ def diagonalrotation(c,co,e,eo):
 
 #reverse
 def changebase(c,co,eo,e1,e2,e3,index):
-    print("change base",index)
-    # add1,add2=(1,2,0),(2,0,1)
     for t in range(index%3):
         c=rcdict[c]
         co=rcodict[co]
@@ -750,7 +761,6 @@ def changebase(c,co,eo,e1,e2,e3,index):
         nco=list(co)
         neo=list(eo)
         ne=list(e)
-        #print(t,"before change",nc,nco,ne,neo)
         
         for i in range(8):
             nc[i]=changecorner[c[i]]
@@ -765,12 +775,10 @@ def changebase(c,co,eo,e1,e2,e3,index):
         for i in range(12):
             n=e.index(i)
             neo[n]=(eo[n]+adde[i])%2
-        #print(t,"after change",nc,nco,ne,neo)
         
         #adjust direction
         for i in range(2):
             nc,nco,ne,neo=diagonalrotation(nc,nco,ne,neo)
-        
         
         c=cdict[tuple(nc)]
         co=codict[tuple(nco)]
@@ -778,35 +786,59 @@ def changebase(c,co,eo,e1,e2,e3,index):
         e1=ep4dict[tuple([ne.index(i) for i in range(0,4)])]
         e2=ep4dict[tuple([ne.index(i) for i in range(4,8)])]
         e3=ep4dict[tuple([ne.index(i) for i in range(8,12)])]
-    #if i>2, reverse
     return c,co,eo,e1,e2,e3
 
 def reversecube(c,co,eo,e1,e2,e3):
     #jump back to original place, see where the previous occupied block jump to
-    pass
+    c=rcdict[c]
+    co=rcodict[co]
+    eo=reodict[eo]
+    e=rep4dict[e1]+rep4dict[e2]+rep4dict[e3]
+    e=[e.index(i) for i in range(12)]
+    
+    nc=list(c)
+    nco=list(co)
+    neo=list(eo)
+    ne=list(e)
+    
+    for i in range(8):
+        nc[c.index(i)]=c[i]
+        nco[c.index(i)]=co[i]
+    
+    for i in range(12):
+        ne[e.index(i)]=e[i]
+        neo[e.index(i)]=eo[i]
+    
+    
+    c=cdict[tuple(nc)]
+    co=codict[tuple(nco)]
+    eo=eodict[tuple(neo)]
+    e1=ep4dict[tuple([ne.index(i) for i in range(0,4)])]
+    e2=ep4dict[tuple([ne.index(i) for i in range(4,8)])]
+    e3=ep4dict[tuple([ne.index(i) for i in range(8,12)])]
+    return c,co,eo,e1,e2,e3
 
 def solvecube():
-    global replaycube,replaystring,replaythread,solving,c,co,eo,e1,e2,e3,center
+    global replaycube,replaystring,solving,c,co,eo,e1,e2,e3,center
     print()
     solving=1
     #adjust direction
     adjust1=[[0,0],[2,2,2],[0],[],[2],[0,0,0]]
-    for a in adjust1[center.index(3)]:
+    for a in adjust1[center.index(3)]:#put white to bottom
         rotatecube(a)
     adjust2=[[],[],[1,1,1],[],[1,1],[1]]
-    for a in adjust2[center.index(1)]:
+    for a in adjust2[center.index(1)]:#put blue to left
         rotatecube(a)
-    '''
+    
     if (c,co,eo,e1,e2,e3)==(ccn,ccon,ceon,cen1,cen2,cen3):
         print("unmixed")
         solving=0
         return
-    '''
+    
     display()
     print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
     replaycube=(c,co,eo,e1,e2,e3)
     
-    print("start two phase")
     print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
     htm=qtm=stm=2*stepshouldbelow
     currentminmove=minmove=eighteen[-1]
@@ -814,17 +846,15 @@ def solvecube():
     cubepacks=[]
     for i in range(3):
         cubepacks.append(changebase(c,co,eo,e1,e2,e3,i))
+    for i in range(3):
+        cubepacks.append(reversecube(*cubepacks[i]))
     print("cube packs:",cubepacks)
     '''
-    for i in range(3):
-        for j in range(3):
+    for i in range(10):
+        for j in 3,0:
             c,co,eo,e1,e2,e3=cubepacks[j]
-            center=list(changedirections[(0,2,1)[j]])
             display()
             sleep(1)
-    c,co,eo,e1,e2,e3=cubepacks[0]
-    center=list(changedirections[0])
-    display()
     '''
     for i in range(threadn):
         print("{}\nc = {} ; co = {} ; eo = {} ; e1 = {} ; e2 = {} ; e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(i),*cubepacks[i],"htm","qtm","stm","time/s","type","solution"))
@@ -839,24 +869,22 @@ def solvecube():
     if htm>=stepshouldbelow:
         print("fail to solve")
     else:
-        replaystring=numstr=decodevalue(minmove)
-        replaythread=bestid
+        numstr=decodevalue(minmove)
         print("best solution in thread",bestid)
-        print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+numstr)
+        print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+numstr+"\n"+rotatenumbertostring(numstr))
         
-        # c,co,eo,e1,e2,e3=cubepacks[bestid]
-        # center=list(changedirections[bestid%3])
-        # display()
+        replaystring=""
+        direction=changedirections[(-bestid)%3]
+        for i in range(htm):
+            replaystring+=str(direction[int(numstr[2*i])])+numstr[2*i+1]
+        if bestid>2:
+            replaystring=reverserotation(replaystring)
         
-        for j in range(htm):
-            f,t=int(numstr[2*j]),int(numstr[2*j+1])
-            print(allrotation[3*f+t],end="")
-            #rotate(changedirections[bestid%3][f],t)
-            rotate(changedirections[-bestid][f],t)
-            #rotate(f,t)
+        for i in range(htm):
+            f,t=int(replaystring[2*i]),int(replaystring[2*i+1])
+            rotate(f,t)
             display()
             sleep(0.5)
-        print()
     solving=0
 
 phase1step=6#7
@@ -866,7 +894,7 @@ dict2step=8#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
 print(phase1step,"+",dict1step,"+",dict2step)
 dict0,tdict0=getdict0(dict0step)
-print("phase 0 dict time",tdict0)
+print("phase 0 dict time",tdict0,"s")
 dict1,tdict1=getdict1(dict1step,cor0,eor0,ep4r0)
 print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict1),tdict1))
 dict2,tdict2=getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1)
