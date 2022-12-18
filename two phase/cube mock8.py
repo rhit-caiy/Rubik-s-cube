@@ -4,7 +4,7 @@ from math import log
 from itertools import permutations,product,combinations
 from tkinter import Tk,Canvas
 # from sys import getsizeof
-
+#based on two phase algorithm version 27 and 28
 print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
 
 cc,cco,ce,ceo=(0,1,2,3,4,5,6,7),(0,0,0,0,3,3,3,3),(0,1,2,3,4,5,6,7,8,9,10,11),(0,0,0,0,1,1,4,4,3,3,3,3)
@@ -25,14 +25,6 @@ centeredge=((0,2,10,8),(4,5,6,7),(1,3,11,9))
 color=("#FFFF00","#0000FF","#FF0000","#FFFFFF","#00FF00","#FF8000")
 allrotation=("U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'","M","M2","M'","E","E2","E'","S","S2","S'","x","x2","x'","y","y2","y'","z","z2","z'")
 eighteen=tuple([18**i for i in range(28)])
-changedirections=((0,1,2,3,4,5),(1,2,0,4,5,3),(2,0,1,5,3,4))
-#change corner 2 7 034 156
-#change edge 125 069 3a4 7b8
-#directions
-
-#reverse
-
-
 
 #initialize
 t0=time()
@@ -41,9 +33,9 @@ t0=time()
 #corner 40320 8!
 cdict={i:n for n,i in enumerate(permutations(cc))}
 #corner orientation 2187 3**7
-codict={tuple([cornerdirection[j][i[j]] for j in range(8)]):n for n,i in enumerate((i for i in product(range(3),repeat=8) if not sum(i)%3))}
+codict={i:n for n,i in enumerate((i for i in product(range(3),repeat=8) if not sum(i)%3))}
 #edge orientation 2048 2**11
-eodict={tuple([edgedirection[j][i[j]] for j in range(12)]):n for n,i in enumerate([i for i in product(range(2),repeat=12) if not i.count(1)%2])}
+eodict={i:n for n,i in enumerate([i for i in product(range(2),repeat=12) if not i.count(1)%2])}
 #4 edge position 495 C(12,4)
 ep4dict={j:n for n,j in enumerate(j for i in combinations(ce,r=4) for j in permutations(i))}
 #index->tuple
@@ -53,12 +45,12 @@ rep4dict={ep4dict[key]:key for key in ep4dict}
 reodict={eodict[key]:key for key in eodict}
 #list contains length of 0, rotation list
 cl,col,eol,ep4l,cr,cor,eor,ep4r=[0]*len(cdict),[0]*len(codict),[0]*len(eodict),[0]*len(ep4dict),[],[],[],[]
+add1,add2=[1,2,0],[2,0,1]
 for f in 0,1,2,3,4,5:
     c1,c2,c3,c4=facecorner[f]
     e1,e2,e3,e4=fe=faceedge[f]
     sfe=set(fe)
     fte=e2,e3,e4,e1
-    ftd0,ftd1=facetimedirection[f]
     d0,d1,d2=cl.copy(),cl.copy(),cl.copy()
     for a,dc in enumerate(cdict):
         c=list(dc)
@@ -71,43 +63,65 @@ for f in 0,1,2,3,4,5:
             d1[a],d1[b]=b,a
     cr.append((tuple(d0),tuple(d1),tuple(d2)))
     d0,d1,d2=col.copy(),col.copy(),col.copy()
-    for a,dco in enumerate(codict):
-        co=list(dco)
-        co[c1],co[c2],co[c3],co[c4]=ftd0[co[c2]],ftd0[co[c3]],ftd0[co[c4]],ftd0[co[c1]]
-        b=codict[tuple(co)]
-        d0[a],d2[b]=b,a
-        if not d1[a]:
-            co[c1],co[c2],co[c3],co[c4]=ftd0[co[c2]],ftd0[co[c3]],ftd0[co[c4]],ftd0[co[c1]]
+    if f!=0 and f!=3:
+        for a,dco in enumerate(codict):
+            co=list(dco)
+            co[c1],co[c2],co[c3],co[c4]=add1[co[c2]],add2[co[c3]],add1[co[c4]],add2[co[c1]]
             b=codict[tuple(co)]
-            d1[a],d1[b]=b,a
+            d0[a],d2[b]=b,a
+            if not d1[a]:
+                co[c1],co[c2],co[c3],co[c4]=add1[co[c2]],add2[co[c3]],add1[co[c4]],add2[co[c1]]
+                b=codict[tuple(co)]
+                d1[a],d1[b]=b,a
+    else:
+        for a,dco in enumerate(codict):
+            co=list(dco)
+            co[c1],co[c2],co[c3],co[c4]=co[c2],co[c3],co[c4],co[c1]
+            b=codict[tuple(co)]
+            d0[a],d2[b]=b,a
+            if not d1[a]:
+                co[c1],co[c2],co[c3],co[c4]=co[c2],co[c3],co[c4],co[c1]
+                b=codict[tuple(co)]
+                d1[a],d1[b]=b,a
     cor.append((tuple(d0),tuple(d1),tuple(d2)))
     d0,d1,d2=eol.copy(),eol.copy(),eol.copy()
-    for a,deo in enumerate(eodict):
-        eo=list(deo)
-        eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
-        b=eodict[tuple(eo)]
-        d0[a],d2[b]=b,a
-        if not d1[a]:
-            eo[e1],eo[e2],eo[e3],eo[e4]=ftd0[eo[e2]],ftd0[eo[e3]],ftd0[eo[e4]],ftd0[eo[e1]]
+    if f==1 or f==4:
+        for a,deo in enumerate(eodict):
+            eo=list(deo)
+            eo[e1],eo[e2],eo[e3],eo[e4]=1-eo[e2],1-eo[e3],1-eo[e4],1-eo[e1]
             b=eodict[tuple(eo)]
-            d1[a],d1[b]=b,a
+            d0[a],d2[b]=b,a
+            if not d1[a]:
+                eo[e1],eo[e2],eo[e3],eo[e4]=1-eo[e2],1-eo[e3],1-eo[e4],1-eo[e1]
+                b=eodict[tuple(eo)]
+                d1[a],d1[b]=b,a
+    else:
+        for a,deo in enumerate(eodict):
+            eo=list(deo)
+            eo[e1],eo[e2],eo[e3],eo[e4]=eo[e2],eo[e3],eo[e4],eo[e1]
+            b=eodict[tuple(eo)]
+            d0[a],d2[b]=b,a
+            if not d1[a]:
+                eo[e1],eo[e2],eo[e3],eo[e4]=eo[e2],eo[e3],eo[e4],eo[e1]
+                b=eodict[tuple(eo)]
+                d1[a],d1[b]=b,a
     eor.append((tuple(d0),tuple(d1),tuple(d2)))
     d0,d1,d2=ep4l.copy(),ep4l.copy(),ep4l.copy()
     for a,dep in enumerate(ep4dict):
         ep=list(dep)
         for i in 0,1,2,3:
-            if ep[i] in sfe:
-                ep[i]=fe[fte.index(ep[i])]
+            if (x:=ep[i]) in sfe:
+                ep[i]=fe[fte.index(x)]
         b=ep4dict[tuple(ep)]
         d0[a],d2[b]=b,a
         if not d1[a]:
             for i in 0,1,2,3:
-                if ep[i] is not dep[i]:
-                    ep[i]=fe[fte.index(ep[i])]
+                if (x:=ep[i]) is not dep[i]:
+                    ep[i]=fe[fte.index(x)]
             b=ep4dict[tuple(ep)]
             d1[a],d1[b]=b,a
     ep4r.append((tuple(d0),tuple(d1),tuple(d2)))
-cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=tuple(cr),tuple(cor),tuple(ep4r),tuple(eor),cdict[cc],codict[cco],ep4dict[ce[0:4]],ep4dict[ce[4:8]],ep4dict[ce[8:12]],eodict[ceo],tuple([i[0] for i in cr]),tuple([i[0] for i in cor]),tuple([i[0] for i in eor]),tuple([i[0] for i in ep4r]),tuple([i[1] for i in cr]),tuple([i[1] for i in ep4r])
+cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1=tuple(cr),tuple(cor),tuple(ep4r),tuple(eor),cdict[(0,1,2,3,4,5,6,7)],codict[(0,0,0,0,0,0,0,0)],ep4dict[(0,1,2,3)],ep4dict[(4,5,6,7)],ep4dict[(8,9,10,11)],eodict[(0,0,0,0,0,0,0,0,0,0,0,0)],tuple([i[0] for i in cr]),tuple([i[0] for i in cor]),tuple([i[0] for i in eor]),tuple([i[0] for i in ep4r]),tuple([i[1] for i in cr]),tuple([i[1] for i in ep4r])
 
 #dict for directly complete cube
 #1 19
@@ -279,13 +293,11 @@ window.title("cube")
 def rotatemiddle(a):
     global e1,e2,e3,eo,center
     #LDF for MES
-    edge=[0]*12
-    for n,i in enumerate(rep4dict[e1]+rep4dict[e2]+rep4dict[e3]):
-        edge[i]=n
-    edged=reodict[eo]
-    
+    edge=[(rep4dict[e1]+rep4dict[e2]+rep4dict[e3]).index(i) for i in range(12)]
+    edged=[edgedirection[n][i] for n,i in enumerate(reodict[eo])]#??
     ne=list(edge)
     ned=list(edged)
+    print(ned)
     nc=center.copy()
     facenum=0
     if a==0:
@@ -306,6 +318,8 @@ def rotatemiddle(a):
             ned[centeredge[a][i-1]]=edgedirection[centeredge[a][i-1]][0]
     
     center=nc
+    print(ned)
+    ned=[edgedirection[i].index(ned[i]) for i in range(12)]#??
     eo=eodict[tuple(ned)]
     e1=ep4dict[tuple([ne.index(i) for i in range(0,4)])]
     e2=ep4dict[tuple([ne.index(i) for i in range(4,8)])]
@@ -416,23 +430,32 @@ def click(coordinate):
         randomcube()
         print("random")
         print("cube =",cubecolor)
-        print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
+        print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
     elif 50<x<150 and 560<y<610:
         print("solve")
         print("cube =",cubecolor)
-        print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
+        print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
         solvecube()
     elif 200<x<300 and 560<y<610:
         randomcube()
         display()
         print("random and solve")
         print("cube =",cubecolor)
-        print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
+        print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
         solvecube()
     elif 900<x<1000 and 500<y<550:
-        i=input("input:")
-        if i.isdigit():
-            pass
+        #i=input("input:")
+        #exec(i)
+        c=input("c:")
+        co=input("co:")
+        eo=input("eo:")
+        e1=input("e1:")
+        e2=input("e2:")
+        e3=input("e3:")
+        print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
+        
+        #if i.isdigit():
+        #    pass
         #     i=rotatenumbertostring(i)
         # do(i)
     elif 900<x<1000 and 560<y<610:
@@ -477,7 +500,8 @@ def keypress(key):
     elif k=="Return":
         solvecube()
     elif k=="space":
-        pass   
+        randomcube()
+        solvecube()
     elif k=='BackSpace':
         loadhistory()
     display()
@@ -506,7 +530,7 @@ def updatecubecolor():
         edge[i]=n
     edged=reodict[eo]
     for i in range(12):
-        n=edgedirection[i].index(edged[i])
+        n=edged[i]
         for j in 0,1:
             a,b=edgeposition[i][j]
             cubecolor[a][b]=edgedirection[edge[i]][n-j]
@@ -514,7 +538,7 @@ def updatecubecolor():
     corner=rcdict[c]
     cornerd=rcodict[co]
     for i in range(8):
-        n=cornerdirection[i].index(cornerd[i])
+        n=cornerd[i]
         for j in 0,1,2:
             a,b=cornerposition[i][j]
             cubecolor[a][b]=cornerdirection[corner[i]][j-n]
@@ -586,14 +610,14 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                                 l=int(log(m1,18))+int(log(m2,18))
                                 if l<=htm:
                                     cl=randomcolor()#"#00FF00"
-                                    htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
+                                    htm,qtm,stm,minmove=solved(m1,m2,minmove,l,qtm,stm,step,tstart,1)
                                     ep4rf01=ep4r1[f0]
                                     nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
                                     if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
                                         m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
                                         l=int(log(m1,18))+int(log(m2,18))
                                         if l<=htm:
-                                            htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+                                            htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,qtm,stm,step,tstart,2)
     else:
         while cubes:
             n=1+n
@@ -613,8 +637,9 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                         if nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1)))) in dict0:
                             m2=dict0[nc+40320*(nco+2187*(neo+2048*(ne3+11880*(ne2+11880*ne1))))]
                             l=int(log(m1,18))+int(log(m2,18))
-                            htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,0)
-                            cl="#FFFFFF"
+                            if l<=htm:
+                                htm,qtm,stm,minmove=solved(m1,m2,minmove,l,qtm,stm,step,tstart,0)
+                                cl=randomcolor()
                         if step is not phase1step:
                             cubes.append((nc,nco,neo,ne1,ne2,ne3,m1,step,f))
                         if ne2//24+495*(neo+2048*nco) in dict1:
@@ -628,27 +653,27 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                                 l=int(log(m1,18))+int(log(m2,18))
                                 if l<=htm:
                                     cl=randomcolor()#"#00FF00"
-                                    htm,qtm,stm,minmove=solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,1)
+                                    htm,qtm,stm,minmove=solved(m1,m2,minmove,l,qtm,stm,step,tstart,1)
                                     ep4rf01=ep4r1[f0]
                                     nc1,ne11,ne21,ne31=cr1[f0][nc1],ep4rf01[ne11],ep4rf01[ne21],ep4rf01[ne31]
                                     if ne31+11880*(ne21+11880*(ne11+11880*nc1)) in dict2:
                                         m2=dict2[ne31+11880*(ne21+11880*(ne11+11880*nc1))]
                                         l=int(log(m1,18))+int(log(m2,18))
                                         if l<=htm:
-                                            htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,htm,qtm,stm,step,tstart,2)
+                                            htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,qtm,stm,step,tstart,2)
     
     return htm,qtm,stm,minmove,time()-tstart
 
 #print the solved form solve, solution must be <= current htm
-def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
+def solved(m1,m2,minmove,l,qtm,stm,step,tstart,rtype):
     n=solution=(m1-1)*eighteen[int(log(m2,18))]+m2
     if solution<minmove:
         minmove=solution
-    qtmvalue=stmvalue=htm=l
-    numstr=""
-    while n>=18:
-        numstr,n=str(n//3%6)+str(n%3)+numstr,n//18
-        if n%3==1:
+    qtmvalue=stmvalue=l
+    n,numstr=18*n,""
+    while (n:=n//18)>=18:
+        numstr=str(n//3%6)+str(n%3)+numstr
+        if numstr[1]=="1":
             qtmvalue+=1
     for i in range(0,len(numstr)-2,2):
         if abs(int(numstr[i])-int(numstr[i+2]))==3 and int(numstr[i+1])+int(numstr[i+3])==2:
@@ -657,11 +682,8 @@ def solved(m1,m2,minmove,l,htm,qtm,stm,step,tstart,rtype):
         qtm=qtmvalue
     if stmvalue<stm:
         stm=stmvalue
-    if rtype==0:
-        s=f"{htm} = {step} + {int(log(m2,18))}"
-    s=f"{htm} = {step} + {htm-step-int(log(m2,18))} + {int(log(m2,18))}"
-    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(s,qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
-    return htm,qtm,stm,minmove
+    print("{:<18}{:<6}{:<6}{:<14f}{:<6}{:<36}{}".format(f"{l} = {step} + {l-step-int(log(m2,18))} + {int(log(m2,18))}",qtmvalue,stmvalue,time()-tstart,rtype,solution,numstr))
+    return l,qtm,stm,minmove
 
 def decodevalue(num):
     s=""
@@ -675,18 +697,96 @@ totalnums=[sum(total[:n])+1 for n in range(len(total))]
 
 replaycube=(c,co,eo,e1,e2,e3)
 replaystring=""
+replaythread=0
 def replay():
     global c,co,eo,e1,e2,e3
     c,co,eo,e1,e2,e3=replaycube
     display()
     sleep(1)
     for i in range(len(replaystring)//2):
-        rotate(int(replaystring[2*i]),int(replaystring[2*i+1]))
+        f,t=int(replaystring[2*i]),int(replaystring[2*i+1])
+        rotate(changedirections[-replaythread][f],t)
         display()
         sleep(0.5)
 
+#change corner 2 7 034 156
+changecorner=(4,6,2,0,3,1,5,7)
+#change edge 125 069 3a4 7b8
+changeedge=(9,5,1,4,
+            10,2,0,8,
+            11,6,3,7)
+addc=(1,2,2,1,1,2,2,1)
+adde=(1,0,1,0,1,1,1,1,1,0,1,0)
+#directions
+changedirections=((0,1,2,3,4,5),(1,2,0,4,5,3),(2,0,1,5,3,4))
+
+def diagonalrotation(c,co,e,eo):
+    nc=c.copy()
+    nco=co.copy()
+    ne=e.copy()
+    neo=eo.copy()
+    for i in range(8):
+        nc[i]=c[changecorner[i]]
+    for i in range(12):
+        ne[i]=e[changeedge[i]]
+    for i in range(8):
+        nco[i]=(co[changecorner[i]]+addc[i])%3
+    for i in range(12):
+        neo[i]=(eo[changeedge[i]]+adde[i])%2
+    return nc,nco,ne,neo
+
+#reverse
+def changebase(c,co,eo,e1,e2,e3,index):
+    print("change base",index)
+    # add1,add2=(1,2,0),(2,0,1)
+    for t in range(index%3):
+        c=rcdict[c]
+        co=rcodict[co]
+        eo=reodict[eo]
+        e=rep4dict[e1]+rep4dict[e2]+rep4dict[e3]
+        e=[e.index(i) for i in range(12)]
+        
+        nc=list(c)
+        nco=list(co)
+        neo=list(eo)
+        ne=list(e)
+        #print(t,"before change",nc,nco,ne,neo)
+        
+        for i in range(8):
+            nc[i]=changecorner[c[i]]
+        for i in range(12):
+            ne[i]=changeedge[e[i]]
+        
+        
+        for i in range(8):
+            n=c.index(i)
+            nco[n]=(co[n]+addc[i])%3
+        
+        for i in range(12):
+            n=e.index(i)
+            neo[n]=(eo[n]+adde[i])%2
+        #print(t,"after change",nc,nco,ne,neo)
+        
+        #adjust direction
+        for i in range(2):
+            nc,nco,ne,neo=diagonalrotation(nc,nco,ne,neo)
+        
+        
+        c=cdict[tuple(nc)]
+        co=codict[tuple(nco)]
+        eo=eodict[tuple(neo)]
+        e1=ep4dict[tuple([ne.index(i) for i in range(0,4)])]
+        e2=ep4dict[tuple([ne.index(i) for i in range(4,8)])]
+        e3=ep4dict[tuple([ne.index(i) for i in range(8,12)])]
+    #if i>2, reverse
+    return c,co,eo,e1,e2,e3
+
+def reversecube(c,co,eo,e1,e2,e3):
+    #jump back to original place, see where the previous occupied block jump to
+    pass
+
 def solvecube():
-    global replaycube,replaystring,solving
+    global replaycube,replaystring,replaythread,solving,c,co,eo,e1,e2,e3,center
     print()
     solving=1
     #adjust direction
@@ -696,23 +796,43 @@ def solvecube():
     adjust2=[[],[],[1,1,1],[],[1,1],[1]]
     for a in adjust2[center.index(1)]:
         rotatecube(a)
+    '''
     if (c,co,eo,e1,e2,e3)==(ccn,ccon,ceon,cen1,cen2,cen3):
         print("unmixed")
         solving=0
         return
+    '''
     display()
-    #try to solve within 12 moves
-    print(f"c = {c}  co = {co}  eo = {eo}  e1 = {e1}  e2 = {e2}  e3 = {e3}")
+    print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
     replaycube=(c,co,eo,e1,e2,e3)
     
     print("start two phase")
     print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
     htm=qtm=stm=2*stepshouldbelow
-    minmove=eighteen[-1]
+    currentminmove=minmove=eighteen[-1]
+    bestid=0
+    cubepacks=[]
+    for i in range(3):
+        cubepacks.append(changebase(c,co,eo,e1,e2,e3,i))
+    print("cube packs:",cubepacks)
+    '''
+    for i in range(3):
+        for j in range(3):
+            c,co,eo,e1,e2,e3=cubepacks[j]
+            center=list(changedirections[(0,2,1)[j]])
+            display()
+            sleep(1)
+    c,co,eo,e1,e2,e3=cubepacks[0]
+    center=list(changedirections[0])
+    display()
+    '''
     for i in range(threadn):
-        print("{}\nc = {}  co = {}  eo = {}  e1 = {}  e2 = {}  e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(i),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
-        htm,qtm,stm,minmove,threadtime=solve(c,co,eo,e1,e2,e3,i,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
+        print("{}\nc = {} ; co = {} ; eo = {} ; e1 = {} ; e2 = {} ; e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(i),*cubepacks[i],"htm","qtm","stm","time/s","type","solution"))
+        htm,qtm,stm,minmove,threadtime=solve(*cubepacks[i],i,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
         print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}\n".format(i,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
+        if currentminmove!=minmove:
+            currentminmove=minmove
+            bestid=i
         if htm<=phase1step+dict0step:
             break
     solving=2
@@ -720,10 +840,20 @@ def solvecube():
         print("fail to solve")
     else:
         replaystring=numstr=decodevalue(minmove)
+        replaythread=bestid
+        print("best solution in thread",bestid)
         print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+numstr)
+        
+        # c,co,eo,e1,e2,e3=cubepacks[bestid]
+        # center=list(changedirections[bestid%3])
+        # display()
+        
         for j in range(htm):
-            print(allrotation[3*int(numstr[2*j])+int(numstr[2*j+1])],end="")
-            rotate(int(numstr[2*j]),int(numstr[2*j+1]))
+            f,t=int(numstr[2*j]),int(numstr[2*j+1])
+            print(allrotation[3*f+t],end="")
+            #rotate(changedirections[bestid%3][f],t)
+            rotate(changedirections[-bestid][f],t)
+            #rotate(f,t)
             display()
             sleep(0.5)
         print()
@@ -749,7 +879,7 @@ print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
 # gb=2**30
 # print(dict0size/gb,dict1size/gb,dict2size/gb)
 
-threadn=2
+threadn=3
 print(threadn,"threads")
 
 c=ccn
