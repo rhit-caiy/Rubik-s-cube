@@ -3,7 +3,6 @@ from random import randint
 from math import log
 from itertools import permutations,product,combinations
 from tkinter import Tk,Canvas
-# from sys import getsizeof
 #based on two phase algorithm version 27 and 28
 print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
 
@@ -14,7 +13,6 @@ facetimedirection=(((0,5,1,3,2,4),(0,4,5,3,1,2)),((2,1,3,5,4,0),(3,1,5,0,4,2)),(
 cornerdirection=((0,5,1),(0,4,5),(0,1,2),(0,2,4),(3,2,1),(3,4,2),(3,1,5),(3,5,4))
 edgedirection=((0,5),(0,1),(0,2),(0,4),(1,5),(1,2),(4,2),(4,5),(3,5),(3,1),(3,2),(3,4))
 adj=((5,4,2,1),(0,2,3,5),(0,4,3,1),(1,2,4,5),(0,5,3,2),(0,1,3,4))
-
 #the position of each face of each block
 cornerposition=(((0,0),(5,2),(1,0)),((0,2),(4,2),(5,0)),((0,6),(1,2),(2,0)),((0,8),(2,2),(4,0)),
                 ((3,0),(2,6),(1,8)),((3,2),(4,6),(2,8)),((3,6),(1,6),(5,8)),((3,8),(5,6),(4,8)))
@@ -265,20 +263,6 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
         predictstate,newpredictstate=newpredictstate,[]
     return dict2,round(time()-t0,6)
 
-# =============================================================================
-# def size(d):
-#     a=getsizeof(d)
-#     if type(d)==list or type(d)==tuple:
-#         for i in d:
-#             a+=size(i)
-#     elif type(d)==dict:
-#         for i in d:
-#             a+=size(i)
-#         for i in d.values():
-#             a+=size(i)
-#     return a
-# =============================================================================
-
 window=Tk()
 canvas=Canvas(window,bg="#808080",width=1440,height=810)
 window.title("cube")
@@ -287,10 +271,9 @@ def rotatemiddle(a):
     global e1,e2,e3,eo,center
     #LDF for MES
     edge=[(rep4dict[e1]+rep4dict[e2]+rep4dict[e3]).index(i) for i in range(12)]
-    edged=[edgedirection[n][i] for n,i in enumerate(reodict[eo])]#??
+    edged=[edgedirection[n][i] for n,i in enumerate(reodict[eo])]
     ne=list(edge)
     ned=list(edged)
-    print(ned)
     nc=center.copy()
     facenum=0
     if a==0:
@@ -305,14 +288,10 @@ def rotatemiddle(a):
         ne[centeredge[a][i]]=edge[centeredge[a][i-1]]
     me1,me2,me3,me4=centeredge[a]
     for i in range(4):
-        if edged[centeredge[a][i]]==edgedirection[centeredge[a][i]][0]:
-            ned[centeredge[a][i-1]]=edgedirection[centeredge[a][i-1]][1]
-        else:
-            ned[centeredge[a][i-1]]=edgedirection[centeredge[a][i-1]][0]
+        ned[centeredge[a][i-1]]=edgedirection[centeredge[a][i-1]][edged[centeredge[a][i]]==edgedirection[centeredge[a][i]][0]]
     
     center=nc
-    print(ned)
-    ned=[edgedirection[i].index(ned[i]) for i in range(12)]#??
+    ned=[edgedirection[i].index(ned[i]) for i in range(12)]
     eo=eodict[tuple(ned)]
     e1=ep4dict[tuple([ne.index(i) for i in range(0,4)])]
     e2=ep4dict[tuple([ne.index(i) for i in range(4,8)])]
@@ -343,7 +322,6 @@ def rotate(f,t):
     eo=eor[f][t][eo]
     ep4rft=ep4r[f][t]
     e1,e2,e3=ep4rft[e1],ep4rft[e2],ep4rft[e3]
-    
 
 def start():
     display()
@@ -361,6 +339,8 @@ def draw():
     canvas.create_text(950,525,text="input")
     canvas.create_rectangle(900,560,1000,610,fill="#C0C0C0")
     canvas.create_text(950,585,text="replay")
+    canvas.create_rectangle(1050,500,1150,550,fill="#C0C0C0")
+    canvas.create_text(1100,525,text="?")
     canvas.create_rectangle(1050,560,1150,610,fill="#C0C0C0")
     canvas.create_text(1100,585,text="back")
     for i in range(12):
@@ -437,7 +417,7 @@ def click(coordinate):
         print(f"c = {c} ; co = {co} ; eo = {eo} ; e1 = {e1} ; e2 = {e2} ; e3 = {e3}")
         solvecube()
     elif 900<x<1000 and 500<y<550:
-        print("\ninput input mode:\n1 rotation notation, ULFDRB\n2 rotation in number from 0 to 17\n3 in 18decimal\n4 number of c,co,eo,e1,e2,e3, split by comma")
+        print("\ninput input mode:\n1: rotation notation, ULFDRB\n2: rotation in number from 0 to 17\n3: in 18decimal\n4: number of c,co,eo,e1,e2,e3, split by comma")
         i=input("input type:")
         v=input("input value:")
         if i=="1":
@@ -454,6 +434,8 @@ def click(coordinate):
 
     elif 900<x<1000 and 560<y<610:
         replay()
+    elif 1050<x<1150 and 500<y<550:
+        pass
     elif 1050<x<1150 and 560<y<610:
         loadhistory()
     display()
@@ -496,7 +478,7 @@ def keypress(key):
     elif k=="space":
         randomcube()
         solvecube()
-    elif k=='BackSpace':
+    elif k=="BackSpace":
         loadhistory()
     display()
     addhistory()
@@ -537,8 +519,6 @@ def updatecubecolor():
             a,b=cornerposition[i][j]
             cubecolor[a][b]=cornerdirection[corner[i]][j-n]
 
-
-
 def addhistory():
     global history
     if (c,co,eo,e1,e2,e3,center)!=history[-1]:
@@ -572,7 +552,7 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
     y=20+100*threadid
     w=1000
     y1=80+100*threadid
-    cl=randomcolor()#"#0080FF"
+    cl=randomcolor()
     drawnum=total//1000
     if threadid:
         while cubes:
@@ -610,7 +590,7 @@ def solve(c,co,eo,e1,e2,e3,threadid,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0
                                         m2=dict2[key2]
                                         if (l:=int(log(m1,18))+int(log(m2,18)))<=htm:
                                             htm,qtm,stm,minmove=solved(m1-2,m2,minmove,l,qtm,stm,step,tstart,2)
-    else:
+    else:#threadid==0
         while cubes:
             n=1+n
             if not n%drawnum:
@@ -709,7 +689,7 @@ def reverserotation(s):
 total=[round((-(6-3*6**0.5)**n*(-3+6**0.5)+(3*(2+6**0.5))**n*(3+6**0.5))/4) for n in range(1,12)]#correct for n<=12, from sum of series OEIS A333298, real should be sum of A080583 from A080601
 totalnums=[sum(total[:n])+1 for n in range(len(total))]
 
-replaycube=(c,co,eo,e1,e2,e3)
+replaycube=(ccn,ccon,ceon,cen1,cen2,cen3)
 replaystring=""
 def replay():
     global c,co,eo,e1,e2,e3
@@ -822,10 +802,10 @@ def solvecube():
     print()
     solving=1
     #adjust direction
-    adjust1=[[0,0],[2,2,2],[0],[],[2],[0,0,0]]
+    adjust1=[[0,0],[2,2,2],[0,0,0],[],[2],[0]]
     for a in adjust1[center.index(3)]:#put white to bottom
         rotatecube(a)
-    adjust2=[[],[],[1,1,1],[],[1,1],[1]]
+    adjust2=[[],[],[1],[],[1,1],[1,1,1]]
     for a in adjust2[center.index(1)]:#put blue to left
         rotatecube(a)
     
@@ -853,18 +833,24 @@ def solvecube():
         print("{}\nc = {} ; co = {} ; eo = {} ; e1 = {} ; e2 = {} ; e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(i),*cubepacks[i],"htm","qtm","stm","time/s","type","solution"))
         htm,qtm,stm,minmove,threadtime=solve(*cubepacks[i],i,htm,qtm,stm,minmove,phase1step,cr0,cor0,eor0,ep4r0,cr1,ep4r1,cr,ep4r,dict1,dict2,eighteen)
         print("finish thread {}    htm {}  qtm {}  stm {}    time {:f}s    {}\n".format(i,htm,qtm,stm,threadtime,strftime("%Y-%m-%d %H:%M:%S",localtime())))
+        canvas.create_text(1250,50+100*i,text=str(round(threadtime,3))+"s")
+        canvas.update()
         if currentminmove!=minmove:
             currentminmove=minmove
             bestid=i
-        if htm<=phase1step+dict0step:
+        if htm<=phase1step+dict0step+1:
             break
+    sleep(1)
     solving=2
     if htm>=stepshouldbelow:
         print("fail to solve")
+        canvas.create_text(50,50,text="no solution")
+        canvas.update()
     else:
         numstr=decodevalue(minmove)
+        rotatenotation=rotatenumbertostring(numstr)
         print("best solution in thread",bestid)
-        print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+numstr+"\n"+rotatenumbertostring(numstr))
+        print("\nmin htm",htm,"qtm",qtm,"stm",stm,"\nsolution\n"+str(minmove)+"\n"+numstr+"\n"+rotatenotation)
         
         replaystring=""
         direction=changedirections[(-bestid)%3]
@@ -872,12 +858,20 @@ def solvecube():
             replaystring+=str(direction[int(numstr[2*i])])+numstr[2*i+1]
         if bestid>2:
             replaystring=reverserotation(replaystring)
-        
+        display()
+        sleep(1)
         for i in range(htm):
             f,t=int(replaystring[2*i]),int(replaystring[2*i+1])
             rotate(f,t)
             display()
+            canvas.create_text(1000,30,text=str(minmove))
+            canvas.create_text(1000,60,text=numstr)
+            canvas.create_text(1000,90,text=rotatenotation)
+            canvas.create_text(1000,120,text="htm "+str(htm))
+            canvas.create_text(50,50,text="thread "+str(bestid))
+            canvas.update()
             sleep(0.5)
+    sleep(1)
     solving=0
 
 phase1step=6#7
@@ -887,18 +881,12 @@ dict2step=8#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
 print(phase1step,"+",dict1step,"+",dict2step)
 dict0,tdict0=getdict0(dict0step)
-print("phase 0 dict time",tdict0,"s")
+print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict0),tdict0))
 dict1,tdict1=getdict1(dict1step,cor0,eor0,ep4r0)
 print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict1),tdict1))
 dict2,tdict2=getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1)
 print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict2),tdict2))
-print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
-
-# dict0size=size(dict0)
-# dict1size=size(dict1)
-# dict2size=size(dict2)
-# gb=2**30
-# print(dict0size/gb,dict1size/gb,dict2size/gb)
+print(f"dicts time {round(tdict0+tdict1+tdict2,6)}s = {tdict0}s + {tdict1}s + {tdict2}s")
 
 threadn=6
 print(threadn,"threads")
@@ -918,6 +906,6 @@ solving=0
 canvas.bind("<Button-1>",click)
 canvas.bind_all("<KeyPress>",keypress)
 start()
-canvas.focus()
+canvas.after(1, lambda: window.focus_force())
 canvas.pack()
 window.mainloop()

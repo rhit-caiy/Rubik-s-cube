@@ -12,7 +12,7 @@ def getdicts():
     eodict={i:n for n,i in enumerate([i for i in product(range(2),repeat=12) if not i.count(1)%2])}
     ep4dict={j:n for n,j in enumerate(j for i in combinations((0,1,2,3,4,5,6,7,8,9,10,11),r=4) for j in permutations(i))}
     cl,col,eol,ep4l,cr,cor,eor,ep4r=[0]*len(cdict),[0]*len(codict),[0]*len(eodict),[0]*len(ep4dict),[],[],[],[]
-    add1,add2=[1,2,0],[2,0,1]
+    add1,add2=(1,2,0),(2,0,1)
     for f in 0,1,2,3,4,5:
         c1,c2,c3,c4=facecorner[f]
         e1,e2,e3,e4=fe=faceedge[f]
@@ -238,9 +238,9 @@ changedirections=((0,1,2,3,4,5),(1,2,0,4,5,3),(2,0,1,5,3,4))
 allrotation=("U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'")
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1,tinit=getdicts()
 print("initialize time",tinit,"s")
-phase1step=5#7
-dict1step=7#8
-dict2step=8#9
+phase1step=6#7
+dict1step=8#8
+dict2step=9#9
 stepshouldbelow=phase1step+dict1step+dict2step+1
 print(phase1step,"+",dict1step,"+",dict2step)
 dict1,tdict1=getdict1(dict1step,cor0,eor0,ep4r0)
@@ -251,7 +251,7 @@ print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
 
 htms,qtms,stms,times,miss=[],[],[],[],0
 n=6
-cubenumber=10
+cubenumber=100
 print(cubenumber,"cubes",n,"threads")
 
 starttime=time()
