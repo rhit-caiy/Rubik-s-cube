@@ -9,8 +9,8 @@ def getdicts():
     faceedge=((0,1,2,3),(1,4,9,5),(2,5,10,6),(10,9,8,11),(3,6,11,7),(0,7,8,4))
     cdict={i:n for n,i in enumerate(permutations((0,1,2,3,4,5,6,7)))}
     codict={i:n for n,i in enumerate((i for i in product(range(3),repeat=8) if not sum(i)%3))}
-    eodict={i:n for n,i in enumerate([i for i in product(range(2),repeat=12) if not i.count(1)%2])}
-    ep4dict={j:n for n,j in enumerate(j for i in combinations((0,1,2,3,4,5,6,7,8,9,10,11),r=4) for j in permutations(i))}
+    eodict={i:n for n,i in enumerate((i for i in product(range(2),repeat=12) if not i.count(1)%2))}
+    ep4dict={i:n for n,i in enumerate(j for i in combinations((0,1,2,3,4,5,6,7,8,9,10,11),r=4) for j in permutations(i))}
     cl,col,eol,ep4l,cr,cor,eor,ep4r=[0]*len(cdict),[0]*len(codict),[0]*len(eodict),[0]*len(ep4dict),[],[],[],[]
     add1,add2=(1,2,0),(2,0,1)
     for f in 0,1,2,3,4,5:
@@ -30,17 +30,7 @@ def getdicts():
                 d1[a],d1[b]=b,a
         cr.append((tuple(d0),tuple(d1),tuple(d2)))
         d0,d1,d2=col.copy(),col.copy(),col.copy()
-        if f!=0 and f!=3:
-            for a,dco in enumerate(codict):
-                co=list(dco)
-                co[c1],co[c2],co[c3],co[c4]=add1[co[c2]],add2[co[c3]],add1[co[c4]],add2[co[c1]]
-                b=codict[tuple(co)]
-                d0[a],d2[b]=b,a
-                if not d1[a]:
-                    co[c1],co[c2],co[c3],co[c4]=add1[co[c2]],add2[co[c3]],add1[co[c4]],add2[co[c1]]
-                    b=codict[tuple(co)]
-                    d1[a],d1[b]=b,a
-        else:
+        if f==0 or f==3:
             for a,dco in enumerate(codict):
                 co=list(dco)
                 co[c1],co[c2],co[c3],co[c4]=co[c2],co[c3],co[c4],co[c1]
@@ -48,6 +38,16 @@ def getdicts():
                 d0[a],d2[b]=b,a
                 if not d1[a]:
                     co[c1],co[c2],co[c3],co[c4]=co[c2],co[c3],co[c4],co[c1]
+                    b=codict[tuple(co)]
+                    d1[a],d1[b]=b,a
+        else:
+            for a,dco in enumerate(codict):
+                co=list(dco)
+                co[c1],co[c2],co[c3],co[c4]=add1[co[c2]],add2[co[c3]],add1[co[c4]],add2[co[c1]]
+                b=codict[tuple(co)]
+                d0[a],d2[b]=b,a
+                if not d1[a]:
+                    co[c1],co[c2],co[c3],co[c4]=add1[co[c2]],add2[co[c3]],add1[co[c4]],add2[co[c1]]
                     b=codict[tuple(co)]
                     d1[a],d1[b]=b,a
         cor.append((tuple(d0),tuple(d1),tuple(d2)))
@@ -105,7 +105,7 @@ def getdict1(dict1step,cor0,eor0,ep4r0):
                     newstep=oldstep+3*f
                     nco,neo,ne2=oco,oeo,oe2
                     corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
-                    for newstep in [newstep+2,newstep+1,newstep]:
+                    for newstep in newstep+2,newstep+1,newstep:
                         nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
                         if (key1:=ne2//24+495*(neo+2048*nco)) not in dict1:
                             dict1[key1]=newstep
@@ -116,7 +116,7 @@ def getdict1(dict1step,cor0,eor0,ep4r0):
                     newstep=oldstep+3*f
                     nco,neo,ne2=oco,oeo,oe2
                     corf0,eorf0,ep4rf0=cor0[f],eor0[f],ep4r0[f]
-                    for newstep in [newstep+2,newstep+1,newstep]:
+                    for newstep in newstep+2,newstep+1,newstep:
                         nco,neo,ne2=corf0[nco],eorf0[neo],ep4rf0[ne2]
                         if (key1:=ne2//24+495*(neo+2048*nco)) not in dict1:
                             dict1[key1]=newstep
@@ -238,9 +238,11 @@ changedirections=((0,1,2,3,4,5),(1,2,0,4,5,3),(2,0,1,5,3,4))
 allrotation=("U","U2","U'","L","L2","L'","F","F2","F'","D","D2","D'","R","R2","R'","B","B2","B'")
 cr,cor,ep4r,eor,ccn,ccon,cen1,cen2,cen3,ceon,cr0,cor0,eor0,ep4r0,cr1,ep4r1,tinit=getdicts()
 print("initialize time",tinit,"s")
-phase1step=6#7
-dict1step=8#8
-dict2step=9#9
+phase1step=5#7
+dict1step=7#8
+dict2step=8#9
+n=6
+cubenumber=10
 stepshouldbelow=phase1step+dict1step+dict2step+1
 print(phase1step,"+",dict1step,"+",dict2step)
 dict1,tdict1=getdict1(dict1step,cor0,eor0,ep4r0)
@@ -248,10 +250,7 @@ print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict1),tdict1))
 dict2,tdict2=getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1)
 print("{:<8}{:<16}{:<16}{:<16f}".format("total","",len(dict2),tdict2))
 print(f"dicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
-
 htms,qtms,stms,times,miss=[],[],[],[],0
-n=6
-cubenumber=100
 print(cubenumber,"cubes",n,"threads")
 
 starttime=time()
@@ -283,9 +282,7 @@ for i in range(cubenumber):
         miss+=1
         print("no solution below",htm,"steps for this cube")
     else:
-        htms.append(htm)
-        qtms.append(qtm)
-        stms.append(stm)
+        htms.append(htm);qtms.append(qtm);stms.append(stm)
         numstr,num="",18*minmove
         while (num:=num//18)>=18:
             numstr=str(num//3%6)+str(num%3)+numstr
@@ -306,18 +303,13 @@ print(strftime("%Y-%m-%d %H:%M:%S",localtime()))
 print(f"initialize time {tinit}s\ndicts time {tdict1+tdict2}s = {tdict1}s + {tdict2}s")
 print(f"total time {round(endtime-starttime,6)}s, actual time {round(sum(times),6)}s, average time {round(sum(times)/cubenumber,6)}s")
 print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-1)
+print(cubenumber,"cubes")
 if cubenumber<=100:
     print("htm",htms,"\nqtm",qtms,"\nstm",stms)
-print(cubenumber,"cubes")
 if len(htms)>0:
-    print("\nhtm average",round(sum(htms)/len(htms),6),"range",min(htms),"-",max(htms),"\nhtm     number")
-    for i in range(min(htms),max(htms)+1):
-        print("{:<8}{:<8}{}".format(i,htms.count(i),"-"*int(100*htms.count(i)/cubenumber)))
-    print("\nqtm average",round(sum(qtms)/len(qtms),6),"range",min(qtms),"-",max(qtms),"\nqtm     number")
-    for i in range(min(qtms),max(qtms)+1):
-        print("{:<8}{:<8}{}".format(i,qtms.count(i),"-"*int(100*qtms.count(i)/cubenumber)))
-    print("\nstm average",round(sum(stms)/len(stms),6),"range",min(stms),"-",max(stms),"\nstm     number")
-    for i in range(min(stms),max(stms)+1):
-        print("{:<8}{:<8}{}".format(i,stms.count(i),"-"*int(100*stms.count(i)/cubenumber)))
+    for tmname,tm in (("htm",htms),("qtm",qtms),("stm",stms)):
+        print("\n"+tmname+" average",round(sum(tm)/len(tm),6)," range",min(tm),"-",max(tm),"\n"+tmname+"     number")
+        for i in range(min(tm),max(tm)+1):
+            print("{:<8}{:<8}{}".format(i,tm.count(i),"-"*(100*tm.count(i)//cubenumber)))
 if miss!=0:
-    print("miss rate",miss,"/",cubenumber)
+    print("\nmiss rate",miss,"/",cubenumber)
