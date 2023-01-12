@@ -165,7 +165,7 @@ def getdict2(dict2step,eighteen,cr0,ep4r0,cr1,ep4r1):
                         dict2[key2]=newstep+eighteen1
                         if step is not dict2step:
                             newpredictstate.append((nc,ne1,ne2,ne3,newstep,3))
-                if f1!=0:
+                if f1:
                     crf0,ep4rf0=cr0[0],ep4r0[0]
                     nc,ne1,ne2,ne3=oc,oe1,oe2,oe3
                     for t in 2,1,0:
@@ -265,11 +265,10 @@ for i in range(cubenumber):
     print("random with",l,"moves\n")
     cubetime=0
     for j in range(n):
-        randomlist=randomlists[j//3]
         direction=changedirections[j%3]
         c,co,eo,e1,e2,e3=ccn,ccon,ceon,cen1,cen2,cen3
-        for k in range(l):
-            f,t=direction[randomlist[k]//3],randomlist[k]%3
+        for k in randomlists[j//3]:
+            f,t=direction[k//3],k%3
             ep4rft=ep4r[f][t]
             c,co,eo,e1,e2,e3=cr[f][t][c],cor[f][t][co],eor[f][t][eo],ep4rft[e1],ep4rft[e2],ep4rft[e3]
         print("{}\nc = {} ; co = {} ; eo = {} ; e1 = {} ; e2 = {} ; e3 = {}\n{:<18}{:<6}{:<6}{:<14}{:<6}{:<36}".format("thread "+str(j),c,co,eo,e1,e2,e3,"htm","qtm","stm","time/s","type","solution"))
@@ -306,10 +305,10 @@ print("search depth",phase1step,"+",dict1step,"+",dict2step,"=",stepshouldbelow-
 print(cubenumber,"cubes")
 if cubenumber<=100:
     print("htm",htms,"\nqtm",qtms,"\nstm",stms)
-if len(htms)>0:
-    for tmname,tm in (("htm",htms),("qtm",qtms),("stm",stms)):
+if len(htms):
+    for tmname,tm in ("htm",htms),("qtm",qtms),("stm",stms):
         print("\n"+tmname+" average",round(sum(tm)/len(tm),6)," range",min(tm),"-",max(tm),"\n"+tmname+"     number")
         for i in range(min(tm),max(tm)+1):
             print("{:<8}{:<8}{}".format(i,tm.count(i),"-"*(100*tm.count(i)//cubenumber)))
-if miss!=0:
+if miss:
     print("\nmiss rate",miss,"/",cubenumber)
